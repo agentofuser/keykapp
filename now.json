@@ -1,6 +1,7 @@
 {
+  "name": "keycapp.org",
   "scope": "agentofuser",
-  "alias": ["keycapp.org"],
+  "alias": "keycapp.org",
   "version": 2,
   "builds": [
     {
