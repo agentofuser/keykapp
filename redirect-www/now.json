@@ -1,0 +1,12 @@
+{
+  "name": "keycapp.org-redirect-www",
+  "version": 2,
+  "alias": "www.keycapp.org",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "status": 301,
+      "headers": { "Location": "https://keycapp.org/$1" }
+    }
+  ]
+}
