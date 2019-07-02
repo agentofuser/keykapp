@@ -8,7 +8,8 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "start": "gatsby develop"
+    "start": "gatsby develop",
+    "now-build": "gatsby build"
   },
   "dependencies": {
     "gatsby": "^2.12.0",
