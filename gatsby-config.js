@@ -7,5 +7,14 @@ module.exports = {
         // allExtensions: true,
       },
     },
+    {
+      resolve: 'gatsby-plugin-top-layout',
+    },
+    {
+      resolve: 'gatsby-plugin-material-ui',
+    },
+    {
+      resolve: 'gatsby-plugin-react-helmet',
+    },
   ],
 }
