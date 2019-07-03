@@ -8,6 +8,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
+    "format": "prettier --write ./**/*.{js,ts,tsx,json,md,mdx,html,css}",
     "start": "gatsby develop",
     "now-build": "gatsby build"
   },
@@ -16,5 +17,17 @@
     "gatsby-plugin-typescript": "^2.1.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
+  },
+  "prettier": {
+    "printWidth": 79,
+    "proseWrap": "always",
+    "endOfLine": "lf",
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5"
+  },
+  "devDependencies": {
+    "prettier": "^1.18.2"
   }
 }
