@@ -1,7 +1,13 @@
 import * as React from 'react'
+import Button from '@material-ui/core/Button'
 
 const FrontPage: React.FunctionComponent = (): React.ReactElement => (
-  <h1>Hello, worlds!</h1>
+  <div>
+    <h1>Hello, worlds!</h1>
+    <Button variant="contained" color="primary">
+      Hi!
+    </Button>
+  </div>
 )
 
 export default FrontPage
