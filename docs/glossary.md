@@ -1,4 +1,4 @@
-# Glossary
+# Keycapp Glossary
 
 - **Display**: the non-interactive visible area that renders the output buffer,
   the **Keycapp** state visualizations (ngrams, **Command** graph), and any
@@ -24,3 +24,9 @@
 - **Waypoint**: a non-leaf node in the **Command** graph. Its **Legend** shows
   a summary of the **Commands** that following it leads to. Pressing its
   corresponding **Keyswitch** replaces the current **Layout** with a new one.
+
+## Credits
+
+Thanks to the very helpful
+[MechTYPE Glossary of Mechanical Keyboard Terms and Definitions](http://www.mechtype.com/mechanical-keyboard-terminology/)
+which served as inspiration for many Keycapp terms.
