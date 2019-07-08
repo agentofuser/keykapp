@@ -35,10 +35,10 @@ const useStyles = makeStyles({
 export default function App(): React.ReactNode {
   const classes = useStyles()
   const commandButtons = map(
-    (i: number): React.ReactElement => (
-      <Command title={`${i}`} key={`commandKey${i}`} />
+    (i: string): React.ReactElement => (
+      <Command title={`${i}`} key={`keyswitch-${i}`} />
     )
-  )(range(0, 7))
+  )(['a', 's', 'd', 'f', 'j', 'k', 'l', ';'])
   return (
     <React.Fragment>
       <Helmet title="#Keycapp🧢"></Helmet>
