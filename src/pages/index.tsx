@@ -36,7 +36,7 @@ export default function App(): React.ReactNode {
   const classes = useStyles()
   const commandButtons = map(
     (i: string): React.ReactElement => (
-      <Command title={`${i}`} key={`keyswitch-${i}`} />
+      <Command title={`${i}`} keyswitchHint={i} key={`keyswitch-${i}`} />
     )
   )(['a', 's', 'd', 'f', 'j', 'k', 'l', ';'])
   return (

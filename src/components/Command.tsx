@@ -17,8 +17,10 @@ const useStyles = makeStyles({
 
 export default function Command({
   title,
+  keyswitchHint,
 }: {
   title: string
+  keyswitchHint: string
 }): React.ReactElement {
   const classes = useStyles()
   return (
