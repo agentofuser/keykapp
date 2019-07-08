@@ -51,7 +51,7 @@ export default function App(): React.ReactNode {
             <div className={classes.display}>
               <div className={classes.displayItem}>commandNgrams</div>
               <div className={classes.displayItem}>outputBuffer</div>
-              <div className={classes.displayItem}>commandDag</div>
+              <div className={classes.displayItem}>commandGraph</div>
             </div>
             <div className={classes.keypad}>{commandButtons}</div>
           </div>
