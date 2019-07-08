@@ -15,15 +15,15 @@ const useStyles = makeStyles({
     gridColumnGap: '16px',
     gridRowGap: '16px',
   },
-  displayGridItemContainer: {
+  display: {
     border: '1px solid green',
     display: 'grid',
     gridTemplateColumns: '1fr 2fr 1fr',
   },
-  displayGridItem: {
+  displayItem: {
     border: '1px solid pink',
   },
-  keypadGridItemContainer: {
+  keypad: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr',
     gridColumnGap: '16px',
@@ -34,7 +34,7 @@ const useStyles = makeStyles({
 
 export default function App(): React.ReactNode {
   const classes = useStyles()
-  const commandCards = map(
+  const commandButtons = map(
     (i: number): React.ReactElement => (
       <Command title={`${i}`} key={`commandKey${i}`} />
     )
@@ -48,14 +48,12 @@ export default function App(): React.ReactNode {
             #Keycapp🧢
           </Typography>
           <div className={classes.mainGridContainer}>
-            <div className={classes.displayGridItemContainer}>
-              <div className={classes.displayGridItem}>commandNgrams</div>
-              <div className={classes.displayGridItem}>outputBuffer</div>
-              <div className={classes.displayGridItem}>commandDag</div>
+            <div className={classes.display}>
+              <div className={classes.displayItem}>commandNgrams</div>
+              <div className={classes.displayItem}>outputBuffer</div>
+              <div className={classes.displayItem}>commandDag</div>
             </div>
-            <div className={classes.keypadGridItemContainer}>
-              {commandCards}
-            </div>
+            <div className={classes.keypad}>{commandButtons}</div>
           </div>
         </Box>
       </Container>
