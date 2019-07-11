@@ -52,35 +52,35 @@ export default function App(): React.ReactNode {
   const classes = useStyles()
   const commandButtons = map(makePlaceholderButton)([
     {
-      legend: 'sample command legend',
+      legend: 'write newline',
       keyswitchHint: 'a',
     },
     {
-      legend: 'sample command legend',
+      legend: 'write space',
       keyswitchHint: 's',
     },
     {
-      legend: 'sample command legend',
+      legend: "write '🧢'",
       keyswitchHint: 'd',
     },
     {
-      legend: 'sample command legend',
+      legend: "write 'o'",
       keyswitchHint: 'f',
     },
     {
-      legend: 'sample command legend',
+      legend: "write 'k'",
       keyswitchHint: 'j',
     },
     {
-      legend: 'sample command legend',
+      legend: 'upcase word',
       keyswitchHint: 'k',
     },
     {
-      legend: 'sample command legend',
+      legend: 'downcase word',
       keyswitchHint: 'l',
     },
     {
-      legend: 'sample command legend',
+      legend: 'delete word',
       keyswitchHint: ';',
     },
   ])
