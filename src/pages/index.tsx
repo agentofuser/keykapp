@@ -4,7 +4,7 @@ import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
 import Box from '@material-ui/core/Box'
 import { makeStyles } from '@material-ui/styles'
-import Command from '../components/Command'
+import Button from '../components/Button'
 import { range, map } from 'fp-ts/es6/Array'
 
 const useStyles = makeStyles({
@@ -32,13 +32,58 @@ const useStyles = makeStyles({
   },
 })
 
+function makePlaceholderButton({
+  legend,
+  keyswitchHint,
+}: {
+  legend: string
+  keyswitchHint: string
+}): React.ReactElement {
+  return (
+    <Button
+      legend={legend}
+      keyswitchHint={keyswitchHint}
+      key={`keyswitch-${keyswitchHint}`}
+    />
+  )
+}
+
 export default function App(): React.ReactNode {
   const classes = useStyles()
-  const commandButtons = map(
-    (i: string): React.ReactElement => (
-      <Command title={`${i}`} keyswitchHint={i} key={`keyswitch-${i}`} />
-    )
-  )(['a', 's', 'd', 'f', 'j', 'k', 'l', ';'])
+  const commandButtons = map(makePlaceholderButton)([
+    {
+      legend: 'sample command legend',
+      keyswitchHint: 'a',
+    },
+    {
+      legend: 'sample command legend',
+      keyswitchHint: 's',
+    },
+    {
+      legend: 'sample command legend',
+      keyswitchHint: 'd',
+    },
+    {
+      legend: 'sample command legend',
+      keyswitchHint: 'f',
+    },
+    {
+      legend: 'sample command legend',
+      keyswitchHint: 'j',
+    },
+    {
+      legend: 'sample command legend',
+      keyswitchHint: 'k',
+    },
+    {
+      legend: 'sample command legend',
+      keyswitchHint: 'l',
+    },
+    {
+      legend: 'sample command legend',
+      keyswitchHint: ';',
+    },
+  ])
   return (
     <React.Fragment>
       <Helmet title="#Keycapp🧢"></Helmet>
