@@ -6,6 +6,10 @@ import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
 import * as React from 'react'
 
+import { AppAction } from '../pages/index'
+
+const useState = React.useState
+
 const useStyles = makeStyles({
   button: {
     height: 150,
@@ -22,21 +26,31 @@ const useStyles = makeStyles({
 })
 
 export default function Button({
+  dispatch,
   legend,
-  keyswitchHint,
+  keyswitchId,
 }: {
+  dispatch: React.Dispatch<AppAction>
   legend: string
-  keyswitchHint: string
+  keyswitchId: string
 }): React.ReactElement {
   const classes = useStyles()
   return (
     <Card className={classes.button}>
-      <CardActionArea className={classes.buttonActionArea}>
+      <CardActionArea
+        onMouseUp={(): void =>
+          dispatch({
+            type: 'KeyswitchUp',
+            data: { keyswitchId },
+          })
+        }
+        className={classes.buttonActionArea}
+      >
         <CardContent className={classes.buttonContent}>
           <Typography align="center">{legend}</Typography>
           <Container>
             <Typography align="center" color="textSecondary">
-              {keyswitchHint}
+              {keyswitchId}
             </Typography>
           </Container>
         </CardContent>

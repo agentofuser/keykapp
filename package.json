@@ -38,6 +38,7 @@
     "eslint": "^6.0.1",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-react": "^7.14.2",
+    "eslint-plugin-react-hooks": "^1.6.1",
     "now": "^15.6.2",
     "prettier": "^1.18.2",
     "typescript": "^3.5.2"
@@ -58,7 +59,8 @@
     },
     "plugins": [
       "@typescript-eslint",
-      "react"
+      "react",
+      "react-hooks"
     ],
     "extends": [
       "plugin:@typescript-eslint/recommended",
@@ -72,6 +74,9 @@
         "version": "detect"
       }
     },
-    "rules": {}
+    "rules": {
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn"
+    }
   }
 }
