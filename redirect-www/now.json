@@ -1,5 +1,6 @@
 {
   "name": "keyk.app-redirect-www",
+  "scope": "agentofuser",
   "version": 2,
   "alias": "www.keyk.app",
   "routes": [
