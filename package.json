@@ -8,40 +8,44 @@
   "license": "MIT",
   "private": false,
   "scripts": {
+    "build": "rm -rf ./.cache ./public && gatsby build",
     "deploy": "now --target production",
     "format": "prettier --write ./**/*.{js,ts,tsx,json,md,mdx,html,css}",
     "lint": "eslint --fix src/**/*",
     "now-build": "gatsby build",
-    "start": "gatsby develop"
+    "serve": "gatsby serve",
+    "start": "gatsby develop",
+    "watch": "nodemon"
   },
   "dependencies": {
-    "@material-ui/core": "^4.1.3",
+    "@material-ui/core": "^4.2.0",
     "@material-ui/icons": "^4.2.1",
-    "@material-ui/styles": "^4.1.2",
-    "fp-ts": "^2.0.0",
-    "gatsby": "^2.12.0",
+    "@material-ui/styles": "^4.2.0",
+    "fp-ts": "^2.0.2",
+    "gatsby": "^2.13.21",
     "gatsby-plugin-material-ui": "^2.1.4",
-    "gatsby-plugin-react-helmet": "^3.1.0",
-    "gatsby-plugin-typescript": "^2.1.0",
+    "gatsby-plugin-react-helmet": "^3.1.2",
+    "gatsby-plugin-typescript": "^2.1.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-helmet": "^5.2.1",
     "typeface-roboto": "^0.0.54"
   },
   "devDependencies": {
-    "@types/node": "^12.0.10",
-    "@types/react": "^16.8.22",
+    "@types/node": "^12.6.2",
+    "@types/react": "^16.8.23",
     "@types/react-dom": "^16.8.4",
     "@types/react-helmet": "^5.0.8",
-    "@typescript-eslint/eslint-plugin": "^1.11.0",
-    "@typescript-eslint/parser": "^1.11.0",
+    "@typescript-eslint/eslint-plugin": "^1.12.0",
+    "@typescript-eslint/parser": "^1.12.0",
     "eslint": "^6.0.1",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-react": "^7.14.2",
     "eslint-plugin-react-hooks": "^1.6.1",
-    "now": "^15.6.2",
+    "nodemon": "^1.19.1",
+    "now": "^15.8.0",
     "prettier": "^1.18.2",
-    "typescript": "^3.5.2"
+    "typescript": "^3.5.3"
   },
   "prettier": {
     "printWidth": 79,
@@ -78,5 +82,29 @@
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn"
     }
+  },
+  "nodemonConfig": {
+    "ignore": [
+      ".DS_Store",
+      ".cache",
+      ".git",
+      "node_modules",
+      "public",
+      "yarn-error.log",
+      "yarn.lock",
+      "*flycheck*"
+    ],
+    "watch": [
+      "content",
+      "gatsby-browser.js",
+      "gatsby-config.js",
+      "gatsby-node.js",
+      "package.json",
+      "src",
+      "tsconfig.json"
+    ],
+    "ext": "js,ts,tsx,md",
+    "verbose": true,
+    "exec": "yarn build && yarn serve"
   }
 }
