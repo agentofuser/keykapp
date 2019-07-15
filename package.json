@@ -1,9 +1,9 @@
 {
-  "name": "keycapp",
+  "name": "keykapp",
   "version": "1.0.0",
   "description": "Keycapp is an inclusive, predictive, and programmable keyboard for all.",
   "main": "n/a",
-  "repository": "https://github.com/agentofuser/keycapp.org",
+  "repository": "https://github.com/agentofuser/keykapp",
   "author": "Agent of User <git@agentofuser.com>",
   "license": "MIT",
   "private": false,

@@ -1,7 +1,7 @@
 {
-  "name": "keycapp.org",
+  "name": "keykapp",
   "scope": "agentofuser",
-  "alias": "keycapp.org",
+  "alias": "keyk.app",
   "version": 2,
   "builds": [
     {
