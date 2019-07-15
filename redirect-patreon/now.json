@@ -1,0 +1,13 @@
+{
+  "name": "keyk.app-redirect-patreon",
+  "scope": "agentofuser",
+  "version": 2,
+  "alias": "keyk.app",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "status": 302,
+      "headers": { "Location": "https://patreon.com/agentofuser" }
+    }
+  ]
+}
