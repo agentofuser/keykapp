@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
+import TextareaAutosize from '@material-ui/core/TextareaAutosize'
 import Box from '@material-ui/core/Box'
 import { makeStyles } from '@material-ui/styles'
 import Button from '../components/Button'
@@ -29,6 +30,9 @@ const useStyles = makeStyles({
     gridColumnGap: '16px',
     border: '1px solid red',
     margin: '0 32px',
+  },
+  appStateViz: {
+    width: '100%',
   },
 })
 
@@ -63,7 +67,7 @@ interface AppState {
 }
 
 function appReducer(state: AppState, action: AppAction): AppState {
-  const newState: AppState = { appActionLog: [...state.appActionLog, action] }
+  const newState: AppState = { appActionLog: [action, ...state.appActionLog] }
 
   return newState
 }
@@ -133,7 +137,13 @@ export default function App(): React.ReactNode {
               <div className={classes.displayItem}>commandNgrams</div>
               <div className={classes.displayItem}>outputBuffer</div>
               <div className={classes.displayItem}>
-                {JSON.stringify(state, null, 2)}
+                appState
+                <br />
+                <TextareaAutosize
+                  className={classes.appStateViz}
+                  rowsMax={42}
+                  value={JSON.stringify(state, null, 2)}
+                ></TextareaAutosize>
               </div>
             </div>
             <div className={classes.keypad}>{commandButtons}</div>
