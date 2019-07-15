@@ -1,10 +1,10 @@
-# Keycapp Glossary
+# Keykapp Glossary
 
 - **Button**: one specific **Command** + **Keyswitch** mapping.
 - **Command**: either a **Waypoint** or a **Kapp**. Basically a **Legend** + an
   **Instruction**.
 - **Display**: the non-interactive visible area that renders the output buffer,
-  the **Keycapp** state visualizations (ngrams, **Command** graph), and any
+  the **Keykapp** state visualizations (ngrams, **Command** graph), and any
   other data projection.
 - **Instruction**: the actual code that the computer executes when the user
   issues a **Command** by actuating the **Keyswitch** it is currently assigned
@@ -33,4 +33,4 @@
 
 Thanks to the very helpful
 [MechTYPE Glossary of Mechanical Keyboard Terms and Definitions](http://www.mechtype.com/mechanical-keyboard-terminology/)
-which served as inspiration for many Keycapp terms.
+which served as inspiration for many Keykapp terms.

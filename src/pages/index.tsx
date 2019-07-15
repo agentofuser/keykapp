@@ -122,11 +122,11 @@ export default function App(): React.ReactNode {
   ])
   return (
     <React.Fragment>
-      <Helmet title="#Keycapp🧢"></Helmet>
+      <Helmet title="#Keykapp🧢"></Helmet>
       <Container maxWidth="lg">
         <Box my={4}>
           <Typography variant="h5" component="h1" gutterBottom>
-            #Keycapp🧢
+            #Keykapp🧢
           </Typography>
           <div className={classes.mainGridContainer}>
             <div className={classes.display}>
