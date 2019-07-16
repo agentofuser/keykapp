@@ -9,7 +9,6 @@ const useStyles = makeStyles({
     display: 'grid',
     gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr',
     gridColumnGap: '16px',
-    border: '1px solid red',
     margin: '0 32px',
   },
 })

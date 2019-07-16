@@ -8,8 +8,9 @@ import { makeStyles } from '@material-ui/styles'
 import { findFirst, zip } from 'fp-ts/es6/Array'
 import Keypad from '../components/Keypad'
 import { fold, Option } from 'fp-ts/es6/Option'
+import { Paper, Theme } from '@material-ui/core'
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
     display: 'grid',
     gridTemplateColumns: '1fr',
@@ -18,21 +19,21 @@ const useStyles = makeStyles({
     gridRowGap: '16px',
   },
   display: {
-    border: '1px solid green',
     display: 'grid',
     gridTemplateColumns: '1fr 2fr 1fr',
+    gridColumnGap: '16px',
   },
   displayItem: {
-    border: '1px solid pink',
+    padding: theme.spacing(2, 2),
   },
   appStateViz: {
     width: '100%',
+    border: 0,
   },
   outputBuffer: {
-    border: '1px solid pink',
-    maxWidth: 600,
+    padding: theme.spacing(2, 2),
   },
-})
+}))
 
 const pushString = (str: string): AppReducer => (
   prevState: AppState,
@@ -215,21 +216,31 @@ export default function App(): React.ReactNode {
           </Typography>
           <div className={classes.mainGridContainer}>
             <div className={classes.display}>
-              <div className={classes.displayItem}>commandNgrams</div>
-              <div className={classes.displayItem}>
-                <pre className={classes.outputBuffer}>
-                  <code>{state.currentBuffer}</code>
+              <Paper className={classes.displayItem}>
+                <Typography>commandNgrams</Typography>
+              </Paper>
+              <Paper className={classes.outputBuffer}>
+                <pre
+                  style={{
+                    fontFamily: 'monospace',
+                    fontSize: '16px',
+                    margin: 0,
+                  }}
+                >
+                  {state.currentBuffer}
                 </pre>
-              </div>
-              <div className={classes.displayItem}>
-                appState
-                <br />
-                <TextareaAutosize
-                  className={classes.appStateViz}
-                  rowsMax={42}
-                  value={JSON.stringify(state, null, 2)}
-                ></TextareaAutosize>
-              </div>
+              </Paper>
+              <Paper className={classes.displayItem}>
+                <Typography>
+                  appState
+                  <br />
+                  <TextareaAutosize
+                    className={classes.appStateViz}
+                    rowsMax={42}
+                    value={JSON.stringify(state, null, 2)}
+                  ></TextareaAutosize>
+                </Typography>
+              </Paper>
             </div>
             <Keypad dispatch={dispatch} layout={state.currentLayout} />
           </div>
