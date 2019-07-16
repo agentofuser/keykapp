@@ -6,9 +6,7 @@ import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
 import * as React from 'react'
 
-import { AppAction } from '../pages/index'
-
-const useState = React.useState
+import { AppAction, Command, Keyswitch } from '../pages/index'
 
 const useStyles = makeStyles({
   button: {
@@ -25,15 +23,17 @@ const useStyles = makeStyles({
   },
 })
 
+interface ButtonProps {
+  dispatch: React.Dispatch<AppAction>
+  command: Command
+  keyswitch: Keyswitch
+}
+
 export default function Button({
   dispatch,
-  legend,
-  keyswitchId,
-}: {
-  dispatch: React.Dispatch<AppAction>
-  legend: string
-  keyswitchId: string
-}): React.ReactElement {
+  command,
+  keyswitch,
+}: ButtonProps): React.ReactElement {
   const classes = useStyles()
   return (
     <Card className={classes.button}>
@@ -41,16 +41,16 @@ export default function Button({
         onMouseUp={(): void =>
           dispatch({
             type: 'KeyswitchUp',
-            data: { keyswitchId },
+            data: { timestamp: Date.now(), keyswitch, command },
           })
         }
         className={classes.buttonActionArea}
       >
         <CardContent className={classes.buttonContent}>
-          <Typography align="center">{legend}</Typography>
+          <Typography align="center">{command.legend}</Typography>
           <Container>
             <Typography align="center" color="textSecondary">
-              {keyswitchId}
+              {keyswitch.key}
             </Typography>
           </Container>
         </CardContent>

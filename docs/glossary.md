@@ -1,6 +1,6 @@
 # Keykapp Glossary
 
-- **Button**: one specific **Command** + **Keyswitch** mapping.
+- **Keybinding**: one specific **Command** + **Keyswitch** mapping.
 - **Command**: either a **Waypoint** or a **Kapp**. Basically a **Legend** + an
   **Instruction**.
 - **Display**: the non-interactive visible area that renders the output buffer,
@@ -18,8 +18,8 @@
 - **Keyswitch**: an actionable placeholder that corresponds to a human actuator
   (e.g. a finger). A **Keyswitch** can be dynamically mapped to any
   **Command**.
-- **Layout**: a mapping from **Commands** to **Keyswitches**, aka, an ordered
-  set of **Buttons**.
+- **Layout**: a mapping from **Keyswitches** to **Commands**, aka, an ordered
+  set of **Keybindings**.
 - **Legend**: The visual/auditory/sensory representation/description of what a
   **Command** does.
 - **LoadBalancer**: maps a list of **Commands** to a list of **Keyswitches**
