@@ -34,12 +34,30 @@ const useStyles = makeStyles({
   },
 })
 
-const pushString = (char: string): React.Reducer<AppState, AppAction> => (
+const pushString = (str: string): AppReducer => (
   prevState: AppState,
   _action: AppAction
 ): AppState => {
   const nextState = prevState
-  nextState.currentBuffer = prevState.currentBuffer + char
+  nextState.currentBuffer = prevState.currentBuffer + str
+  return nextState
+}
+
+const mapLastWord = (mapWord: (word: string) => string): AppReducer => (
+  prevState: AppState,
+  _action: AppAction
+): AppState => {
+  const nextState = prevState
+  nextState.currentBuffer = prevState.currentBuffer.replace(
+    /\w+$/,
+    (lastWord: string): string => mapWord(lastWord)
+  )
+  return nextState
+}
+
+const deleteChunkBackwards: AppReducer = (prevState, _action): AppState => {
+  const nextState = prevState
+  nextState.currentBuffer = prevState.currentBuffer.replace(/\s*\S+\s*$/, '')
   return nextState
 }
 
@@ -77,15 +95,15 @@ const allCommands: Command[] = [
   },
   {
     legend: 'upcase word',
-    instruction: pushString('TBD'),
+    instruction: mapLastWord((word: string): string => word.toUpperCase()),
   },
   {
     legend: 'downcase word',
-    instruction: pushString('TBD'),
+    instruction: mapLastWord((word: string): string => word.toLowerCase()),
   },
   {
     legend: 'delete word',
-    instruction: pushString('TBD'),
+    instruction: deleteChunkBackwards,
   },
 ]
 
@@ -97,7 +115,7 @@ function loadBalancer(keyswitches: Keyswitch[], commands: Command[]): Layout {
 }
 
 type Legend = React.ReactNode
-type Instruction = React.Reducer<AppState, AppAction>
+type Instruction = AppReducer
 
 export interface Keyswitch {
   key: React.Key
@@ -129,10 +147,9 @@ interface AppState {
   currentLayout: Layout
 }
 
-const logAction: React.Reducer<AppState, AppAction> = (
-  prevState,
-  action
-): AppState => {
+type AppReducer = React.Reducer<AppState, AppAction>
+
+const logAction: AppReducer = (prevState, action): AppState => {
   const newState = {
     appActionLog: [action, ...prevState.appActionLog],
     currentBuffer: prevState.currentBuffer,
