@@ -236,7 +236,7 @@ export default function App(): React.ReactNode {
                   <br />
                   <TextareaAutosize
                     className={classes.appStateViz}
-                    rowsMax={42}
+                    rowsMax={40}
                     value={JSON.stringify(state, null, 2)}
                   ></TextareaAutosize>
                 </Typography>
