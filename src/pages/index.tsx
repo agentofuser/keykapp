@@ -1,14 +1,23 @@
-import * as React from 'react'
-import { Helmet } from 'react-helmet'
-import Container from '@material-ui/core/Container'
-import Typography from '@material-ui/core/Typography'
-import TextareaAutosize from '@material-ui/core/TextareaAutosize'
+import { Paper, Theme } from '@material-ui/core'
 import Box from '@material-ui/core/Box'
+import Container from '@material-ui/core/Container'
+import TextareaAutosize from '@material-ui/core/TextareaAutosize'
+import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
 import { findFirst, zip } from 'fp-ts/es6/Array'
-import Keypad from '../components/Keypad'
 import { fold, Option } from 'fp-ts/es6/Option'
-import { Paper, Theme } from '@material-ui/core'
+import * as React from 'react'
+import { Helmet } from 'react-helmet'
+import Keypad from '../components/Keypad'
+import {
+  AppAction,
+  AppReducer,
+  AppState,
+  Command,
+  Keybinding,
+  Keyswitch,
+  Layout,
+} from '../types'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
@@ -114,41 +123,6 @@ function loadBalancer(keyswitches: Keyswitch[], commands: Command[]): Layout {
 
   return new Map(keybindings)
 }
-
-type Legend = React.ReactNode
-type Instruction = AppReducer
-
-export interface Keyswitch {
-  key: React.Key
-}
-
-export interface Command {
-  legend: Legend
-  instruction: Instruction
-}
-
-export type Keybinding = [Keyswitch, Command]
-
-export type Layout = Map<Keyswitch, Command>
-
-export interface AppAction {
-  type: string
-  data: {
-    timestamp: number
-    keyswitch: Keyswitch
-    command: Command
-  }
-}
-
-type AppActionLog = AppAction[]
-
-interface AppState {
-  appActionLog: AppActionLog
-  currentBuffer: string
-  currentLayout: Layout
-}
-
-type AppReducer = React.Reducer<AppState, AppAction>
 
 const logAction: AppReducer = (prevState, action): AppState => {
   const newState = {

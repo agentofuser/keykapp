@@ -1,12 +1,11 @@
-import Container from '@material-ui/core/Container'
 import Card from '@material-ui/core/Card'
 import CardActionArea from '@material-ui/core/CardActionArea'
 import CardContent from '@material-ui/core/CardContent'
+import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
 import * as React from 'react'
-
-import { AppAction, Command, Keyswitch } from '../pages/index'
+import { AppAction, Command, Keyswitch } from '../types'
 
 const useStyles = makeStyles({
   button: {

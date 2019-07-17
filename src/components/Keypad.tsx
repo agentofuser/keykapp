@@ -1,7 +1,7 @@
-import * as React from 'react'
 import { makeStyles } from '@material-ui/styles'
 import { map } from 'fp-ts/es6/Array'
-import { Keybinding, Layout, AppAction } from '../pages'
+import * as React from 'react'
+import { AppAction, Keybinding, Layout } from '../types'
 import Button from './Button'
 
 const useStyles = makeStyles({
