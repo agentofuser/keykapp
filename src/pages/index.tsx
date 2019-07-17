@@ -18,6 +18,7 @@ import {
   Keyswitch,
   Layout,
 } from '../types'
+import { literals } from '../commands/literals'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
@@ -43,15 +44,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     padding: theme.spacing(2, 2),
   },
 }))
-
-const pushString = (str: string): AppReducer => (
-  prevState: AppState,
-  _action: AppAction
-): AppState => {
-  const nextState = prevState
-  nextState.currentBuffer = prevState.currentBuffer + str
-  return nextState
-}
 
 const mapLastWord = (mapWord: (word: string) => string): AppReducer => (
   prevState: AppState,
@@ -83,26 +75,7 @@ const allKeyswitches: Keyswitch[] = [
 ]
 
 const allCommands: Command[] = [
-  {
-    legend: 'write newline',
-    instruction: pushString('\n'),
-  },
-  {
-    legend: 'write space',
-    instruction: pushString(' '),
-  },
-  {
-    legend: "write '🧢'",
-    instruction: pushString('🧢'),
-  },
-  {
-    legend: "write 'o'",
-    instruction: pushString('o'),
-  },
-  {
-    legend: "write 'k'",
-    instruction: pushString('k'),
-  },
+  ...literals,
   {
     legend: 'upcase word',
     instruction: mapLastWord((word: string): string => word.toUpperCase()),
