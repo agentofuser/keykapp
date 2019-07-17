@@ -18,7 +18,7 @@ import {
   Keyswitch,
   Layout,
 } from '../types'
-import { printableAsciiChars, newlineChar } from '../commands/literals'
+import { allKapps } from '../commands'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
@@ -45,24 +45,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }))
 
-const mapLastWord = (mapWord: (word: string) => string): AppReducer => (
-  prevState: AppState,
-  _action: AppAction
-): AppState => {
-  const nextState = prevState
-  nextState.currentBuffer = prevState.currentBuffer.replace(
-    /\w+$/,
-    (lastWord: string): string => mapWord(lastWord)
-  )
-  return nextState
-}
-
-const deleteChunkBackwards: AppReducer = (prevState, _action): AppState => {
-  const nextState = prevState
-  nextState.currentBuffer = prevState.currentBuffer.replace(/\s*\S+\s*$/, '')
-  return nextState
-}
-
 const allKeyswitches: Keyswitch[] = [
   { key: 'a' },
   { key: 's' },
@@ -72,23 +54,6 @@ const allKeyswitches: Keyswitch[] = [
   { key: 'k' },
   { key: 'l' },
   { key: ';' },
-]
-
-const allCommands: Command[] = [
-  ...printableAsciiChars,
-  newlineChar,
-  {
-    legend: 'upcase word',
-    instruction: mapLastWord((word: string): string => word.toUpperCase()),
-  },
-  {
-    legend: 'downcase word',
-    instruction: mapLastWord((word: string): string => word.toLowerCase()),
-  },
-  {
-    legend: 'delete word',
-    instruction: deleteChunkBackwards,
-  },
 ]
 
 function loadBalancer(keyswitches: Keyswitch[], commands: Command[]): Layout {
@@ -120,7 +85,7 @@ export default function App(): React.ReactNode {
   const [state, dispatch] = React.useReducer(appReducer, {
     appActionLog: [],
     currentBuffer: '',
-    currentLayout: loadBalancer(allKeyswitches, allCommands),
+    currentLayout: loadBalancer(allKeyswitches, allKapps),
   })
 
   function onKeyUp(event: KeyboardEvent): void {

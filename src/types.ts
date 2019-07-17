@@ -1,8 +1,10 @@
 type Legend = React.ReactNode
 type Instruction = AppReducer
+
 export interface Keyswitch {
   key: React.Key
 }
+
 export interface Command {
   legend: Legend
   instruction: Instruction
