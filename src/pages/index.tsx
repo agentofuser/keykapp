@@ -18,7 +18,7 @@ import {
   Keyswitch,
   Layout,
 } from '../types'
-import { literals } from '../commands/literals'
+import { printableAsciiChars, newlineChar } from '../commands/literals'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
@@ -75,7 +75,8 @@ const allKeyswitches: Keyswitch[] = [
 ]
 
 const allCommands: Command[] = [
-  ...literals,
+  ...printableAsciiChars,
+  newlineChar,
   {
     legend: 'upcase word',
     instruction: mapLastWord((word: string): string => word.toUpperCase()),
