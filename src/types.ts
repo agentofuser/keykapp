@@ -6,12 +6,14 @@ export interface Keyswitch {
 }
 
 export interface Command {
+  idv0: string
   legend: Legend
   instruction: Instruction
 }
 
 export type Keybinding = [Keyswitch, Command]
 export type Layout = Map<Keyswitch, Command>
+
 export interface AppAction {
   type: string
   data: {

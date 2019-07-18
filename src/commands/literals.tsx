@@ -17,8 +17,11 @@ const pushLiteral = (literal: string): AppReducer => (
 const ascii32To126 =
   ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
 
+const idv0Prefix = '/keykapp/commands/literals/ascii/'
+
 export const printableAsciiChars: Command[] = map(
   (char: string): Command => ({
+    idv0: `${idv0Prefix}${char.charCodeAt}`,
     legend: (
       <Paper>
         <kbd>{char === ' ' ? 'space' : char}</kbd>
@@ -29,6 +32,7 @@ export const printableAsciiChars: Command[] = map(
 )(ascii32To126.split(''))
 
 export const newlineChar: Command = {
+  idv0: `${idv0Prefix}${'\n'.charCodeAt}`,
   legend: 'write newline',
   instruction: pushLiteral('\n'),
 }
