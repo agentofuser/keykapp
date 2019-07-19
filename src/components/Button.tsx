@@ -1,7 +1,6 @@
 import Card from '@material-ui/core/Card'
 import CardActionArea from '@material-ui/core/CardActionArea'
 import CardContent from '@material-ui/core/CardContent'
-import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
 import * as React from 'react'
@@ -46,12 +45,11 @@ export default function Button({
         className={classes.buttonActionArea}
       >
         <CardContent className={classes.buttonContent}>
-          <Typography align="center">{command.legend}</Typography>
-          <Container>
-            <Typography align="center" color="textSecondary">
-              {keyswitch.key}
-            </Typography>
-          </Container>
+          {command.legend}
+
+          <Typography align="center" color="textSecondary">
+            {keyswitch.key}
+          </Typography>
         </CardContent>
       </CardActionArea>
     </Card>

@@ -1,7 +1,7 @@
-import * as React from 'react'
+import { Paper, Typography } from '@material-ui/core'
 import { map } from 'fp-ts/es6/Array'
-import { AppReducer, AppState, AppAction, Command } from '../types'
-import { Paper } from '@material-ui/core'
+import * as React from 'react'
+import { AppAction, AppReducer, AppState, Command } from '../types'
 
 const pushLiteral = (literal: string): AppReducer => (
   prevState: AppState,
@@ -23,8 +23,16 @@ export const printableAsciiChars: Command[] = map(
   (char: string): Command => ({
     idv0: `${idv0Prefix}${char.charCodeAt}`,
     legend: (
-      <Paper>
-        <kbd>{char === ' ' ? 'space' : char}</kbd>
+      <Paper
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Typography variant="h5" align="center">
+          <kbd>{char === ' ' ? 'space' : char}</kbd>
+        </Typography>
       </Paper>
     ),
     instruction: pushLiteral(char),
