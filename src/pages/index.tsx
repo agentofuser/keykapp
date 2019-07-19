@@ -8,6 +8,7 @@ import { findFirst, zip } from 'fp-ts/es6/Array'
 import { fold, Option } from 'fp-ts/es6/Option'
 import * as React from 'react'
 import { Helmet } from 'react-helmet'
+import { allCommands } from '../commands'
 import Keypad from '../components/Keypad'
 import {
   AppAction,
@@ -18,7 +19,6 @@ import {
   Keyswitch,
   Layout,
 } from '../types'
-import { allCommands } from '../commands'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
@@ -119,6 +119,7 @@ export default function App(): React.ReactNode {
   })
 
   const classes = useStyles()
+
   return (
     <React.Fragment>
       <Helmet title="#Keykapp🧢"></Helmet>
