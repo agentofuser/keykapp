@@ -18,7 +18,7 @@ import {
   Keyswitch,
   Layout,
 } from '../types'
-import { allKapps } from '../commands'
+import { allCommands } from '../commands'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
@@ -85,7 +85,7 @@ export default function App(): React.ReactNode {
   const [state, dispatch] = React.useReducer(appReducer, {
     appActionLog: [],
     currentBuffer: '',
-    currentLayout: loadBalancer(allKeyswitches, allKapps),
+    currentLayout: loadBalancer(allKeyswitches, allCommands),
   })
 
   function onKeyUp(event: KeyboardEvent): void {

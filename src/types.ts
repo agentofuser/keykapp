@@ -24,6 +24,7 @@ export interface AppAction {
 }
 
 type AppActionLog = AppAction[]
+
 export interface AppState {
   appActionLog: AppActionLog
   currentBuffer: string
