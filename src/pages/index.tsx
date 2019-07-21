@@ -1,23 +1,31 @@
 import { Paper, Theme } from '@material-ui/core'
 import Box from '@material-ui/core/Box'
 import Container from '@material-ui/core/Container'
-import TextareaAutosize from '@material-ui/core/TextareaAutosize'
 import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
-import { findFirst, zip } from 'fp-ts/es6/Array'
-import { fold, Option } from 'fp-ts/es6/Option'
+import {
+  findFirst,
+  isNonEmpty,
+  map,
+  zip,
+  reduceWithIndex,
+} from 'fp-ts/es6/Array'
+import { fold, none, Option, some } from 'fp-ts/es6/Option'
 import * as React from 'react'
 import { Helmet } from 'react-helmet'
-import { allCommands } from '../commands'
+import { allKapps } from '../commands'
 import Keypad from '../components/Keypad'
+import { zoomInto, zoomOutToRoot } from '../navigation'
+import { makeWaypoint, mAryHuffmanTreeBuilder } from '../navigation/huffman'
+import { logAction } from '../state'
 import {
   AppAction,
-  AppReducer,
   AppState,
-  Command,
+  Kapp,
   Keybinding,
   Keyswitch,
   Layout,
+  Waypoint,
 } from '../types'
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -56,55 +64,90 @@ const allKeyswitches: Keyswitch[] = [
   { key: ';' },
 ]
 
-function loadBalancer(keyswitches: Keyswitch[], commands: Command[]): Layout {
-  const keybindings = zip(keyswitches, commands)
-  console.log({ keybindings })
+function loadBalancer(
+  keyswitches: Keyswitch[],
+  waypoints: Waypoint[]
+): Layout {
+  // waypoints are sorted by frequency, highest last
+  const partition = reduceWithIndex(
+    { even: [], odd: [] },
+    (i, partition, waypoint) => {
+      if (i % 2 === 0) {
+        return { even: partition.even.concat(waypoint), odd: partition.odd }
+      } else {
+        return { even: partition.even, odd: partition.odd.concat(waypoint) }
+      }
+    }
+  )(waypoints)
+
+  const centerBiasedWaypoints = partition.even.concat(partition.odd.reverse())
+
+  const keybindings = zip(keyswitches, centerBiasedWaypoints)
 
   return new Map(keybindings)
 }
 
-const logAction: AppReducer = (prevState, action): AppState => {
-  const newState = {
-    appActionLog: [action, ...prevState.appActionLog],
-    currentBuffer: prevState.currentBuffer,
-    currentLayout: prevState.currentLayout,
+export function makeOrphanLeafWaypoint(kapp: Kapp): Waypoint {
+  const value = {
+    huffmanWeight: kapp.actuationCount,
+    parent: none,
+    kapp: some(kapp),
   }
-
-  return newState
+  return makeWaypoint(value, [])
 }
 
 function appReducer(prevState: AppState, action: AppAction): AppState {
-  let mutatedState = prevState
-  mutatedState = logAction(mutatedState, action)
-  const { instruction } = action.data.command
-  mutatedState = instruction(mutatedState, action)
-  return mutatedState
+  let nextState = prevState
+
+  nextState = logAction(nextState, action)
+
+  const [_keyswitch, waypoint] = action.data.keybinding
+  nextState = fold(
+    (): AppState => zoomInto(waypoint)(nextState, action),
+    (kapp: Kapp): AppState =>
+      zoomOutToRoot(kapp.instruction(nextState, action), action)
+  )(waypoint.value.kapp)
+
+  return nextState
+}
+
+function layout(waypoint: Waypoint): Layout {
+  return loadBalancer(allKeyswitches, waypoint.forest)
 }
 
 export default function App(): React.ReactNode {
+  const huffmanOrphanLeaves = map(makeOrphanLeafWaypoint)(allKapps)
+  const huffmanTreeBuilder = mAryHuffmanTreeBuilder(allKeyswitches.length)
+  let huffmanRoot
+  if (isNonEmpty(huffmanOrphanLeaves)) {
+    huffmanRoot = huffmanTreeBuilder(huffmanOrphanLeaves)
+  } else {
+    throw new Error('Could not find any Kapps')
+  }
+
   const [state, dispatch] = React.useReducer(appReducer, {
     appActionLog: [],
     currentBuffer: '',
-    currentLayout: loadBalancer(allKeyswitches, allCommands),
+    rootWaypoint: huffmanRoot,
+    currentWaypoint: huffmanRoot,
   })
 
   function onKeyUp(event: KeyboardEvent): void {
     event.stopPropagation()
     event.preventDefault()
     const keybinding: Option<Keybinding> = findFirst(
-      ([keyswitch, _command]: Keybinding): boolean =>
+      ([keyswitch, _waypoint]: Keybinding): boolean =>
         keyswitch.key === event.key
-    )(Array.from(state.currentLayout.entries()))
+    )(Array.from(layout(state.currentWaypoint).entries()))
 
     fold(
       (): void => {},
-      ([keyswitch, command]: Keybinding): void =>
+      (keybinding: Keybinding): void =>
         dispatch({
           type: 'KeyswitchUp',
           data: {
             timestamp: Date.now(),
-            keyswitch,
-            command,
+            keybinding,
           },
         })
     )(keybinding)
@@ -145,18 +188,13 @@ export default function App(): React.ReactNode {
                 </pre>
               </Paper>
               <Paper className={classes.displayItem}>
-                <Typography>
-                  appState
-                  <br />
-                  <TextareaAutosize
-                    className={classes.appStateViz}
-                    rowsMax={40}
-                    value={JSON.stringify(state, null, 2)}
-                  ></TextareaAutosize>
-                </Typography>
+                <Typography>appState</Typography>
               </Paper>
             </div>
-            <Keypad dispatch={dispatch} layout={state.currentLayout} />
+            <Keypad
+              dispatch={dispatch}
+              layout={layout(state.currentWaypoint)}
+            />
           </div>
         </Box>
       </Container>

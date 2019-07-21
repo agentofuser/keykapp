@@ -25,16 +25,14 @@ export default function Keypad({
   const classes = useStyles()
 
   const keybindings = map(
-    ([keyswitch, command]: Keybinding): React.ReactElement => (
+    (keybinding: Keybinding): React.ReactElement => (
       <Button
         dispatch={dispatch}
-        keyswitch={keyswitch}
-        command={command}
-        key={`react-collection-key-${keyswitch.key}`}
+        keybinding={keybinding}
+        key={`react-collection-key-${keybinding[0].key}`}
       ></Button>
     )
   )(Array.from(layout.entries()))
-  console.log({ keybindings })
 
   return <div className={classes.keypad}>{keybindings}</div>
 }

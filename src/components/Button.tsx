@@ -3,8 +3,11 @@ import CardActionArea from '@material-ui/core/CardActionArea'
 import CardContent from '@material-ui/core/CardContent'
 import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
+import { map } from 'fp-ts/es6/Array'
+import { fold } from 'fp-ts/es6/Option'
 import * as React from 'react'
-import { AppAction, Command, Keyswitch } from '../types'
+import { reachableKapps } from '../navigation/huffman'
+import { AppAction, Kapp, Keybinding, Legend } from '../types'
 
 const useStyles = makeStyles({
   button: {
@@ -23,14 +26,12 @@ const useStyles = makeStyles({
 
 interface ButtonProps {
   dispatch: React.Dispatch<AppAction>
-  command: Command
-  keyswitch: Keyswitch
+  keybinding: Keybinding
 }
 
 export default function Button({
   dispatch,
-  command,
-  keyswitch,
+  keybinding,
 }: ButtonProps): React.ReactElement {
   const classes = useStyles()
   return (
@@ -39,16 +40,27 @@ export default function Button({
         onMouseUp={(): void =>
           dispatch({
             type: 'KeyswitchUp',
-            data: { timestamp: Date.now(), keyswitch, command },
+            data: { timestamp: Date.now(), keybinding },
           })
         }
         className={classes.buttonActionArea}
       >
         <CardContent className={classes.buttonContent}>
-          {command.legend}
+          {fold(
+            (): Legend => (
+              <Typography align="center">
+                {map((kapp: Kapp): string => kapp.shortAsciiName)(
+                  reachableKapps(keybinding[1])
+                )
+                  .reverse()
+                  .join(' ')}
+              </Typography>
+            ),
+            (kapp: Kapp): Legend => kapp.legend
+          )(keybinding[1].value.kapp)}
 
           <Typography align="center" color="textSecondary">
-            {keyswitch.key}
+            {keybinding[0].key}
           </Typography>
         </CardContent>
       </CardActionArea>
