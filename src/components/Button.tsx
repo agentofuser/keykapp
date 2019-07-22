@@ -72,7 +72,9 @@ export default function Button({
                 )}
               </Typography>
             ),
-            (kapp: Kapp): Legend => kapp.legend
+            (kapp: Kapp): Legend => (
+              <Typography align="center">{kapp.legend}</Typography>
+            )
           )(keybinding[1].value.kapp)}
 
           <Typography align="center" color="textSecondary">

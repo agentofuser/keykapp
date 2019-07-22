@@ -9,11 +9,21 @@ export interface HuffmanWeighted {
   huffmanWeight: number
 }
 
+const byActuationCountDesc = ord.contramap(
+  ordNumber,
+  (kapp: Kapp): number => -kapp.actuationCount
+)
+const sortByActuationCount = sortBy([byActuationCountDesc])
+
 export function reachableKapps(waypoint: Waypoint): Kapp[] {
   const M = getMonoid<Kapp>()
-  const kapps = foldMap(M)((waypointValue: WaypointValue): Kapp[] =>
-    fold((): Kapp[] => [], (kapp: Kapp): Kapp[] => [kapp])(waypointValue.kapp)
-  )(waypoint)
+  const kapps = sortByActuationCount(
+    foldMap(M)((waypointValue: WaypointValue): Kapp[] =>
+      fold((): Kapp[] => [], (kapp: Kapp): Kapp[] => [kapp])(
+        waypointValue.kapp
+      )
+    )(waypoint)
+  )
   return kapps
 }
 
