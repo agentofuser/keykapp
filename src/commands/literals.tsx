@@ -1,6 +1,7 @@
 import { Paper, Typography } from '@material-ui/core'
 import { map } from 'fp-ts/es6/Array'
 import * as React from 'react'
+import { charCounts } from '../datasets/tweet'
 import { AppAction, AppReducer, AppState, Kapp } from '../types'
 
 const pushLiteral = (literal: string): AppReducer => (
@@ -29,27 +30,30 @@ export function LiteralLegend({
   title,
 }: LiteralLegendProps): React.ReactElement {
   return (
-    <Paper
+    <div
       style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        minWidth: '100%',
       }}
     >
-      <Typography variant="h5" align="center">
-        <kbd>{title === ' ' ? ':space' : title}</kbd>
-      </Typography>
-    </Paper>
+      <Paper>
+        <Typography align="center">
+          <kbd style={{ padding: '1rem' }}>{title}</kbd>
+        </Typography>
+      </Paper>
+    </div>
   )
 }
 
 export const printableAsciiChars: Kapp[] = map(
   (char: string): Kapp => ({
     idv0: `${idv0Prefix}${char.charCodeAt(0)}`,
-    shortAsciiName: char,
-    legend: <LiteralLegend title={char} />,
+    shortAsciiName: char === ' ' ? ':space' : char,
+    legend: <LiteralLegend title={char === ' ' ? ':space' : char} />,
     instruction: pushLiteral(char),
-    actuationCount: 1,
+    actuationCount: charCounts[char] || 0,
   })
 )(ascii32To126.split(''))
 
@@ -58,5 +62,5 @@ export const newlineChar: Kapp = {
   shortAsciiName: ':newline',
   legend: 'newline',
   instruction: pushLiteral('\n'),
-  actuationCount: 1,
+  actuationCount: charCounts['\n'] || 0,
 }

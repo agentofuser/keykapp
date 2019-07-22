@@ -11,18 +11,34 @@ import { AppAction, Kapp, Keybinding, Legend } from '../types'
 
 const useStyles = makeStyles({
   button: {
-    height: 150,
+    height: 180,
   },
   buttonActionArea: {
     width: '100%',
     height: '100%',
   },
   buttonContent: {
-    display: 'grid',
-    gridTemplateRows: '3fr 1fr',
-    gridRowGap: '0.5rem',
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
   },
 })
+
+function clampString(str: string): string {
+  const maxLength = 50
+  if (str.length > maxLength) {
+    const clamped = str
+      .slice(0, maxLength)
+      .split(' ')
+      .slice(0, -1)
+      .join(' ')
+    return clamped + ' [...]'
+  } else {
+    return str
+  }
+}
 
 interface ButtonProps {
   dispatch: React.Dispatch<AppAction>
@@ -49,11 +65,11 @@ export default function Button({
           {fold(
             (): Legend => (
               <Typography align="center">
-                {map((kapp: Kapp): string => kapp.shortAsciiName)(
-                  reachableKapps(keybinding[1])
-                )
-                  .reverse()
-                  .join(' ')}
+                {clampString(
+                  map((kapp: Kapp): string => kapp.shortAsciiName)(
+                    reachableKapps(keybinding[1])
+                  ).join(' ')
+                )}
               </Typography>
             ),
             (kapp: Kapp): Legend => kapp.legend

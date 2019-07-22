@@ -33,6 +33,15 @@ export function makeWaypoint(
   return tree
 }
 
+export function makeOrphanLeafWaypoint(kapp: Kapp): Waypoint {
+  const value = {
+    huffmanWeight: kapp.actuationCount,
+    parent: none,
+    kapp: some(kapp),
+  }
+  return makeWaypoint(value, [])
+}
+
 const byHuffmanWeight = ord.contramap(
   ordNumber,
   (hw: Waypoint): number => hw.value.huffmanWeight

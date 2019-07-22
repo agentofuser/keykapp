@@ -3,36 +3,27 @@ import Box from '@material-ui/core/Box'
 import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
-import {
-  findFirst,
-  isNonEmpty,
-  map,
-  zip,
-  reduceWithIndex,
-} from 'fp-ts/es6/Array'
-import { fold, none, Option, some } from 'fp-ts/es6/Option'
+import { findFirst, isNonEmpty, map } from 'fp-ts/es6/Array'
+import { fold, Option } from 'fp-ts/es6/Option'
 import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import { allKapps } from '../commands'
-import Keypad from '../components/Keypad'
+import Keypad, { layout } from '../components/Keypad'
+import { allKeyswitches } from '../constants'
 import { zoomInto, zoomOutToRoot } from '../navigation'
-import { makeWaypoint, mAryHuffmanTreeBuilder } from '../navigation/huffman'
-import { logAction } from '../state'
 import {
-  AppAction,
-  AppState,
-  Kapp,
-  Keybinding,
-  Keyswitch,
-  Layout,
-  Waypoint,
-} from '../types'
+  makeOrphanLeafWaypoint,
+  mAryHuffmanTreeBuilder,
+} from '../navigation/huffman'
+import { logAction } from '../state'
+import { AppAction, AppState, Kapp, Keybinding } from '../types'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
+    height: 768,
     display: 'grid',
     gridTemplateColumns: '1fr',
-    gridTemplateRows: '4fr 1fr',
+    gridTemplateRows: '1.5fr 1fr',
     gridColumnGap: '16px',
     gridRowGap: '16px',
   },
@@ -53,49 +44,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }))
 
-const allKeyswitches: Keyswitch[] = [
-  { key: 'a' },
-  { key: 's' },
-  { key: 'd' },
-  { key: 'f' },
-  { key: 'j' },
-  { key: 'k' },
-  { key: 'l' },
-  { key: ';' },
-]
-
-function loadBalancer(
-  keyswitches: Keyswitch[],
-  waypoints: Waypoint[]
-): Layout {
-  // waypoints are sorted by frequency, highest last
-  const partition = reduceWithIndex(
-    { even: [], odd: [] },
-    (i, partition, waypoint) => {
-      if (i % 2 === 0) {
-        return { even: partition.even.concat(waypoint), odd: partition.odd }
-      } else {
-        return { even: partition.even, odd: partition.odd.concat(waypoint) }
-      }
-    }
-  )(waypoints)
-
-  const centerBiasedWaypoints = partition.even.concat(partition.odd.reverse())
-
-  const keybindings = zip(keyswitches, centerBiasedWaypoints)
-
-  return new Map(keybindings)
-}
-
-export function makeOrphanLeafWaypoint(kapp: Kapp): Waypoint {
-  const value = {
-    huffmanWeight: kapp.actuationCount,
-    parent: none,
-    kapp: some(kapp),
-  }
-  return makeWaypoint(value, [])
-}
-
 function appReducer(prevState: AppState, action: AppAction): AppState {
   let nextState = prevState
 
@@ -104,20 +52,24 @@ function appReducer(prevState: AppState, action: AppAction): AppState {
   const [_keyswitch, waypoint] = action.data.keybinding
   nextState = fold(
     (): AppState => zoomInto(waypoint)(nextState, action),
-    (kapp: Kapp): AppState =>
-      zoomOutToRoot(kapp.instruction(nextState, action), action)
+    (kapp: Kapp): AppState => {
+      const stateAfterKapp = kapp.instruction(nextState, action)
+      // Don't zoom out to root waypoint if the kapp changed the
+      // current waypoint already, eg. :navUp.
+      if (stateAfterKapp.currentWaypoint === prevState.currentWaypoint) {
+        return zoomOutToRoot(stateAfterKapp, action)
+      } else {
+        return stateAfterKapp
+      }
+    }
   )(waypoint.value.kapp)
 
   return nextState
 }
 
-function layout(waypoint: Waypoint): Layout {
-  return loadBalancer(allKeyswitches, waypoint.forest)
-}
-
 export default function App(): React.ReactNode {
   const huffmanOrphanLeaves = map(makeOrphanLeafWaypoint)(allKapps)
-  const huffmanTreeBuilder = mAryHuffmanTreeBuilder(allKeyswitches.length)
+  const huffmanTreeBuilder = mAryHuffmanTreeBuilder(allKeyswitches.length - 2)
   let huffmanRoot
   if (isNonEmpty(huffmanOrphanLeaves)) {
     huffmanRoot = huffmanTreeBuilder(huffmanOrphanLeaves)
