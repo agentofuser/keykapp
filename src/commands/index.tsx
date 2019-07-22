@@ -1,7 +1,8 @@
 import { zoomOutToParent, zoomOutToRoot } from '../navigation'
 import { AppAction, AppReducer, AppState, Kapp, Waypoint } from '../types'
-import { newlineChar, printableAsciiChars } from './literals'
+import { newlineChar, printableAsciiChars, LiteralLegend } from './literals'
 import { makeOrphanLeafWaypoint } from '../navigation/huffman'
+import * as React from 'react'
 
 const mapLastWord = (mapWord: (word: string) => string): AppReducer => (
   prevState: AppState,
@@ -56,7 +57,7 @@ export const allKapps: Kapp[] = [
 const navUpKapp: Kapp = {
   idv0: '/keykapp/kapps/navigation/up',
   shortAsciiName: ':navUp',
-  legend: '⬆️ back up',
+  legend: <LiteralLegend title={'⬅️back'} />,
   instruction: zoomOutToParent,
   actuationCount: 0,
 }
@@ -67,7 +68,7 @@ export const navUpWaypointBuilder = (): Waypoint =>
 const navRootKapp: Kapp = {
   idv0: '/keykapp/kapps/navigation/root',
   shortAsciiName: ':navRoot',
-  legend: '🔝 back to top',
+  legend: <LiteralLegend title={'🏡home'} />,
   instruction: zoomOutToRoot,
   actuationCount: 0,
 }

@@ -60,7 +60,7 @@ export const printableAsciiChars: Kapp[] = map(
 export const newlineChar: Kapp = {
   idv0: `${idv0Prefix}${'\n'.charCodeAt}`,
   shortAsciiName: ':newline',
-  legend: 'newline',
+  legend: <LiteralLegend title={'newline'} />,
   instruction: pushLiteral('\n'),
   actuationCount: charCounts['\n'] || 0,
 }

@@ -1,7 +1,7 @@
 {
   "name": "keykapp",
   "scope": "agentofuser",
-  "alias": "klay.keyk.app",
+  "alias": "clay.keyk.app",
   "version": 2,
   "builds": [
     {
