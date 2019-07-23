@@ -90,7 +90,7 @@ export default function App(): React.ReactNode {
     const keybinding: Option<Keybinding> = findFirst(
       ([keyswitch, _waypoint]: Keybinding): boolean =>
         keyswitch.key === event.key
-    )(Array.from(layout(state.currentWaypoint).entries()))
+    )(layout(state.currentWaypoint))
 
     fold(
       (): void => {},

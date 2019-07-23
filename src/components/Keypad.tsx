@@ -1,17 +1,32 @@
 import { makeStyles } from '@material-ui/styles'
-import { map, reduceWithIndex, zip } from 'fp-ts/es6/Array'
+import { map, reverse, sortBy, zip, partition } from 'fp-ts/es6/Array'
+import { ord, ordNumber } from 'fp-ts/es6/Ord'
 import * as React from 'react'
-import { AppAction, Keybinding, Layout, Keyswitch, Waypoint } from '../types'
-import Button from './Button'
+import { navRootWaypointBuilder, navUpWaypointBuilder } from '../commands'
 import { allKeyswitches } from '../constants'
-import { navUpWaypointBuilder, navRootWaypointBuilder } from '../commands'
+import {
+  AppAction,
+  Keybinding,
+  Keyswitch,
+  Layout,
+  Waypoint,
+  Hand,
+  RightHand,
+} from '../types'
+import Button from './Button'
 
 const useStyles = makeStyles({
   keypad: {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr',
-    gridColumnGap: '16px',
-    margin: '0 32px',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gridColumnGap: '24px',
+    justifyContent: 'center',
+  },
+  hand: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, 128px)',
+    gridColumnGap: '12px',
+    justifyContent: 'center',
   },
 })
 
@@ -19,35 +34,38 @@ function loadBalancer(
   keyswitches: Keyswitch[],
   waypoints: Waypoint[]
 ): Layout {
-  // waypoints are sorted by frequency, highest last
-  const partition = reduceWithIndex(
-    { even: [], odd: [] },
-    (
-      i: number,
-      partition: { even: Waypoint[]; odd: Waypoint[] },
-      waypoint: Waypoint
-    ): { even: Waypoint[]; odd: Waypoint[] } => {
-      if (i % 2 === 0) {
-        return { even: partition.even.concat(waypoint), odd: partition.odd }
-      } else {
-        return { even: partition.even, odd: partition.odd.concat(waypoint) }
-      }
-    }
-  )(waypoints)
-
-  const centerBiasedWaypoints = partition.even.concat(partition.odd.reverse())
-
-  // TODO if there are less waypoints than keyswitches, put those waypoints at
+  // if there are less waypoints than keyswitches, put those waypoints at
   // the center, not all at the left
+  const sortedDescWeightWaypoints = reverse(waypoints)
+  let keybindings: Keybinding[] = [[keyswitches[0], navUpWaypointBuilder()]]
 
-  const keybindings = zip(
-    keyswitches,
-    [navUpWaypointBuilder()]
-      .concat(centerBiasedWaypoints)
-      .concat([navRootWaypointBuilder()])
+  // leave first and last keyswitches for 'back' and 'home'
+  const dynamicKeyswitches = keyswitches.slice(1, -1)
+
+  const lowestActuationCost = ord.contramap(
+    ordNumber,
+    (keyswitch: Keyswitch): number => keyswitch.actuationCost
+  )
+  const sortedAscCostKeyswitches = sortBy([lowestActuationCost])(
+    dynamicKeyswitches
   )
 
-  return new Map(keybindings)
+  keybindings = keybindings.concat(
+    zip(sortedAscCostKeyswitches, sortedDescWeightWaypoints)
+  )
+
+  keybindings.push([
+    keyswitches[keyswitches.length - 1],
+    navRootWaypointBuilder(),
+  ])
+
+  const ascendingIndex = ord.contramap(
+    ordNumber,
+    ([keyswitch, _waypoint]: Keybinding): number => keyswitch.index
+  )
+  keybindings = sortBy([ascendingIndex])(keybindings)
+
+  return keybindings
 }
 
 export function layout(waypoint: Waypoint): Layout {
@@ -65,7 +83,11 @@ export default function Keypad({
 }: KeypadProps): React.ReactElement {
   const classes = useStyles()
 
-  const keybindings = map(
+  const { left, right } = partition(
+    (keybinding: Keybinding): boolean => keybinding[0].hand === RightHand
+  )(layout)
+
+  const hand = map(
     (keybinding: Keybinding): React.ReactElement => (
       <Button
         dispatch={dispatch}
@@ -73,7 +95,12 @@ export default function Keypad({
         key={`react-collection-key-${keybinding[0].key}`}
       ></Button>
     )
-  )(Array.from(layout.entries()))
+  )
 
-  return <div className={classes.keypad}>{keybindings}</div>
+  return (
+    <div className={classes.keypad}>
+      <div className={classes.hand}>{hand(left)}</div>
+      <div className={classes.hand}>{hand(right)}</div>
+    </div>
+  )
 }

@@ -5,8 +5,16 @@ import { HuffmanWeighted } from './navigation/huffman'
 export type Legend = React.ReactNode
 export type Instruction = AppReducer
 
+export type LeftHand = 'LeftHand'
+export type RightHand = 'RightHand'
+export const LeftHand: LeftHand = 'LeftHand'
+export const RightHand: RightHand = 'RightHand'
+export type Hand = LeftHand | RightHand
 export interface Keyswitch {
+  index: number
+  hand: Hand
   key: React.Key
+  actuationCost: number
 }
 
 export interface Kapp {
@@ -25,7 +33,7 @@ export interface WaypointValue extends HuffmanWeighted {
 export type Waypoint = Tree<WaypointValue>
 
 export type Keybinding = [Keyswitch, Waypoint]
-export type Layout = Map<Keyswitch, Waypoint>
+export type Layout = Keybinding[]
 
 export interface AppAction {
   type: string
