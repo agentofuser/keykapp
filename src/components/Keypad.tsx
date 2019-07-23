@@ -1,5 +1,5 @@
 import { makeStyles } from '@material-ui/styles'
-import { map, reverse, sortBy, zip, partition } from 'fp-ts/es6/Array'
+import { map, partition, reverse, sortBy, zip } from 'fp-ts/es6/Array'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
 import * as React from 'react'
 import { navRootWaypointBuilder, navUpWaypointBuilder } from '../commands'
@@ -9,9 +9,8 @@ import {
   Keybinding,
   Keyswitch,
   Layout,
-  Waypoint,
-  Hand,
   RightHand,
+  Waypoint,
 } from '../types'
 import Button from './Button'
 
@@ -24,7 +23,8 @@ const useStyles = makeStyles({
   },
   hand: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, 128px)',
+    gridTemplateColumns: 'repeat(4, 128px)',
+    gridAutoColumns: '128px',
     gridColumnGap: '12px',
     justifyContent: 'center',
   },

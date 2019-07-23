@@ -7,7 +7,14 @@ import { map } from 'fp-ts/es6/Array'
 import { fold } from 'fp-ts/es6/Option'
 import * as React from 'react'
 import { reachableKapps } from '../navigation/huffman'
-import { AppAction, Kapp, Keybinding, Legend } from '../types'
+import {
+  AppAction,
+  Kapp,
+  Keybinding,
+  Legend,
+  LeftHand,
+  RightHand,
+} from '../types'
 
 const useStyles = makeStyles({
   button: {
@@ -50,8 +57,26 @@ export default function Button({
   keybinding,
 }: ButtonProps): React.ReactElement {
   const classes = useStyles()
+
+  let gridColumn: number
+  switch (keybinding[0].hand) {
+    case LeftHand:
+      gridColumn = keybinding[0].index + 1
+      break
+
+    case RightHand:
+      gridColumn = keybinding[0].index + 1 - 4
+      break
+    default:
+      throw new Error('Missing hand assignment for keybinding')
+      break
+  }
+
   return (
-    <Card className={classes.button}>
+    <Card
+      className={classes.button}
+      style={{ gridColumn: `${gridColumn} / ${gridColumn + 1}` }}
+    >
       <CardActionArea
         onMouseUp={(): void =>
           dispatch({
