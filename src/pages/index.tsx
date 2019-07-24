@@ -1,4 +1,11 @@
-import { Paper, Theme } from '@material-ui/core'
+import {
+  Paper,
+  Theme,
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
+} from '@material-ui/core'
 import Box from '@material-ui/core/Box'
 import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
@@ -132,7 +139,22 @@ export default function App(): React.ReactNode {
                 </pre>
               </Paper>
               <Paper className={classes.displayItem}>
-                <Typography>appState</Typography>
+                <Typography>stats</Typography>
+
+                <Table>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>characters</TableCell>
+                      <TableCell>{state.currentBuffer.length}</TableCell>
+                    </TableRow>
+                    {/* <TableRow>
+                      <TableCell>bytes</TableCell>
+                      <TableCell>
+                        {new Blob([state.currentBuffer]).size}
+                      </TableCell>
+                    </TableRow> */}
+                  </TableBody>
+                </Table>
               </Paper>
             </div>
             <Keypad
