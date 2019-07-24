@@ -68,7 +68,7 @@ export const navUpWaypointBuilder = (): Waypoint =>
 const navRootKapp: Kapp = {
   idv0: '/keykapp/kapps/navigation/root',
   shortAsciiName: ':navRoot',
-  legend: <LiteralLegend title={'🏡home'} />,
+  legend: <LiteralLegend title={'🏡 home'} />,
   instruction: zoomOutToRoot,
   actuationCount: 0,
 }

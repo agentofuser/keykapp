@@ -124,7 +124,7 @@ export default function App(): React.ReactNode {
                 <pre
                   style={{
                     fontFamily: 'monospace',
-                    fontSize: '16px',
+                    fontSize: '22px',
                     margin: 0,
                   }}
                 >

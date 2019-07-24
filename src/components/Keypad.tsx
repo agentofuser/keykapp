@@ -18,13 +18,12 @@ const useStyles = makeStyles({
   keypad: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
-    gridColumnGap: '24px',
+    gridColumnGap: '16px',
     justifyContent: 'center',
   },
   hand: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(4, 128px)',
-    gridAutoColumns: '128px',
+    gridTemplateColumns: 'repeat(4, 135px)',
     gridColumnGap: '12px',
     justifyContent: 'center',
   },
