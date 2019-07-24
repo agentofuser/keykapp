@@ -52,7 +52,6 @@ function appReducer(prevState: AppState, action: AppAction): AppState {
       let stateAfterKapp = kapp.instruction(nextState, action)
       kapp.actuationCount++
       stateAfterKapp = { ...stateAfterKapp, rootWaypoint: newHuffmanRoot() }
-      console.log(kapp)
 
       // Don't zoom out to root waypoint if the kapp changed the
       // current waypoint already, eg. :navUp.
