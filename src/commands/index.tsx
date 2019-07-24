@@ -3,6 +3,7 @@ import { AppAction, AppReducer, AppState, Kapp, Waypoint } from '../types'
 import { newlineChar, printableAsciiChars, LiteralLegend } from './literals'
 import { makeOrphanLeafWaypoint } from '../navigation/huffman'
 import * as React from 'react'
+import * as copy from 'copy-text-to-clipboard'
 
 const mapLastWord = (mapWord: (word: string) => string): AppReducer => (
   prevState: AppState,
@@ -26,30 +27,51 @@ const deleteChunkBackwards: AppReducer = (prevState, _action): AppState => {
   return nextState
 }
 
-const idv0Prefix = '/keykapp/kapps/word/'
+// TODO this should be an async task or something to handle effects
+const copyCurrentBufferToClipboard: AppReducer = (
+  prevState,
+  _action
+): AppState => {
+  const copied = copy(prevState.currentBuffer)
+  const statusMsg = copied ? '[!copied]' : "[!couldn't copy]"
+  const nextState = {
+    ...prevState,
+    currentBuffer: prevState.currentBuffer + ` ${statusMsg}`,
+  }
+  return nextState
+}
+
+const idv0Prefix = '/keykapp/kapps/'
 
 export const allKapps: Kapp[] = [
   ...printableAsciiChars,
   newlineChar,
   {
-    idv0: `${idv0Prefix}upcase`,
+    idv0: `${idv0Prefix}word/upcase`,
     shortAsciiName: ':upcase',
     legend: 'upcase word',
     instruction: mapLastWord((word: string): string => word.toUpperCase()),
     actuationCount: 0,
   },
   {
-    idv0: `${idv0Prefix}downcase`,
+    idv0: `${idv0Prefix}word/downcase`,
     shortAsciiName: ':downcase',
     legend: 'downcase word',
     instruction: mapLastWord((word: string): string => word.toLowerCase()),
     actuationCount: 0,
   },
   {
-    idv0: `${idv0Prefix}delete`,
+    idv0: `${idv0Prefix}text/delete`,
     shortAsciiName: ':delete',
     legend: 'delete word',
     instruction: deleteChunkBackwards,
+    actuationCount: 10000,
+  },
+  {
+    idv0: `${idv0Prefix}text/copy-to-clipboard`,
+    shortAsciiName: ':copy',
+    legend: 'copy text to clipboard',
+    instruction: copyCurrentBufferToClipboard,
     actuationCount: 10000,
   },
 ]
