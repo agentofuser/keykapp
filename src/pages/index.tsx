@@ -20,6 +20,7 @@ import { newHuffmanRoot } from '../navigation/huffman'
 import { logAction } from '../state'
 import { AppAction, AppState, Kapp, Keybinding } from '../types'
 import { allKapps } from '../commands'
+import { wordCount } from '../kitchensink/purefns'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
@@ -146,6 +147,10 @@ export default function App(): React.ReactNode {
                     <TableRow>
                       <TableCell>characters</TableCell>
                       <TableCell>{state.currentBuffer.length}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>words</TableCell>
+                      <TableCell>{wordCount(state.currentBuffer)}</TableCell>
                     </TableRow>
                     {/* <TableRow>
                       <TableCell>bytes</TableCell>
