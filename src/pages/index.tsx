@@ -3,20 +3,16 @@ import Box from '@material-ui/core/Box'
 import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
-import { findFirst, isNonEmpty, map } from 'fp-ts/es6/Array'
+import { findFirst } from 'fp-ts/es6/Array'
 import { fold, Option } from 'fp-ts/es6/Option'
 import * as React from 'react'
 import { Helmet } from 'react-helmet'
-import { allKapps } from '../commands'
 import Keypad, { layout } from '../components/Keypad'
-import { allKeyswitches } from '../constants'
 import { zoomInto, zoomOutToRoot } from '../navigation'
-import {
-  makeOrphanLeafWaypoint,
-  mAryHuffmanTreeBuilder,
-} from '../navigation/huffman'
+import { newHuffmanRoot } from '../navigation/huffman'
 import { logAction } from '../state'
 import { AppAction, AppState, Kapp, Keybinding } from '../types'
+import { allKapps } from '../commands'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
@@ -53,7 +49,11 @@ function appReducer(prevState: AppState, action: AppAction): AppState {
   nextState = fold(
     (): AppState => zoomInto(waypoint)(nextState, action),
     (kapp: Kapp): AppState => {
-      const stateAfterKapp = kapp.instruction(nextState, action)
+      let stateAfterKapp = kapp.instruction(nextState, action)
+      kapp.actuationCount++
+      stateAfterKapp = { ...stateAfterKapp, rootWaypoint: newHuffmanRoot() }
+      console.log(kapp)
+
       // Don't zoom out to root waypoint if the kapp changed the
       // current waypoint already, eg. :navUp.
       if (stateAfterKapp.currentWaypoint === prevState.currentWaypoint) {
@@ -68,20 +68,13 @@ function appReducer(prevState: AppState, action: AppAction): AppState {
 }
 
 export default function App(): React.ReactNode {
-  const huffmanOrphanLeaves = map(makeOrphanLeafWaypoint)(allKapps)
-  const huffmanTreeBuilder = mAryHuffmanTreeBuilder(allKeyswitches.length - 2)
-  let huffmanRoot
-  if (isNonEmpty(huffmanOrphanLeaves)) {
-    huffmanRoot = huffmanTreeBuilder(huffmanOrphanLeaves)
-  } else {
-    throw new Error('Could not find any Kapps')
-  }
-
+  const initialHuffmanRoot = newHuffmanRoot()
   const [state, dispatch] = React.useReducer(appReducer, {
     appActionLog: [],
     currentBuffer: '',
-    rootWaypoint: huffmanRoot,
-    currentWaypoint: huffmanRoot,
+    rootWaypoint: initialHuffmanRoot,
+    currentWaypoint: initialHuffmanRoot,
+    kapps: allKapps,
   })
 
   function onKeyUp(event: KeyboardEvent): void {

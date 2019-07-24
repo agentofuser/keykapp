@@ -50,6 +50,7 @@ export interface AppState {
   readonly currentBuffer: string
   readonly rootWaypoint: Waypoint
   readonly currentWaypoint: Waypoint
+  readonly kapps: Kapp[]
 }
 
 export type AppReducer = React.Reducer<AppState, AppAction>

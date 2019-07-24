@@ -21,7 +21,7 @@ const mapLastWord = (mapWord: (word: string) => string): AppReducer => (
 const deleteChunkBackwards: AppReducer = (prevState, _action): AppState => {
   const nextState = {
     ...prevState,
-    currentBuffer: prevState.currentBuffer.replace(/\s*\S+\s*$/, ''),
+    currentBuffer: prevState.currentBuffer.replace(/(\s*\S+|\s+)$/, ''),
   }
   return nextState
 }
@@ -50,7 +50,7 @@ export const allKapps: Kapp[] = [
     shortAsciiName: ':delete',
     legend: 'delete word',
     instruction: deleteChunkBackwards,
-    actuationCount: 0,
+    actuationCount: 10000,
   },
 ]
 

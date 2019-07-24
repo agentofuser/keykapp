@@ -1,9 +1,18 @@
-import { foldLeft, getMonoid, map, sortBy, splitAt } from 'fp-ts/es6/Array'
+import {
+  foldLeft,
+  getMonoid,
+  map,
+  sortBy,
+  splitAt,
+  isNonEmpty,
+} from 'fp-ts/es6/Array'
 import { cons, head, NonEmptyArray } from 'fp-ts/es6/NonEmptyArray'
 import { fold, none, some } from 'fp-ts/es6/Option'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
 import { foldMap, make } from 'fp-ts/es6/Tree'
 import { Kapp, Waypoint, WaypointValue } from '../types'
+import { allKapps } from '../commands'
+import { allKeyswitches } from '../constants'
 
 export interface HuffmanWeighted {
   huffmanWeight: number
@@ -85,4 +94,19 @@ export function mAryHuffmanTreeBuilder(
     }
     return result
   }
+}
+
+export function newHuffmanRoot(
+  width: number = allKeyswitches.length - 2,
+  kapps: Kapp[] = allKapps
+): Waypoint {
+  const huffmanOrphanLeaves = map(makeOrphanLeafWaypoint)(kapps)
+  const huffmanTreeBuilder = mAryHuffmanTreeBuilder(width)
+  let huffmanRoot
+  if (isNonEmpty(huffmanOrphanLeaves)) {
+    huffmanRoot = huffmanTreeBuilder(huffmanOrphanLeaves)
+  } else {
+    throw new Error('Could not find any Kapps')
+  }
+  return huffmanRoot
 }
