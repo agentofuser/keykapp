@@ -57,7 +57,7 @@ export const allKapps: Kapp[] = [
 const navUpKapp: Kapp = {
   idv0: '/keykapp/kapps/navigation/up',
   shortAsciiName: ':navUp',
-  legend: <LiteralLegend title={'⬅️back'} />,
+  legend: <LiteralLegend title={'⬅️ back'} />,
   instruction: zoomOutToParent,
   actuationCount: 0,
 }
