@@ -135,7 +135,7 @@ export default function App(): React.ReactNode {
               </Paper>
               <Paper className={classes.outputBuffer}>
                 <pre className={classes.outputBufferPre}>
-                  {state.currentBuffer}
+                  {state.currentBuffer + '|'}
                 </pre>
               </Paper>
               <Paper className={classes.displayItem}>
