@@ -46,6 +46,11 @@ const useStyles = makeStyles((theme: Theme) => ({
   outputBuffer: {
     padding: theme.spacing(2, 2),
   },
+  outputBufferPre: {
+    whiteSpace: 'pre-wrap',
+    fontSize: 22,
+    margin: '1rem',
+  },
 }))
 
 function appReducer(prevState: AppState, action: AppAction): AppState {
@@ -129,13 +134,7 @@ export default function App(): React.ReactNode {
                 <Typography>commandNgrams</Typography>
               </Paper>
               <Paper className={classes.outputBuffer}>
-                <pre
-                  style={{
-                    fontFamily: 'monospace',
-                    fontSize: '22px',
-                    margin: 0,
-                  }}
-                >
+                <pre className={classes.outputBufferPre}>
                   {state.currentBuffer}
                 </pre>
               </Paper>
