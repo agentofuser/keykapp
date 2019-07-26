@@ -1,5 +1,5 @@
 {
-  "name": "keyk.app-redirect-patreon",
+  "name": "keyk.app-redirect-apex",
   "scope": "agentofuser",
   "version": 2,
   "alias": "keyk.app",
@@ -7,7 +7,7 @@
     {
       "src": "/(.*)",
       "status": 302,
-      "headers": { "Location": "https://patreon.com/agentofuser" }
+      "headers": { "Location": "https://clay.keyk.app" }
     }
   ]
 }
