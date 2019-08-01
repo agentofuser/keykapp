@@ -10,3 +10,6 @@ export const allKeyswitches: Keyswitch[] = [
   { index: 6, key: 'l', actuationCost: 3, hand: RightHand },
   { index: 7, key: ';', actuationCost: 4, hand: RightHand },
 ]
+
+export const idv0Prefix = '/kapp/'
+export const asciiIdv0Path = `${idv0Prefix}literals/ascii/`

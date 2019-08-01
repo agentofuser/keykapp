@@ -1,6 +1,5 @@
 import { Option } from 'fp-ts/es6/Option'
 import { Tree } from 'fp-ts/es6/tree'
-import { HuffmanWeighted } from './navigation/huffman'
 
 export type Legend = React.ReactNode
 export type Instruction = AppReducer
@@ -22,7 +21,10 @@ export interface Kapp {
   shortAsciiName: string
   legend: Legend
   instruction: Instruction
-  actuationCount: number // denormalization
+}
+
+export interface HuffmanWeighted {
+  huffmanWeight: number
 }
 
 export interface WaypointValue extends HuffmanWeighted {

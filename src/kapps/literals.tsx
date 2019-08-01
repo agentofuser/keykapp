@@ -1,7 +1,7 @@
 import { Paper, Typography } from '@material-ui/core'
 import { map } from 'fp-ts/es6/Array'
 import * as React from 'react'
-import { charCounts } from '../datasets/tweet'
+import { asciiIdv0Path } from '../constants'
 import { AppAction, AppReducer, AppState, Kapp } from '../types'
 
 const pushLiteral = (literal: string): AppReducer => (
@@ -19,8 +19,6 @@ const pushLiteral = (literal: string): AppReducer => (
 // from 32 to 126.
 const ascii32To126 =
   ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
-
-const idv0Prefix = '/keykapp/kapps/literals/ascii/'
 
 export interface LiteralLegendProps {
   title: string
@@ -49,18 +47,16 @@ export function LiteralLegend({
 
 export const printableAsciiChars: Kapp[] = map(
   (char: string): Kapp => ({
-    idv0: `${idv0Prefix}${char.charCodeAt(0)}`,
+    idv0: `${asciiIdv0Path}${char.charCodeAt(0)}`,
     shortAsciiName: char === ' ' ? ':space' : char,
     legend: <LiteralLegend title={char === ' ' ? ':space' : char} />,
     instruction: pushLiteral(char),
-    actuationCount: charCounts[char] || 0,
   })
 )(ascii32To126.split(''))
 
 export const newlineChar: Kapp = {
-  idv0: `${idv0Prefix}${'\n'.charCodeAt}`,
+  idv0: `${asciiIdv0Path}${'\n'.charCodeAt(0)}`,
   shortAsciiName: ':newline',
   legend: <LiteralLegend title={'newline'} />,
   instruction: pushLiteral('\n'),
-  actuationCount: charCounts['\n'] || 0,
 }

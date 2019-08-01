@@ -62,9 +62,14 @@ function appReducer(prevState: AppState, action: AppAction): AppState {
     (): AppState => zoomInto(waypoint)(nextState, action),
     (kapp: Kapp): AppState => {
       let stateAfterKapp = kapp.instruction(nextState, action)
-      kapp.actuationCount++
-      // Update huffman tree based on kapp's new weight
-      stateAfterKapp = { ...stateAfterKapp, rootWaypoint: newHuffmanRoot() }
+      // Update huffman tree based on kapp's updated weight calculated from
+      // the appActionLog
+      stateAfterKapp = {
+        ...stateAfterKapp,
+        rootWaypoint: newHuffmanRoot({
+          appActionLog: stateAfterKapp.appActionLog,
+        }),
+      }
 
       if (stateAfterKapp.currentWaypoint === prevState.currentWaypoint) {
         return zoomOutToRoot(stateAfterKapp, action)
@@ -80,9 +85,10 @@ function appReducer(prevState: AppState, action: AppAction): AppState {
 }
 
 export default function App(): React.ReactNode {
-  const initialHuffmanRoot = newHuffmanRoot()
+  const userLog: AppAction[] = []
+  const initialHuffmanRoot = newHuffmanRoot({ appActionLog: userLog })
   const [state, dispatch] = React.useReducer(appReducer, {
-    appActionLog: [],
+    appActionLog: userLog,
     currentBuffer: '',
     rootWaypoint: initialHuffmanRoot,
     currentWaypoint: initialHuffmanRoot,

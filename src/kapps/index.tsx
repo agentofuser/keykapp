@@ -4,8 +4,9 @@ import { newlineChar, printableAsciiChars, LiteralLegend } from './literals'
 import { makeOrphanLeafWaypoint } from '../navigation/huffman'
 import * as React from 'react'
 import * as copy from 'copy-text-to-clipboard'
+import { idv0Prefix } from '../constants'
 
-const mapLastWord = (mapWord: (word: string) => string): AppReducer => (
+const mapLastWord = (wordMapper: (word: string) => string): AppReducer => (
   prevState: AppState,
   _action: AppAction
 ): AppState => {
@@ -13,8 +14,33 @@ const mapLastWord = (mapWord: (word: string) => string): AppReducer => (
     ...prevState,
     currentBuffer: prevState.currentBuffer.replace(
       /\w+$/,
-      (lastWord: string): string => mapWord(lastWord)
+      (lastWord: string): string => wordMapper(lastWord)
     ),
+  }
+  return nextState
+}
+
+const mapLastChar = (charMapper: (char: string) => string): AppReducer => (
+  prevState: AppState,
+  _action: AppAction
+): AppState => {
+  const nextState = {
+    ...prevState,
+    currentBuffer: prevState.currentBuffer.replace(
+      /.$/,
+      (lastChar: string): string => charMapper(lastChar)
+    ),
+  }
+  return nextState
+}
+
+const mapBuffer = (bufferMapper: (buffer: string) => string): AppReducer => (
+  prevState: AppState,
+  _action: AppAction
+): AppState => {
+  const nextState = {
+    ...prevState,
+    currentBuffer: bufferMapper(prevState.currentBuffer),
   }
   return nextState
 }
@@ -41,8 +67,6 @@ const copyCurrentBufferToClipboard: AppReducer = (
   return nextState
 }
 
-const idv0Prefix = '/keykapp/kapps/'
-
 export const userlandKapps: Kapp[] = [
   ...printableAsciiChars,
   newlineChar,
@@ -51,49 +75,55 @@ export const userlandKapps: Kapp[] = [
     shortAsciiName: ':upcase',
     legend: 'upcase word',
     instruction: mapLastWord((word: string): string => word.toUpperCase()),
-    actuationCount: 0,
   },
   {
     idv0: `${idv0Prefix}word/downcase`,
     shortAsciiName: ':downcase',
     legend: 'downcase word',
     instruction: mapLastWord((word: string): string => word.toLowerCase()),
-    actuationCount: 0,
   },
   {
-    idv0: `${idv0Prefix}text/delete`,
-    shortAsciiName: ':delete',
+    idv0: `${idv0Prefix}text/delete-wordish-backwards`,
+    shortAsciiName: ':delWord',
     legend: 'delete word',
     instruction: deleteChunkBackwards,
-    actuationCount: 10000,
+  },
+  {
+    idv0: `${idv0Prefix}text/delete-char-backwards`,
+    shortAsciiName: ':delChar',
+    legend: 'delete character',
+    instruction: mapLastChar((_char: string): string => ''),
+  },
+  {
+    idv0: `${idv0Prefix}text/clear-buffer`,
+    shortAsciiName: ':clear',
+    legend: 'clear buffer',
+    instruction: mapBuffer((_buffer: string): string => ''),
   },
   {
     idv0: `${idv0Prefix}text/copy-to-clipboard`,
     shortAsciiName: ':copy',
     legend: 'copy text to clipboard',
     instruction: copyCurrentBufferToClipboard,
-    actuationCount: 10000,
   },
 ]
 
 const navUpKapp: Kapp = {
-  idv0: '/keykapp/kapps/navigation/up',
+  idv0: `${idv0Prefix}navigation/up`,
   shortAsciiName: ':navUp',
   legend: <LiteralLegend title={'⬅️ back'} />,
   instruction: zoomOutToParent,
-  actuationCount: 0,
 }
 
 export const navUpWaypointBuilder = (): Waypoint =>
-  makeOrphanLeafWaypoint(navUpKapp)
+  makeOrphanLeafWaypoint([], navUpKapp)
 
 const navRootKapp: Kapp = {
-  idv0: '/keykapp/kapps/navigation/root',
+  idv0: `${idv0Prefix}navigation/root`,
   shortAsciiName: ':navRoot',
   legend: <LiteralLegend title={'🏡 home'} />,
   instruction: zoomOutToRoot,
-  actuationCount: 0,
 }
 
 export const navRootWaypointBuilder = (): Waypoint =>
-  makeOrphanLeafWaypoint(navRootKapp)
+  makeOrphanLeafWaypoint([], navRootKapp)

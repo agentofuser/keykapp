@@ -28,7 +28,7 @@
 
 // console.log(JSON.stringify({ charCounts }, null, 2))
 
-export const charCounts = {
+export const charCounts: { [name: string]: number } = {
   '0': 224,
   '1': 271,
   '2': 227,

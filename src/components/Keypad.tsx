@@ -2,7 +2,7 @@ import { makeStyles } from '@material-ui/styles'
 import { map, partition, reverse, sortBy, zip } from 'fp-ts/es6/Array'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
 import * as React from 'react'
-import { navRootWaypointBuilder, navUpWaypointBuilder } from '../commands'
+import { navRootWaypointBuilder, navUpWaypointBuilder } from '../kapps'
 import { allKeyswitches } from '../constants'
 import {
   AppAction,
