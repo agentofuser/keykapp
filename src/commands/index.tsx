@@ -43,7 +43,7 @@ const copyCurrentBufferToClipboard: AppReducer = (
 
 const idv0Prefix = '/keykapp/kapps/'
 
-export const allKapps: Kapp[] = [
+export const userlandKapps: Kapp[] = [
   ...printableAsciiChars,
   newlineChar,
   {

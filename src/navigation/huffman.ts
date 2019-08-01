@@ -11,7 +11,7 @@ import { fold, none, some } from 'fp-ts/es6/Option'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
 import { foldMap, make } from 'fp-ts/es6/Tree'
 import { Kapp, Waypoint, WaypointValue } from '../types'
-import { allKapps } from '../commands'
+import { userlandKapps } from '../commands'
 import { allKeyswitches } from '../constants'
 
 export interface HuffmanWeighted {
@@ -98,7 +98,7 @@ export function mAryHuffmanTreeBuilder(
 
 export function newHuffmanRoot(
   width: number = allKeyswitches.length - 2,
-  kapps: Kapp[] = allKapps
+  kapps: Kapp[] = userlandKapps
 ): Waypoint {
   const huffmanOrphanLeaves = map(makeOrphanLeafWaypoint)(kapps)
   const huffmanTreeBuilder = mAryHuffmanTreeBuilder(width)

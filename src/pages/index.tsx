@@ -1,10 +1,10 @@
 import {
   Paper,
-  Theme,
   Table,
   TableBody,
-  TableRow,
   TableCell,
+  TableRow,
+  Theme,
 } from '@material-ui/core'
 import Box from '@material-ui/core/Box'
 import Container from '@material-ui/core/Container'
@@ -15,12 +15,11 @@ import { fold, Option } from 'fp-ts/es6/Option'
 import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
+import { wordCount } from '../kitchensink/purefns'
 import { zoomInto, zoomOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
 import { logAction } from '../state'
 import { AppAction, AppState, Kapp, Keybinding } from '../types'
-import { allKapps } from '../commands'
-import { wordCount } from '../kitchensink/purefns'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
@@ -64,13 +63,14 @@ function appReducer(prevState: AppState, action: AppAction): AppState {
     (kapp: Kapp): AppState => {
       let stateAfterKapp = kapp.instruction(nextState, action)
       kapp.actuationCount++
+      // Update huffman tree based on kapp's new weight
       stateAfterKapp = { ...stateAfterKapp, rootWaypoint: newHuffmanRoot() }
 
-      // Don't zoom out to root waypoint if the kapp changed the
-      // current waypoint already, eg. :navUp.
       if (stateAfterKapp.currentWaypoint === prevState.currentWaypoint) {
         return zoomOutToRoot(stateAfterKapp, action)
       } else {
+        // Don't zoom out to root waypoint if the kapp changed the
+        // current waypoint already, eg. :navUp.
         return stateAfterKapp
       }
     }
@@ -86,7 +86,6 @@ export default function App(): React.ReactNode {
     currentBuffer: '',
     rootWaypoint: initialHuffmanRoot,
     currentWaypoint: initialHuffmanRoot,
-    kapps: allKapps,
   })
 
   function onKeyUp(event: KeyboardEvent): void {
