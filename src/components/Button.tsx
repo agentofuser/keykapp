@@ -34,7 +34,7 @@ const useStyles = makeStyles({
 })
 
 function clampString(str: string): string {
-  const maxLength = 70
+  const maxLength = 50
   if (str.length > maxLength) {
     const clamped = str
       .slice(0, maxLength)
