@@ -1,7 +1,7 @@
 import { foldMap, getMonoid } from 'fp-ts/es6/Array'
 import { cons } from 'fp-ts/es6/NonEmptyArray'
-import { getFirstKappFromWaypoint } from '../kapps'
 import { AppAction, AppReducer, AppState, Kapp } from '../types'
+import { getKappById } from '../kapps'
 
 export const logAction: AppReducer = (prevState, action): AppState => {
   const nextState = {
@@ -16,9 +16,9 @@ export function kappLog(appActionLog: AppAction[]): Kapp[] {
   const M = getMonoid<Kapp>()
   const log = foldMap(M)((appAction: AppAction): Kapp[] => {
     const waypoint = appAction.data.keybinding[1]
-    const idSet: Set<string> = waypoint.value.reachableKappIdsv0
-    if (idSet.size === 1) {
-      return [getFirstKappFromWaypoint(waypoint)]
+    const id = waypoint.value.kappIdv0
+    if (id) {
+      return [getKappById(id)]
     } else {
       return []
     }

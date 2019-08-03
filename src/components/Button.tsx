@@ -5,10 +5,10 @@ import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
 import { map } from 'fp-ts/es6/Array'
 import * as React from 'react'
-import { getFirstKappFromWaypoint } from '../kapps'
 import { reachableKapps } from '../navigation/huffman'
 import { AppAction, Kapp, Keybinding, LeftHand, RightHand } from '../types'
 import { KappLegend } from './Legend'
+import { getKappById } from '../kapps'
 
 const useStyles = makeStyles({
   button: {
@@ -66,6 +66,7 @@ export default function Button({
       break
   }
 
+  const kappIdv0 = keybinding[1].value.kappIdv0
   return (
     <Card
       className={classes.button}
@@ -81,10 +82,8 @@ export default function Button({
         className={classes.buttonActionArea}
       >
         <CardContent className={classes.buttonContent}>
-          {keybinding[1].value.reachableKappIdsv0.size === 1 ? (
-            <KappLegend
-              title={getFirstKappFromWaypoint(keybinding[1]).legend}
-            ></KappLegend>
+          {kappIdv0 ? (
+            <KappLegend title={getKappById(kappIdv0).legend}></KappLegend>
           ) : (
             <Typography align="center">
               {clampString(

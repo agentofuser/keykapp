@@ -28,7 +28,7 @@ export interface HuffmanWeighted {
 }
 
 export interface WaypointValue extends HuffmanWeighted {
-  reachableKappIdsv0: Set<string>
+  kappIdv0: string | null
 }
 
 export type Waypoint = Tree<WaypointValue>

@@ -139,10 +139,6 @@ export function getKappById(id: string): Kapp {
   }
 }
 
-export function getFirstKappFromWaypoint(waypoint: Waypoint): Kapp {
-  return getKappById(Array.from(waypoint.value.reachableKappIdsv0)[0])
-}
-
 export const navUpWaypointBuilder = (): Waypoint =>
   makeOrphanLeafWaypoint([], navUpKapp)
 

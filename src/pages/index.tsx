@@ -11,17 +11,17 @@ import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
 import { findFirst } from 'fp-ts/es6/Array'
+import { head, of } from 'fp-ts/es6/NonEmptyArray'
 import { fold, Option } from 'fp-ts/es6/Option'
 import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
-import { KappStore } from '../kapps'
+import { getKappById } from '../kapps'
 import { wordCount } from '../kitchensink/purefns'
 import { zoomInto, zoomOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
 import { logAction } from '../state'
 import { AppAction, AppState, Keybinding } from '../types'
-import { of, head } from 'fp-ts/es6/NonEmptyArray'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
@@ -61,12 +61,11 @@ function appReducer(prevState: AppState, action: AppAction): AppState {
 
   const [_keyswitch, waypoint] = action.data.keybinding
 
-  if (waypoint.value.reachableKappIdsv0.size > 1) {
+  const kappIdv0 = waypoint.value.kappIdv0
+  if (!kappIdv0) {
     nextState = zoomInto(waypoint)(nextState, action)
-  } else if (waypoint.value.reachableKappIdsv0.size === 1) {
-    const kapp = KappStore.get(
-      Array.from(waypoint.value.reachableKappIdsv0)[0]
-    )
+  } else {
+    const kapp = getKappById(kappIdv0)
 
     if (kapp) {
       let stateAfterKapp = kapp.instruction(nextState, action)
@@ -91,8 +90,6 @@ function appReducer(prevState: AppState, action: AppAction): AppState {
     } else {
       throw new Error('Could not find kapp from id given.')
     }
-  } else {
-    throw new Error('Waypoint must have at least one reachable kapp.')
   }
 
   return nextState

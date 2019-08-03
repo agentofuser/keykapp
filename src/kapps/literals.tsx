@@ -22,7 +22,7 @@ export const printableAsciiChars: Kapp[] = map(
   (char: string): Kapp => ({
     idv0: `${asciiIdv0Path}${char.charCodeAt(0)}`,
     shortAsciiName: char === ' ' ? ':space' : char,
-    legend: char === ' ' ? ':space' : char,
+    legend: char === ' ' ? 'space' : char,
     instruction: pushLiteral(char),
   })
 )(ascii32To126.split(''))

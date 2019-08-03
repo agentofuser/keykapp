@@ -1,21 +1,28 @@
 import {
   filter,
   foldLeft,
+  foldMap as foldMapArray,
+  getMonoid,
   isNonEmpty,
   map,
   sortBy,
   splitAt,
 } from 'fp-ts/es6/Array'
-import { eqString } from 'fp-ts/es6/Eq'
 import { cons, head, NonEmptyArray } from 'fp-ts/es6/NonEmptyArray'
+import { fold, fromNullable } from 'fp-ts/es6/Option'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
-import { fromArray, union } from 'fp-ts/es6/Set'
-import { make } from 'fp-ts/es6/Tree'
+import { foldMap as foldMapTree, make } from 'fp-ts/es6/Tree'
 import { allKeyswitches, asciiIdv0Path } from '../constants'
 import { charCounts } from '../datasets/tweet'
 import { getKappById, userlandKapps } from '../kapps'
 import { kappLog } from '../state'
-import { AppAction, AppActionLog, Kapp, Waypoint } from '../types'
+import {
+  AppAction,
+  AppActionLog,
+  Kapp,
+  Waypoint,
+  WaypointValue,
+} from '../types'
 
 function kappLogCount(appActionLog: AppAction[], kapp: Kapp): number {
   const log = kappLog(appActionLog)
@@ -56,9 +63,44 @@ function huffmanWeightFromKapp(appActionLog: AppAction[], kapp: Kapp): number {
   return finalWeight
 }
 
+type WaypointSorter = (as: Waypoint[]) => Waypoint[]
+const sortByHuffmanWeightAsc = ((): WaypointSorter => {
+  const byHuffmanWeight = ord.contramap(
+    ordNumber,
+    (waypoint: Waypoint): number => waypoint.value.huffmanWeight
+  )
+  return sortBy([byHuffmanWeight])
+})()
+
+type LeafLister = (as: Waypoint) => Waypoint[]
+
 export function reachableKapps(waypoint: Waypoint): Kapp[] {
-  const ids = waypoint.value.reachableKappIdsv0
-  const kapps: Kapp[] = map(getKappById)(Array.from(ids))
+  const byHuffmanWeightDesc = ord.contramap(
+    ordNumber,
+    (waypointValue: WaypointValue): number => -waypointValue.huffmanWeight
+  )
+  const sortByHuffmanWeightDesc = sortBy([byHuffmanWeightDesc])
+
+  const waypointValueM = getMonoid<WaypointValue>()
+  const sortedKappWaypointValues: WaypointValue[] = sortByHuffmanWeightDesc(
+    foldMapTree(waypointValueM)(
+      (waypointValue: WaypointValue): WaypointValue[] => {
+        const kappWaypointValue = fold(
+          (): WaypointValue[] => [],
+          (_kappIdv0: string): WaypointValue[] => [waypointValue]
+        )(fromNullable(waypointValue.kappIdv0))
+        return kappWaypointValue
+      }
+    )(waypoint)
+  )
+
+  const kappM = getMonoid<Kapp>()
+  const kapps = foldMapArray(kappM)((waypointValue: WaypointValue): Kapp[] =>
+    fold(
+      (): Kapp[] => [],
+      (kappIdv0: string): Kapp[] => [getKappById(kappIdv0)]
+    )(fromNullable(waypointValue.kappIdv0))
+  )(sortedKappWaypointValues)
   return kapps
 }
 
@@ -68,16 +110,10 @@ export function makeOrphanLeafWaypoint(
 ): Waypoint {
   const value = {
     huffmanWeight: huffmanWeightFromKapp(appActionLog, kapp),
-    reachableKappIdsv0: fromArray(eqString)([kapp.idv0]),
+    kappIdv0: kapp.idv0,
   }
   return make(value, [])
 }
-
-const byHuffmanWeight = ord.contramap(
-  ordNumber,
-  (hw: Waypoint): number => hw.value.huffmanWeight
-)
-const sortByHuffmanWeight = sortBy([byHuffmanWeight])
 
 const forestWeight: (forest: Waypoint[]) => number = foldLeft(
   (): number => 0,
@@ -97,34 +133,12 @@ export function mAryHuffmanTreeBuilder(
     } else {
       const modM = xs.length % m
       const takeN = modM === 0 ? m : modM + 1
-      const [forest, tail] = splitAt(takeN)(sortByHuffmanWeight(xs))
-
-      const sets: Set<string>[] = map(
-        (waypoint: Waypoint): Set<string> => waypoint.value.reachableKappIdsv0
-      )(forest)
-      const unsortedReachableKappIdsv0 = sets.reduce(
-        (idSetUnion: Set<string>, idSet: Set<string>): Set<string> =>
-          union(eqString)(idSetUnion, idSet),
-        fromArray(eqString)([])
-      )
-
-      const reachableKappIdsv0 = new Set(
-        Array.from(unsortedReachableKappIdsv0).sort(
-          (a: string, b: string): number => {
-            const kappA = getKappById(a)
-            const kappB = getKappById(b)
-            return (
-              huffmanWeightFromKapp(appActionLog, kappB) -
-              huffmanWeightFromKapp(appActionLog, kappA)
-            )
-          }
-        )
-      )
+      const [forest, tail] = splitAt(takeN)(sortByHuffmanWeightAsc(xs))
 
       const tree = make(
         {
           huffmanWeight: forestWeight(forest),
-          reachableKappIdsv0,
+          kappIdv0: null,
         },
         forest
       )
