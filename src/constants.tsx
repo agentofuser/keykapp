@@ -11,5 +11,7 @@ export const allKeyswitches: Keyswitch[] = [
   { index: 7, key: ';', actuationCost: 4, hand: RightHand },
 ]
 
-export const idv0Prefix = '/kapp/'
-export const asciiIdv0Path = `${idv0Prefix}literals/ascii/`
+export const idv0UserlandPrefix = '/userland/kapp/'
+export const asciiIdv0Path = `${idv0UserlandPrefix}literals/ascii/`
+
+export const idv0SystemPrefix = '/system/kapp/'

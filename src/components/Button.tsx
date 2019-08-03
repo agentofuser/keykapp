@@ -4,17 +4,11 @@ import CardContent from '@material-ui/core/CardContent'
 import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
 import { map } from 'fp-ts/es6/Array'
-import { fold } from 'fp-ts/es6/Option'
 import * as React from 'react'
+import { getFirstKappFromWaypoint } from '../kapps'
 import { reachableKapps } from '../navigation/huffman'
-import {
-  AppAction,
-  Kapp,
-  Keybinding,
-  Legend,
-  LeftHand,
-  RightHand,
-} from '../types'
+import { AppAction, Kapp, Keybinding, LeftHand, RightHand } from '../types'
+import { KappLegend } from './Legend'
 
 const useStyles = makeStyles({
   button: {
@@ -87,18 +81,19 @@ export default function Button({
         className={classes.buttonActionArea}
       >
         <CardContent className={classes.buttonContent}>
-          {fold(
-            (): Legend => (
-              <Typography align="center">
-                {clampString(
-                  map((kapp: Kapp): string => kapp.shortAsciiName)(
-                    reachableKapps(keybinding[1])
-                  ).join(' ')
-                )}
-              </Typography>
-            ),
-            (kapp: Kapp): Legend => kapp.legend
-          )(keybinding[1].value.kapp)}
+          {keybinding[1].value.reachableKappIdsv0.size === 1 ? (
+            <KappLegend
+              title={getFirstKappFromWaypoint(keybinding[1]).legend}
+            ></KappLegend>
+          ) : (
+            <Typography align="center">
+              {clampString(
+                map((kapp: Kapp): string => kapp.shortAsciiName)(
+                  reachableKapps(keybinding[1])
+                ).join(' ')
+              )}
+            </Typography>
+          )}
 
           <Typography align="center" color="textSecondary">
             {keybinding[0].key}

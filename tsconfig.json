@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "strict": true,
-    "jsx": "react"
+    "jsx": "react",
+    "downlevelIteration": true
   }
 }

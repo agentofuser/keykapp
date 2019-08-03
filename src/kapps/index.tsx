@@ -1,10 +1,10 @@
-import { zoomOutToParent, zoomOutToRoot } from '../navigation'
-import { AppAction, AppReducer, AppState, Kapp, Waypoint } from '../types'
-import { newlineChar, printableAsciiChars, LiteralLegend } from './literals'
-import { makeOrphanLeafWaypoint } from '../navigation/huffman'
-import * as React from 'react'
 import * as copy from 'copy-text-to-clipboard'
-import { idv0Prefix } from '../constants'
+import { map } from 'fp-ts/es6/Array'
+import { idv0SystemPrefix, idv0UserlandPrefix } from '../constants'
+import { zoomOutToParent, zoomOutToRoot } from '../navigation'
+import { makeOrphanLeafWaypoint } from '../navigation/huffman'
+import { AppAction, AppReducer, AppState, Kapp, Waypoint } from '../types'
+import { newlineChar, printableAsciiChars } from './literals'
 
 const mapLastWord = (wordMapper: (word: string) => string): AppReducer => (
   prevState: AppState,
@@ -71,37 +71,37 @@ export const userlandKapps: Kapp[] = [
   ...printableAsciiChars,
   newlineChar,
   {
-    idv0: `${idv0Prefix}word/upcase`,
+    idv0: `${idv0UserlandPrefix}word/upcase`,
     shortAsciiName: ':upcase',
     legend: 'upcase word',
     instruction: mapLastWord((word: string): string => word.toUpperCase()),
   },
   {
-    idv0: `${idv0Prefix}word/downcase`,
+    idv0: `${idv0UserlandPrefix}word/downcase`,
     shortAsciiName: ':downcase',
     legend: 'downcase word',
     instruction: mapLastWord((word: string): string => word.toLowerCase()),
   },
   {
-    idv0: `${idv0Prefix}text/delete-wordish-backwards`,
+    idv0: `${idv0UserlandPrefix}text/delete-wordish-backwards`,
     shortAsciiName: ':delWord',
     legend: 'delete word',
     instruction: deleteChunkBackwards,
   },
   {
-    idv0: `${idv0Prefix}text/delete-char-backwards`,
+    idv0: `${idv0UserlandPrefix}text/delete-char-backwards`,
     shortAsciiName: ':delChar',
     legend: 'delete character',
     instruction: mapLastChar((_char: string): string => ''),
   },
   {
-    idv0: `${idv0Prefix}text/clear-buffer`,
+    idv0: `${idv0UserlandPrefix}text/clear-buffer`,
     shortAsciiName: ':clear',
     legend: 'clear buffer',
     instruction: mapBuffer((_buffer: string): string => ''),
   },
   {
-    idv0: `${idv0Prefix}text/copy-to-clipboard`,
+    idv0: `${idv0UserlandPrefix}text/copy-to-clipboard`,
     shortAsciiName: ':copy',
     legend: 'copy text to clipboard',
     instruction: copyCurrentBufferToClipboard,
@@ -109,21 +109,42 @@ export const userlandKapps: Kapp[] = [
 ]
 
 const navUpKapp: Kapp = {
-  idv0: `${idv0Prefix}navigation/up`,
+  idv0: `${idv0SystemPrefix}navigation/up`,
   shortAsciiName: ':navUp',
-  legend: <LiteralLegend title={'⬅️ back'} />,
+  legend: '⬅️ back',
   instruction: zoomOutToParent,
+}
+
+const navRootKapp: Kapp = {
+  idv0: `${idv0SystemPrefix}navigation/root`,
+  shortAsciiName: ':navRoot',
+  legend: '🏡 home',
+  instruction: zoomOutToRoot,
+}
+
+export const systemKapps: Kapp[] = [navUpKapp, navRootKapp]
+
+export const allKapps: Kapp[] = systemKapps.concat(userlandKapps)
+
+export const KappStore: Map<string, Kapp> = new Map(
+  map((kapp: Kapp): [string, Kapp] => [kapp.idv0, kapp])(allKapps)
+)
+
+export function getKappById(id: string): Kapp {
+  const kapp = KappStore.get(id)
+  if (kapp) {
+    return kapp
+  } else {
+    throw new Error('Could not find kapp by id.')
+  }
+}
+
+export function getFirstKappFromWaypoint(waypoint: Waypoint): Kapp {
+  return getKappById(Array.from(waypoint.value.reachableKappIdsv0)[0])
 }
 
 export const navUpWaypointBuilder = (): Waypoint =>
   makeOrphanLeafWaypoint([], navUpKapp)
-
-const navRootKapp: Kapp = {
-  idv0: `${idv0Prefix}navigation/root`,
-  shortAsciiName: ':navRoot',
-  legend: <LiteralLegend title={'🏡 home'} />,
-  instruction: zoomOutToRoot,
-}
 
 export const navRootWaypointBuilder = (): Waypoint =>
   makeOrphanLeafWaypoint([], navRootKapp)

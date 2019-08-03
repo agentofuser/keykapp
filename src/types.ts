@@ -1,7 +1,7 @@
-import { Option } from 'fp-ts/es6/Option'
 import { Tree } from 'fp-ts/es6/tree'
+import { NonEmptyArray } from 'fp-ts/es6/NonEmptyArray'
 
-export type Legend = React.ReactNode
+export type Legend = string
 export type Instruction = AppReducer
 
 export type LeftHand = 'LeftHand'
@@ -28,8 +28,7 @@ export interface HuffmanWeighted {
 }
 
 export interface WaypointValue extends HuffmanWeighted {
-  parent: Option<Waypoint>
-  kapp: Option<Kapp>
+  reachableKappIdsv0: Set<string>
 }
 
 export type Waypoint = Tree<WaypointValue>
@@ -45,13 +44,13 @@ export interface AppAction {
   }
 }
 
-type AppActionLog = AppAction[]
+export type AppActionLog = AppAction[]
 
 export interface AppState {
   readonly appActionLog: AppActionLog
   readonly currentBuffer: string
   readonly rootWaypoint: Waypoint
-  readonly currentWaypoint: Waypoint
+  readonly waypointBreadcrumbs: NonEmptyArray<Waypoint>
 }
 
 export type AppReducer = React.Reducer<AppState, AppAction>

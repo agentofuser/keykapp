@@ -15,11 +15,13 @@ import { fold, Option } from 'fp-ts/es6/Option'
 import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
+import { KappStore } from '../kapps'
 import { wordCount } from '../kitchensink/purefns'
 import { zoomInto, zoomOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
 import { logAction } from '../state'
-import { AppAction, AppState, Kapp, Keybinding } from '../types'
+import { AppAction, AppState, Keybinding } from '../types'
+import { of, head } from 'fp-ts/es6/NonEmptyArray'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
@@ -58,9 +60,15 @@ function appReducer(prevState: AppState, action: AppAction): AppState {
   nextState = logAction(nextState, action)
 
   const [_keyswitch, waypoint] = action.data.keybinding
-  nextState = fold(
-    (): AppState => zoomInto(waypoint)(nextState, action),
-    (kapp: Kapp): AppState => {
+
+  if (waypoint.value.reachableKappIdsv0.size > 1) {
+    nextState = zoomInto(waypoint)(nextState, action)
+  } else if (waypoint.value.reachableKappIdsv0.size === 1) {
+    const kapp = KappStore.get(
+      Array.from(waypoint.value.reachableKappIdsv0)[0]
+    )
+
+    if (kapp) {
       let stateAfterKapp = kapp.instruction(nextState, action)
       // Update huffman tree based on kapp's updated weight calculated from
       // the appActionLog
@@ -71,15 +79,21 @@ function appReducer(prevState: AppState, action: AppAction): AppState {
         }),
       }
 
-      if (stateAfterKapp.currentWaypoint === prevState.currentWaypoint) {
-        return zoomOutToRoot(stateAfterKapp, action)
+      if (
+        stateAfterKapp.waypointBreadcrumbs === prevState.waypointBreadcrumbs
+      ) {
+        nextState = zoomOutToRoot(stateAfterKapp, action)
       } else {
         // Don't zoom out to root waypoint if the kapp changed the
         // current waypoint already, eg. :navUp.
-        return stateAfterKapp
+        nextState = stateAfterKapp
       }
+    } else {
+      throw new Error('Could not find kapp from id given.')
     }
-  )(waypoint.value.kapp)
+  } else {
+    throw new Error('Waypoint must have at least one reachable kapp.')
+  }
 
   return nextState
 }
@@ -91,7 +105,7 @@ export default function App(): React.ReactNode {
     appActionLog: userLog,
     currentBuffer: '',
     rootWaypoint: initialHuffmanRoot,
-    currentWaypoint: initialHuffmanRoot,
+    waypointBreadcrumbs: of(initialHuffmanRoot),
   })
 
   function onKeyUp(event: KeyboardEvent): void {
@@ -100,7 +114,7 @@ export default function App(): React.ReactNode {
     const keybinding: Option<Keybinding> = findFirst(
       ([keyswitch, _waypoint]: Keybinding): boolean =>
         keyswitch.key === event.key
-    )(layout(state.currentWaypoint))
+    )(layout(head(state.waypointBreadcrumbs)))
 
     fold(
       (): void => {},
@@ -168,7 +182,7 @@ export default function App(): React.ReactNode {
             </div>
             <Keypad
               dispatch={dispatch}
-              layout={layout(state.currentWaypoint)}
+              layout={layout(head(state.waypointBreadcrumbs))}
             />
           </div>
         </Box>
