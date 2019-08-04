@@ -35,5 +35,8 @@ module.exports = {
         crossOrigin: `use-credentials`,
       },
     },
+    {
+      resolve: 'gatsby-plugin-offline',
+    },
   ],
 }
