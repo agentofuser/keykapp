@@ -72,53 +72,53 @@ export const userlandKapps: Kapp[] = [
   newlineChar,
   {
     idv0: `${idv0UserlandPrefix}word/upcase`,
-    shortAsciiName: ':upcase',
+    shortAsciiName: ':word-upcase',
     legend: 'upcase word',
     instruction: mapLastWord((word: string): string => word.toUpperCase()),
   },
   {
     idv0: `${idv0UserlandPrefix}word/downcase`,
-    shortAsciiName: ':downcase',
+    shortAsciiName: ':word-downcase',
     legend: 'downcase word',
     instruction: mapLastWord((word: string): string => word.toLowerCase()),
   },
   {
-    idv0: `${idv0UserlandPrefix}text/delete-wordish-backwards`,
-    shortAsciiName: ':delWord',
-    legend: 'delete word',
+    idv0: `${idv0UserlandPrefix}wordish/delete`,
+    shortAsciiName: ':wordish-delete',
+    legend: 'delete to prev word',
     instruction: deleteChunkBackwards,
   },
   {
-    idv0: `${idv0UserlandPrefix}text/delete-char-backwards`,
-    shortAsciiName: ':delChar',
+    idv0: `${idv0UserlandPrefix}char/delete`,
+    shortAsciiName: ':char-delete',
     legend: 'delete character',
     instruction: mapLastChar((_char: string): string => ''),
   },
   {
-    idv0: `${idv0UserlandPrefix}text/clear-buffer`,
-    shortAsciiName: ':clear',
-    legend: 'clear buffer',
+    idv0: `${idv0UserlandPrefix}text/delete-all`,
+    shortAsciiName: ':text-delete-all',
+    legend: 'delete all text',
     instruction: mapBuffer((_buffer: string): string => ''),
   },
   {
-    idv0: `${idv0UserlandPrefix}text/copy-to-clipboard`,
-    shortAsciiName: ':copy',
+    idv0: `${idv0UserlandPrefix}text/copy`,
+    shortAsciiName: ':text-copy',
     legend: 'copy text to clipboard',
     instruction: copyCurrentBufferToClipboard,
   },
 ]
 
 const navUpKapp: Kapp = {
-  idv0: `${idv0SystemPrefix}navigation/up`,
-  shortAsciiName: ':navUp',
-  legend: '⬅️ back',
+  idv0: `${idv0SystemPrefix}menu/up`,
+  shortAsciiName: ':menu-up',
+  legend: '⬅️ :menu-up',
   instruction: zoomOutToParent,
 }
 
 const navRootKapp: Kapp = {
-  idv0: `${idv0SystemPrefix}navigation/root`,
-  shortAsciiName: ':navRoot',
-  legend: '🏡 home',
+  idv0: `${idv0SystemPrefix}menu/home`,
+  shortAsciiName: ':menu-home',
+  legend: '🏡 :menu-home',
   instruction: zoomOutToRoot,
 }
 
