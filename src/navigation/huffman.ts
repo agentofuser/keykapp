@@ -12,7 +12,7 @@ import { cons, head, NonEmptyArray } from 'fp-ts/es6/NonEmptyArray'
 import { fold, fromNullable } from 'fp-ts/es6/Option'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
 import { foldMap as foldMapTree, make } from 'fp-ts/es6/Tree'
-import { allKeyswitches, asciiIdv0Path } from '../constants'
+import { allKeyswitches, asciiIdv0Path, manualWeights } from '../constants'
 import { charCounts } from '../datasets/tweet'
 import { getKappById, userlandKapps } from '../kapps'
 import { kappLog } from '../state'
@@ -55,7 +55,7 @@ function huffmanWeightFromKapp(appActionLog: AppAction[], kapp: Kapp): number {
   let logCount = kappLogCount(appActionLog, kapp)
 
   if (!idv0.match(asciiIdv0Path)) {
-    manualWeight = 5
+    manualWeight = manualWeights[idv0] || 1
   }
 
   const finalWeight = twitterCount + manualWeight + logCount
