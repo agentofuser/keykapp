@@ -23,8 +23,8 @@ module.exports = {
         name: 'Keykapp',
         short_name: 'Keykapp',
         start_url: '/',
-        background_color: '#50a5e6f',
-        theme_color: '#50a5e6f',
+        background_color: '#50a5e6',
+        theme_color: '#50a5e6',
         // Enables "Add to Homescreen" prompt and disables browser UI (including back button)
         // see https://developers.google.com/web/fundamentals/web-app-manifest/#display
         display: 'standalone',
