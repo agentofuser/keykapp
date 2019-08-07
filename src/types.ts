@@ -1,5 +1,6 @@
 import { Tree } from 'fp-ts/es6/tree'
 import { NonEmptyArray } from 'fp-ts/es6/NonEmptyArray'
+import * as Automerge from 'automerge'
 
 export type Legend = string
 export type Instruction = AppReducer
@@ -47,6 +48,7 @@ export interface AppAction {
 export type AppActionLog = AppAction[]
 
 export interface AppState {
+  readonly syncDoc: Automerge.Doc<any>
   readonly appActionLog: AppActionLog
   readonly currentBuffer: string
   readonly rootWaypoint: Waypoint

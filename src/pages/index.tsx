@@ -22,6 +22,7 @@ import { zoomInto, zoomOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
 import { logAction } from '../state'
 import { AppAction, AppState, Keybinding } from '../types'
+import * as Automerge from 'automerge'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
@@ -98,12 +99,14 @@ function appReducer(prevState: AppState, action: AppAction): AppState {
 export default function App(): React.ReactNode {
   const userLog: AppAction[] = []
   const initialHuffmanRoot = newHuffmanRoot({ appActionLog: userLog })
-  const [state, dispatch] = React.useReducer(appReducer, {
+  const initialAppState: AppState = {
+    syncDoc: Automerge.init<any>(),
     appActionLog: userLog,
     currentBuffer: '',
     rootWaypoint: initialHuffmanRoot,
     waypointBreadcrumbs: of(initialHuffmanRoot),
-  })
+  }
+  const [state, dispatch] = React.useReducer(appReducer, initialAppState)
 
   function onKeyUp(event: KeyboardEvent): void {
     event.stopPropagation()
