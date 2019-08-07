@@ -21,6 +21,7 @@
     "@material-ui/core": "^4.3.0",
     "@material-ui/icons": "^4.2.1",
     "@material-ui/styles": "^4.3.0",
+    "automerge": "^0.11.0",
     "copy-text-to-clipboard": "^2.1.0",
     "fp-ts": "^2.0.3",
     "gatsby": "^2.13.46",
