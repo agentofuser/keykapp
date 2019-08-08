@@ -1,22 +1,29 @@
 import * as copy from 'copy-text-to-clipboard'
 import { map } from 'fp-ts/es6/Array'
+import * as Automerge from 'automerge'
 import { idv0SystemPrefix, idv0UserlandPrefix } from '../constants'
 import { zoomOutToParent, zoomOutToRoot } from '../navigation'
 import { makeOrphanLeafWaypoint } from '../navigation/huffman'
-import { AppAction, AppReducer, AppState, Kapp, Waypoint } from '../types'
+import {
+  AppAction,
+  AppReducer,
+  AppState,
+  Kapp,
+  Waypoint,
+  SyncRoot,
+} from '../types'
 import { newlineChar, printableAsciiChars } from './literals'
 
 const mapLastWord = (wordMapper: (word: string) => string): AppReducer => (
   prevState: AppState,
   _action: AppAction
 ): AppState => {
-  const nextState = {
-    ...prevState,
-    currentBuffer: prevState.currentBuffer.replace(
+  const nextState = Automerge.change(prevState, (doc: SyncRoot): void => {
+    doc.currentBuffer = prevState.currentBuffer.replace(
       /\w+$/,
       (lastWord: string): string => wordMapper(lastWord)
-    ),
-  }
+    )
+  })
   return nextState
 }
 
@@ -24,13 +31,12 @@ const mapLastChar = (charMapper: (char: string) => string): AppReducer => (
   prevState: AppState,
   _action: AppAction
 ): AppState => {
-  const nextState = {
-    ...prevState,
-    currentBuffer: prevState.currentBuffer.replace(
-      /.$/,
+  const nextState = Automerge.change(prevState, (doc: SyncRoot): void => {
+    doc.currentBuffer = prevState.currentBuffer.replace(
+      /[\s\S]$/,
       (lastChar: string): string => charMapper(lastChar)
-    ),
-  }
+    )
+  })
   return nextState
 }
 
@@ -38,18 +44,16 @@ const mapBuffer = (bufferMapper: (buffer: string) => string): AppReducer => (
   prevState: AppState,
   _action: AppAction
 ): AppState => {
-  const nextState = {
-    ...prevState,
-    currentBuffer: bufferMapper(prevState.currentBuffer),
-  }
+  const nextState = Automerge.change(prevState, (doc: SyncRoot): void => {
+    doc.currentBuffer = bufferMapper(prevState.currentBuffer)
+  })
   return nextState
 }
 
 const deleteChunkBackwards: AppReducer = (prevState, _action): AppState => {
-  const nextState = {
-    ...prevState,
-    currentBuffer: prevState.currentBuffer.replace(/(\s*\S+|\s+)$/, ''),
-  }
+  const nextState = Automerge.change(prevState, (doc: SyncRoot): void => {
+    doc.currentBuffer = prevState.currentBuffer.replace(/(\s*\S+|\s+)$/, '')
+  })
   return nextState
 }
 
@@ -60,10 +64,9 @@ const copyCurrentBufferToClipboard: AppReducer = (
 ): AppState => {
   const copied = copy(prevState.currentBuffer)
   const statusMsg = copied ? '[!copied]' : "[!couldn't copy]"
-  const nextState = {
-    ...prevState,
-    currentBuffer: prevState.currentBuffer + ` ${statusMsg}`,
-  }
+  const nextState = Automerge.change(prevState, (doc: SyncRoot): void => {
+    doc.currentBuffer = prevState.currentBuffer + ` ${statusMsg}`
+  })
   return nextState
 }
 

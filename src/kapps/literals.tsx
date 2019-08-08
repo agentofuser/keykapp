@@ -1,15 +1,15 @@
 import { map } from 'fp-ts/es6/Array'
+import * as Automerge from 'automerge'
 import { asciiIdv0Path } from '../constants'
-import { AppAction, AppReducer, AppState, Kapp } from '../types'
+import { AppAction, AppReducer, AppState, Kapp, SyncRoot } from '../types'
 
 const pushLiteral = (literal: string): AppReducer => (
   prevState: AppState,
   _action: AppAction
 ): AppState => {
-  const nextState = {
-    ...prevState,
-    currentBuffer: prevState.currentBuffer + literal,
-  }
+  const nextState = Automerge.change(prevState, (doc: SyncRoot): void => {
+    doc.currentBuffer = prevState.currentBuffer + literal
+  })
   return nextState
 }
 

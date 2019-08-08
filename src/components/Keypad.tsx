@@ -13,6 +13,7 @@ import {
   Waypoint,
 } from '../types'
 import Button from './Button'
+import { fold, Option } from 'fp-ts/es6/Option'
 
 const useStyles = makeStyles({
   keypad: {
@@ -67,8 +68,12 @@ function loadBalancer(
   return keybindings
 }
 
-export function layout(waypoint: Waypoint): Layout {
-  return loadBalancer(allKeyswitches, waypoint.forest)
+export function layout(waypointOption: Option<Waypoint>): Layout {
+  return fold(
+    (): Layout => [],
+    (waypoint: Waypoint): Layout =>
+      loadBalancer(allKeyswitches, waypoint.forest)
+  )(waypointOption)
 }
 
 interface KeypadProps {

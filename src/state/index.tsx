@@ -1,18 +1,27 @@
-import { foldMap, getMonoid } from 'fp-ts/es6/Array'
-import { cons } from 'fp-ts/es6/NonEmptyArray'
-import { AppAction, AppReducer, AppState, Kapp } from '../types'
+import * as Automerge from 'automerge'
+import { foldMap, getMonoid, last } from 'fp-ts/es6/Array'
 import { getKappById } from '../kapps'
+import { newHuffmanRoot } from '../navigation/huffman'
+import {
+  AppAction,
+  AppActionLog,
+  AppReducer,
+  AppState,
+  Kapp,
+  SyncRoot,
+  Waypoint,
+} from '../types'
+import { fromNullable, Option, fold, none } from 'fp-ts/es6/Option'
 
 export const logAction: AppReducer = (prevState, action): AppState => {
-  const nextState = {
-    ...prevState,
-    appActionLog: cons(action, prevState.appActionLog),
-  }
+  const nextState = Automerge.change(prevState, (doc: SyncRoot): void => {
+    doc.appActionLog.push(action)
+  })
 
   return nextState
 }
 
-export function kappLog(appActionLog: AppAction[]): Kapp[] {
+export function kappLog(appActionLog: AppActionLog): Kapp[] {
   const M = getMonoid<Kapp>()
   const log = foldMap(M)((appAction: AppAction): Kapp[] => {
     const waypoint = appAction.data.keybinding[1]
@@ -27,12 +36,36 @@ export function kappLog(appActionLog: AppAction[]): Kapp[] {
   return log
 }
 
-export function serializeAppState(appState: AppState): string {
-  function setToJson(_key: any, value: any): any {
-    if (typeof value === 'object' && value instanceof Set) {
-      return [...value]
+export function makeInitialAppState(): AppState {
+  const userLog: AppAction[] = []
+  const initialHuffmanRoot = newHuffmanRoot({ appActionLog: userLog })
+  // Use a tmp to get an UUID for the rootWaypoint first and then use
+  // it in waypointBreadcrumbs
+  const tmpInitialAppState: AppState = Automerge.from(
+    {
+      appActionLog: userLog,
+      currentBuffer: '',
+      rootWaypoint: initialHuffmanRoot,
+      waypointBreadcrumbs: [],
+    },
+    { freeze: false }
+  )
+  const initialAppState = Automerge.change(
+    tmpInitialAppState,
+    (doc: SyncRoot): void => {
+      const rootWaypointUuid = Automerge.getObjectId(doc.rootWaypoint)
+      doc.waypointBreadcrumbs = [rootWaypointUuid]
     }
-    return value
-  }
-  return JSON.stringify(appState, setToJson, 2)
+  )
+  return initialAppState
+}
+
+export function currentWaypoint(state: AppState): Option<Waypoint> {
+  const waypointUuidOption = last(state.waypointBreadcrumbs)
+  const waypoint = fold(
+    (): Option<Waypoint> => none,
+    (waypointUuid: Automerge.UUID): Option<Waypoint> =>
+      fromNullable(Automerge.getObjectById(state, waypointUuid))
+  )(waypointUuidOption)
+  return waypoint
 }

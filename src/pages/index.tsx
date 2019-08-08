@@ -10,9 +10,9 @@ import Box from '@material-ui/core/Box'
 import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
+import * as Automerge from 'automerge'
 import { findFirst } from 'fp-ts/es6/Array'
-import { head, of } from 'fp-ts/es6/NonEmptyArray'
-import { fold, Option } from 'fp-ts/es6/Option'
+import { fold, none, Option, toNullable } from 'fp-ts/es6/Option'
 import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
@@ -20,9 +20,8 @@ import { getKappById } from '../kapps'
 import { wordCount } from '../kitchensink/purefns'
 import { zoomInto, zoomOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
-import { logAction } from '../state'
-import { AppAction, AppState, Keybinding } from '../types'
-import * as Automerge from 'automerge'
+import { currentWaypoint, makeInitialAppState } from '../state'
+import { AppAction, AppState, Keybinding, SyncRoot } from '../types'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
@@ -56,9 +55,10 @@ const useStyles = makeStyles((theme: Theme) => ({
 }))
 
 function appReducer(prevState: AppState, action: AppAction): AppState {
+  // TODO make this reducer a single atomic automerge change
   let nextState = prevState
 
-  nextState = logAction(nextState, action)
+  // nextState = logAction(nextState, action)
 
   const [_keyswitch, waypoint] = action.data.keybinding
 
@@ -72,12 +72,14 @@ function appReducer(prevState: AppState, action: AppAction): AppState {
       let stateAfterKapp = kapp.instruction(nextState, action)
       // Update huffman tree based on kapp's updated weight calculated from
       // the appActionLog
-      stateAfterKapp = {
-        ...stateAfterKapp,
-        rootWaypoint: newHuffmanRoot({
-          appActionLog: stateAfterKapp.appActionLog,
-        }),
-      }
+      stateAfterKapp = Automerge.change(
+        stateAfterKapp,
+        (doc: SyncRoot): void => {
+          doc.rootWaypoint = newHuffmanRoot({
+            appActionLog: doc.appActionLog,
+          })
+        }
+      )
 
       if (
         stateAfterKapp.waypointBreadcrumbs === prevState.waypointBreadcrumbs
@@ -97,24 +99,20 @@ function appReducer(prevState: AppState, action: AppAction): AppState {
 }
 
 export default function App(): React.ReactNode {
-  const userLog: AppAction[] = []
-  const initialHuffmanRoot = newHuffmanRoot({ appActionLog: userLog })
-  const initialAppState: AppState = {
-    syncDoc: Automerge.init<any>(),
-    appActionLog: userLog,
-    currentBuffer: '',
-    rootWaypoint: initialHuffmanRoot,
-    waypointBreadcrumbs: of(initialHuffmanRoot),
-  }
+  const initialAppState: AppState = makeInitialAppState()
   const [state, dispatch] = React.useReducer(appReducer, initialAppState)
 
   function onKeyUp(event: KeyboardEvent): void {
     event.stopPropagation()
     event.preventDefault()
-    const keybinding: Option<Keybinding> = findFirst(
-      ([keyswitch, _waypoint]: Keybinding): boolean =>
-        keyswitch.key === event.key
-    )(layout(head(state.waypointBreadcrumbs)))
+    const waypointOption = currentWaypoint(state)
+    const waypoint = toNullable(waypointOption)
+    const keybinding: Option<Keybinding> = waypoint
+      ? findFirst(
+          ([keyswitch, _waypoint]: Keybinding): boolean =>
+            keyswitch.key === event.key
+        )(layout(waypointOption))
+      : none
 
     fold(
       (): void => {},
@@ -182,7 +180,7 @@ export default function App(): React.ReactNode {
             </div>
             <Keypad
               dispatch={dispatch}
-              layout={layout(head(state.waypointBreadcrumbs))}
+              layout={layout(currentWaypoint(state))}
             />
           </div>
         </Box>
