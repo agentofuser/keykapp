@@ -33,7 +33,9 @@ export interface WaypointValue extends HuffmanWeighted {
 
 export type Waypoint = Tree<WaypointValue>
 
-export type Keybinding = [Keyswitch, Waypoint]
+export type WaypointUuid = Automerge.UUID
+
+export type Keybinding = [Keyswitch, WaypointUuid]
 export type Layout = Keybinding[]
 
 export interface AppAction {
@@ -50,7 +52,7 @@ export interface SyncRoot {
   appActionLog: AppActionLog
   currentBuffer: string
   rootWaypoint: Waypoint
-  waypointBreadcrumbs: Automerge.UUID[]
+  waypointBreadcrumbs: WaypointUuid[]
 }
 
 export type AppState = Automerge.Doc<SyncRoot>

@@ -1,8 +1,9 @@
 import { makeStyles } from '@material-ui/styles'
+import { getObjectId } from 'automerge'
 import { map, partition, reverse, sortBy, zip } from 'fp-ts/es6/Array'
+import { fold, Option } from 'fp-ts/es6/Option'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
 import * as React from 'react'
-import { navRootWaypointBuilder, navUpWaypointBuilder } from '../kapps'
 import { allKeyswitches } from '../constants'
 import {
   AppAction,
@@ -11,9 +12,10 @@ import {
   Layout,
   RightHand,
   Waypoint,
+  WaypointUuid,
+  SyncRoot,
 } from '../types'
 import Button from './Button'
-import { fold, Option } from 'fp-ts/es6/Option'
 
 const useStyles = makeStyles({
   keypad: {
@@ -37,7 +39,11 @@ function loadBalancer(
   // if there are less waypoints than keyswitches, put those waypoints at
   // the center, not all at the left
   const sortedDescWeightWaypoints = reverse(waypoints)
-  let keybindings: Keybinding[] = [[keyswitches[0], navUpWaypointBuilder()]]
+
+  // FIXME
+  // const navUpKeybinding = [keyswitches[0], navUpWaypointBuilder()]
+  // let keybindings: Keybinding[] = [navUpKeybinding]
+  let keybindings: Keybinding[] = []
 
   // leave first and last keyswitches for 'back' and 'home'
   const dynamicKeyswitches = keyswitches.slice(1, -1)
@@ -51,13 +57,20 @@ function loadBalancer(
   )
 
   keybindings = keybindings.concat(
-    zip(sortedAscCostKeyswitches, sortedDescWeightWaypoints)
+    zip(
+      sortedAscCostKeyswitches,
+      map((waypoint: Waypoint): WaypointUuid => getObjectId(waypoint))(
+        sortedDescWeightWaypoints
+      )
+    )
   )
 
-  keybindings.push([
-    keyswitches[keyswitches.length - 1],
-    navRootWaypointBuilder(),
-  ])
+  // FIXME
+  // const navRootKeybinding = [
+  //   keyswitches[keyswitches.length - 1],
+  //   navRootWaypointBuilder(),
+  // ]
+  // keybindings.push(navRootKeybinding)
 
   const ascendingIndex = ord.contramap(
     ordNumber,
@@ -77,11 +90,13 @@ export function layout(waypointOption: Option<Waypoint>): Layout {
 }
 
 interface KeypadProps {
+  state: SyncRoot
   dispatch: React.Dispatch<AppAction>
   layout: Layout
 }
 
 export default function Keypad({
+  state,
   dispatch,
   layout,
 }: KeypadProps): React.ReactElement {
@@ -94,6 +109,7 @@ export default function Keypad({
   const hand = map(
     (keybinding: Keybinding): React.ReactElement => (
       <Button
+        state={state}
         dispatch={dispatch}
         keybinding={keybinding}
         key={`react-collection-key-${keybinding[0].key}`}

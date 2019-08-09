@@ -16,16 +16,10 @@ import { allKeyswitches, asciiIdv0Path, manualWeights } from '../constants'
 import { charCounts } from '../datasets/tweet'
 import { getKappById, userlandKapps } from '../kapps'
 import { kappLog } from '../state'
-import {
-  AppAction,
-  AppActionLog,
-  Kapp,
-  Waypoint,
-  WaypointValue,
-} from '../types'
+import { Kapp, SyncRoot, Waypoint, WaypointValue } from '../types'
 
-function kappLogCount(appActionLog: AppAction[], kapp: Kapp): number {
-  const log = kappLog(appActionLog)
+function kappLogCount(state: SyncRoot, kapp: Kapp): number {
+  const log = kappLog(state)
   return filter((loggedKapp: Kapp): boolean => loggedKapp === kapp)(log).length
 }
 
@@ -48,11 +42,11 @@ function kappTwitterCount(kapp: Kapp): number {
   return twitterCount
 }
 
-function huffmanWeightFromKapp(appActionLog: AppAction[], kapp: Kapp): number {
+function huffmanWeightFromKapp(state: SyncRoot | null, kapp: Kapp): number {
   const idv0 = kapp.idv0
   let manualWeight = 0
   let twitterCount = kappTwitterCount(kapp)
-  let logCount = kappLogCount(appActionLog, kapp)
+  let logCount = state ? kappLogCount(state, kapp) : 0
 
   if (!idv0.match(asciiIdv0Path)) {
     manualWeight = manualWeights[idv0] || 1
@@ -105,11 +99,11 @@ export function reachableKapps(waypoint: Waypoint): Kapp[] {
 }
 
 export function makeOrphanLeafWaypoint(
-  appActionLog: AppAction[],
+  state: SyncRoot | null,
   kapp: Kapp
 ): Waypoint {
   const value = {
-    huffmanWeight: huffmanWeightFromKapp(appActionLog, kapp),
+    huffmanWeight: huffmanWeightFromKapp(state, kapp),
     kappIdv0: kapp.idv0,
   }
   return make(value, [])
@@ -120,7 +114,6 @@ const forestWeight: (forest: Waypoint[]) => number = foldLeft(
   (head, tail): number => head.value.huffmanWeight + forestWeight(tail)
 )
 export function mAryHuffmanTreeBuilder(
-  appActionLog: AppActionLog,
   m: number
 ): (xs: NonEmptyArray<Waypoint>) => Waypoint {
   return function treeFromNonEmptyArrayOfTrees(
@@ -149,20 +142,20 @@ export function mAryHuffmanTreeBuilder(
 }
 
 interface NewHuffmanRootParams {
-  appActionLog: AppActionLog
+  state?: SyncRoot | null
   width?: number
   kapps?: Kapp[]
 }
 
 export function newHuffmanRoot({
-  appActionLog,
+  state = null,
   width = allKeyswitches.length - 2,
   kapps = userlandKapps,
 }: NewHuffmanRootParams): Waypoint {
   const huffmanOrphanLeaves = map(
-    (kapp: Kapp): Waypoint => makeOrphanLeafWaypoint(appActionLog, kapp)
+    (kapp: Kapp): Waypoint => makeOrphanLeafWaypoint(state, kapp)
   )(kapps)
-  const huffmanTreeBuilder = mAryHuffmanTreeBuilder(appActionLog, width)
+  const huffmanTreeBuilder = mAryHuffmanTreeBuilder(width)
   let huffmanRoot
   if (isNonEmpty(huffmanOrphanLeaves)) {
     huffmanRoot = huffmanTreeBuilder(huffmanOrphanLeaves)

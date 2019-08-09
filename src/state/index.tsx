@@ -1,17 +1,17 @@
 import * as Automerge from 'automerge'
 import { foldMap, getMonoid, last } from 'fp-ts/es6/Array'
+import { fold, fromNullable, none, Option } from 'fp-ts/es6/Option'
 import { getKappById } from '../kapps'
 import { newHuffmanRoot } from '../navigation/huffman'
 import {
   AppAction,
-  AppActionLog,
   AppReducer,
   AppState,
   Kapp,
   SyncRoot,
   Waypoint,
+  WaypointUuid,
 } from '../types'
-import { fromNullable, Option, fold, none } from 'fp-ts/es6/Option'
 
 export const logAction: AppReducer = (prevState, action): AppState => {
   const nextState = Automerge.change(prevState, (doc: SyncRoot): void => {
@@ -21,24 +21,37 @@ export const logAction: AppReducer = (prevState, action): AppState => {
   return nextState
 }
 
-export function kappLog(appActionLog: AppActionLog): Kapp[] {
+export function getWaypointByUuid(
+  state: AppState,
+  waypointUuid: WaypointUuid
+): Waypoint {
+  const waypoint = Automerge.getObjectById(state, waypointUuid)
+
+  if (!waypoint) {
+    throw new Error('Keybinding refers to unavailable waypoint')
+  }
+
+  return waypoint
+}
+
+export function kappLog(state: SyncRoot): Kapp[] {
   const M = getMonoid<Kapp>()
   const log = foldMap(M)((appAction: AppAction): Kapp[] => {
-    const waypoint = appAction.data.keybinding[1]
+    const waypoint = getWaypointByUuid(state, appAction.data.keybinding[1])
     const id = waypoint.value.kappIdv0
     if (id) {
       return [getKappById(id)]
     } else {
       return []
     }
-  })(appActionLog)
+  })(state.appActionLog)
 
   return log
 }
 
 export function makeInitialAppState(): AppState {
   const userLog: AppAction[] = []
-  const initialHuffmanRoot = newHuffmanRoot({ appActionLog: userLog })
+  const initialHuffmanRoot = newHuffmanRoot({})
   // Use a tmp to get an UUID for the rootWaypoint first and then use
   // it in waypointBreadcrumbs
   const tmpInitialAppState: AppState = Automerge.from(

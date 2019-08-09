@@ -20,7 +20,12 @@ import { getKappById } from '../kapps'
 import { wordCount } from '../kitchensink/purefns'
 import { zoomInto, zoomOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
-import { currentWaypoint, makeInitialAppState } from '../state'
+import {
+  currentWaypoint,
+  makeInitialAppState,
+  getWaypointByUuid,
+  logAction,
+} from '../state'
 import { AppAction, AppState, Keybinding, SyncRoot } from '../types'
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -56,11 +61,12 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 function appReducer(prevState: AppState, action: AppAction): AppState {
   // TODO make this reducer a single atomic automerge change
+  // TODO with subreducers who don't need to know about automerge
   let nextState = prevState
+  nextState = logAction(nextState, action)
 
-  // nextState = logAction(nextState, action)
-
-  const [_keyswitch, waypoint] = action.data.keybinding
+  const [_keyswitch, waypointUuid] = action.data.keybinding
+  const waypoint = getWaypointByUuid(nextState, waypointUuid)
 
   const kappIdv0 = waypoint.value.kappIdv0
   if (!kappIdv0) {
@@ -76,7 +82,7 @@ function appReducer(prevState: AppState, action: AppAction): AppState {
         stateAfterKapp,
         (doc: SyncRoot): void => {
           doc.rootWaypoint = newHuffmanRoot({
-            appActionLog: doc.appActionLog,
+            state: doc,
           })
         }
       )
@@ -179,6 +185,7 @@ export default function App(): React.ReactNode {
               </Paper>
             </div>
             <Keypad
+              state={state}
               dispatch={dispatch}
               layout={layout(currentWaypoint(state))}
             />
