@@ -1,73 +1,60 @@
 import * as copy from 'copy-text-to-clipboard'
 import { map } from 'fp-ts/es6/Array'
-import * as Automerge from 'automerge'
-import { idv0SystemPrefix, idv0UserlandPrefix } from '../constants'
-import { zoomOutToParent, zoomOutToRoot } from '../navigation'
-import { makeOrphanLeafWaypoint } from '../navigation/huffman'
-import {
-  AppAction,
-  AppReducer,
-  AppState,
-  Kapp,
-  Waypoint,
-  SyncRoot,
-} from '../types'
+import { idv0UserlandPrefix } from '../constants'
+import { AppAction, AppSyncRoot, DraftSyncRootMutator, Kapp } from '../types'
 import { newlineChar, printableAsciiChars } from './literals'
 
-const mapLastWord = (wordMapper: (word: string) => string): AppReducer => (
-  prevState: AppState,
+const mapLastWord = (
+  wordMapper: (word: string) => string
+): DraftSyncRootMutator => (
+  draftState: AppSyncRoot,
   _action: AppAction
-): AppState => {
-  const nextState = Automerge.change(prevState, (doc: SyncRoot): void => {
-    doc.currentBuffer = prevState.currentBuffer.replace(
-      /\w+$/,
-      (lastWord: string): string => wordMapper(lastWord)
-    )
-  })
-  return nextState
+): void => {
+  draftState.currentBuffer = draftState.currentBuffer.replace(
+    /\w+$/,
+    (lastWord: string): string => wordMapper(lastWord)
+  )
 }
 
-const mapLastChar = (charMapper: (char: string) => string): AppReducer => (
-  prevState: AppState,
+const mapLastChar = (
+  charMapper: (char: string) => string
+): DraftSyncRootMutator => (
+  draftState: AppSyncRoot,
   _action: AppAction
-): AppState => {
-  const nextState = Automerge.change(prevState, (doc: SyncRoot): void => {
-    doc.currentBuffer = prevState.currentBuffer.replace(
-      /[\s\S]$/,
-      (lastChar: string): string => charMapper(lastChar)
-    )
-  })
-  return nextState
+): void => {
+  draftState.currentBuffer = draftState.currentBuffer.replace(
+    /[\s\S]$/,
+    (lastChar: string): string => charMapper(lastChar)
+  )
 }
 
-const mapBuffer = (bufferMapper: (buffer: string) => string): AppReducer => (
-  prevState: AppState,
+const mapBuffer = (
+  bufferMapper: (buffer: string) => string
+): DraftSyncRootMutator => (
+  draftState: AppSyncRoot,
   _action: AppAction
-): AppState => {
-  const nextState = Automerge.change(prevState, (doc: SyncRoot): void => {
-    doc.currentBuffer = bufferMapper(prevState.currentBuffer)
-  })
-  return nextState
+): void => {
+  draftState.currentBuffer = bufferMapper(draftState.currentBuffer)
 }
 
-const deleteChunkBackwards: AppReducer = (prevState, _action): AppState => {
-  const nextState = Automerge.change(prevState, (doc: SyncRoot): void => {
-    doc.currentBuffer = prevState.currentBuffer.replace(/(\s*\S+|\s+)$/, '')
-  })
-  return nextState
+const deleteChunkBackwards: DraftSyncRootMutator = (
+  draftState,
+  _action
+): void => {
+  draftState.currentBuffer = draftState.currentBuffer.replace(
+    /(\s*\S+|\s+)$/,
+    ''
+  )
 }
 
 // TODO this should be an async task or something to handle effects
-const copyCurrentBufferToClipboard: AppReducer = (
-  prevState,
+const copyCurrentBufferToClipboard: DraftSyncRootMutator = (
+  draftState,
   _action
-): AppState => {
-  const copied = copy(prevState.currentBuffer)
+): void => {
+  const copied = copy(draftState.currentBuffer)
   const statusMsg = copied ? '[!copied]' : "[!couldn't copy]"
-  const nextState = Automerge.change(prevState, (doc: SyncRoot): void => {
-    doc.currentBuffer = prevState.currentBuffer + ` ${statusMsg}`
-  })
-  return nextState
+  draftState.currentBuffer = draftState.currentBuffer + ` ${statusMsg}`
 }
 
 export const userlandKapps: Kapp[] = [
@@ -111,23 +98,7 @@ export const userlandKapps: Kapp[] = [
   },
 ]
 
-const navUpKapp: Kapp = {
-  idv0: `${idv0SystemPrefix}menu/up`,
-  shortAsciiName: ':menu-up',
-  legend: '⬅️ :menu-up',
-  instruction: zoomOutToParent,
-}
-
-const navRootKapp: Kapp = {
-  idv0: `${idv0SystemPrefix}menu/home`,
-  shortAsciiName: ':menu-home',
-  legend: '🏡 :menu-home',
-  instruction: zoomOutToRoot,
-}
-
-export const systemKapps: Kapp[] = [navUpKapp, navRootKapp]
-
-export const allKapps: Kapp[] = systemKapps.concat(userlandKapps)
+export const allKapps: Kapp[] = userlandKapps
 
 export const KappStore: Map<string, Kapp> = new Map(
   map((kapp: Kapp): [string, Kapp] => [kapp.idv0, kapp])(allKapps)
@@ -141,9 +112,3 @@ export function getKappById(id: string): Kapp {
     throw new Error('Could not find kapp by id.')
   }
 }
-
-export const navUpWaypointBuilder = (): Waypoint =>
-  makeOrphanLeafWaypoint([], navUpKapp)
-
-export const navRootWaypointBuilder = (): Waypoint =>
-  makeOrphanLeafWaypoint([], navRootKapp)

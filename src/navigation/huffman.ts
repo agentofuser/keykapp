@@ -15,12 +15,13 @@ import { foldMap as foldMapTree, make } from 'fp-ts/es6/Tree'
 import { allKeyswitches, asciiIdv0Path, manualWeights } from '../constants'
 import { charCounts } from '../datasets/tweet'
 import { getKappById, userlandKapps } from '../kapps'
-import { kappLog } from '../state'
-import { Kapp, SyncRoot, Waypoint, WaypointValue } from '../types'
+import { Kapp, Waypoint, WaypointValue, AppState } from '../types'
 
-function kappLogCount(state: SyncRoot, kapp: Kapp): number {
-  const log = kappLog(state)
-  return filter((loggedKapp: Kapp): boolean => loggedKapp === kapp)(log).length
+function kappLogCount(state: AppState, kapp: Kapp): number {
+  const log = state.syncRoot.kappIdv0Log
+  return filter(
+    (loggedKappIdv0: string): boolean => loggedKappIdv0 === kapp.idv0
+  )(log).length
 }
 
 function kappTwitterCount(kapp: Kapp): number {
@@ -42,7 +43,7 @@ function kappTwitterCount(kapp: Kapp): number {
   return twitterCount
 }
 
-function huffmanWeightFromKapp(state: SyncRoot | null, kapp: Kapp): number {
+function huffmanWeightFromKapp(state: AppState | null, kapp: Kapp): number {
   const idv0 = kapp.idv0
   let manualWeight = 0
   let twitterCount = kappTwitterCount(kapp)
@@ -99,7 +100,7 @@ export function reachableKapps(waypoint: Waypoint): Kapp[] {
 }
 
 export function makeOrphanLeafWaypoint(
-  state: SyncRoot | null,
+  state: AppState | null,
   kapp: Kapp
 ): Waypoint {
   const value = {
@@ -142,7 +143,7 @@ export function mAryHuffmanTreeBuilder(
 }
 
 interface NewHuffmanRootParams {
-  state?: SyncRoot | null
+  state?: AppState | null
   width?: number
   kapps?: Kapp[]
 }

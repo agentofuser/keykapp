@@ -1,16 +1,12 @@
 import { map } from 'fp-ts/es6/Array'
-import * as Automerge from 'automerge'
 import { asciiIdv0Path } from '../constants'
-import { AppAction, AppReducer, AppState, Kapp, SyncRoot } from '../types'
+import { AppAction, AppSyncRoot, DraftSyncRootMutator, Kapp } from '../types'
 
-const pushLiteral = (literal: string): AppReducer => (
-  prevState: AppState,
+const pushLiteral = (literal: string): DraftSyncRootMutator => (
+  draftState: AppSyncRoot,
   _action: AppAction
-): AppState => {
-  const nextState = Automerge.change(prevState, (doc: SyncRoot): void => {
-    doc.currentBuffer = prevState.currentBuffer + literal
-  })
-  return nextState
+): void => {
+  draftState.currentBuffer = draftState.currentBuffer + literal
 }
 
 // This list doesn't include tab and newline. These are the character codes

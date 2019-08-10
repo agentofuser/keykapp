@@ -5,6 +5,7 @@ import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
 import { map } from 'fp-ts/es6/Array'
 import * as React from 'react'
+import { getKappById } from '../kapps'
 import { reachableKapps } from '../navigation/huffman'
 import {
   AppAction,
@@ -12,11 +13,9 @@ import {
   Keybinding,
   LeftHand,
   RightHand,
-  SyncRoot,
+  AppState,
 } from '../types'
 import { KappLegend } from './Legend'
-import { getKappById } from '../kapps'
-import { getWaypointByUuid } from '../state'
 
 const useStyles = makeStyles({
   button: {
@@ -50,12 +49,12 @@ function clampString(str: string): string {
 }
 
 interface ButtonProps {
-  state: SyncRoot
+  state: AppState
   dispatch: React.Dispatch<AppAction>
   keybinding: Keybinding
 }
 
-export default function Button({
+export default function HuffmanButton({
   state,
   dispatch,
   keybinding,
@@ -76,7 +75,7 @@ export default function Button({
       break
   }
 
-  const kappIdv0 = getWaypointByUuid(state, keybinding[1]).value.kappIdv0
+  const kappIdv0 = keybinding[1].value.kappIdv0
   return (
     <Card
       className={classes.button}
@@ -98,7 +97,7 @@ export default function Button({
             <Typography align="center">
               {clampString(
                 map((kapp: Kapp): string => kapp.shortAsciiName)(
-                  reachableKapps(getWaypointByUuid(state, keybinding[1]))
+                  reachableKapps(keybinding[1])
                 ).join(' ')
               )}
             </Typography>

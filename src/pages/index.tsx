@@ -10,23 +10,14 @@ import Box from '@material-ui/core/Box'
 import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
-import * as Automerge from 'automerge'
 import { findFirst } from 'fp-ts/es6/Array'
 import { fold, none, Option, toNullable } from 'fp-ts/es6/Option'
 import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
-import { getKappById } from '../kapps'
 import { wordCount } from '../kitchensink/purefns'
-import { zoomInto, zoomOutToRoot } from '../navigation'
-import { newHuffmanRoot } from '../navigation/huffman'
-import {
-  currentWaypoint,
-  makeInitialAppState,
-  getWaypointByUuid,
-  logAction,
-} from '../state'
-import { AppAction, AppState, Keybinding, SyncRoot } from '../types'
+import { appReducer, currentWaypoint, makeInitialAppState } from '../state'
+import { AppState, Keybinding } from '../types'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
@@ -58,51 +49,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     margin: '1rem',
   },
 }))
-
-function appReducer(prevState: AppState, action: AppAction): AppState {
-  // TODO make this reducer a single atomic automerge change
-  // TODO with subreducers who don't need to know about automerge
-  let nextState = prevState
-  nextState = logAction(nextState, action)
-
-  const [_keyswitch, waypointUuid] = action.data.keybinding
-  const waypoint = getWaypointByUuid(nextState, waypointUuid)
-
-  const kappIdv0 = waypoint.value.kappIdv0
-  if (!kappIdv0) {
-    nextState = zoomInto(waypoint)(nextState, action)
-  } else {
-    const kapp = getKappById(kappIdv0)
-
-    if (kapp) {
-      let stateAfterKapp = kapp.instruction(nextState, action)
-      // Update huffman tree based on kapp's updated weight calculated from
-      // the appActionLog
-      stateAfterKapp = Automerge.change(
-        stateAfterKapp,
-        (doc: SyncRoot): void => {
-          doc.rootWaypoint = newHuffmanRoot({
-            state: doc,
-          })
-        }
-      )
-
-      if (
-        stateAfterKapp.waypointBreadcrumbs === prevState.waypointBreadcrumbs
-      ) {
-        nextState = zoomOutToRoot(stateAfterKapp, action)
-      } else {
-        // Don't zoom out to root waypoint if the kapp changed the
-        // current waypoint already, eg. :navUp.
-        nextState = stateAfterKapp
-      }
-    } else {
-      throw new Error('Could not find kapp from id given.')
-    }
-  }
-
-  return nextState
-}
 
 export default function App(): React.ReactNode {
   const initialAppState: AppState = makeInitialAppState()
@@ -158,7 +104,7 @@ export default function App(): React.ReactNode {
               </Paper>
               <Paper className={classes.outputBuffer}>
                 <pre className={classes.outputBufferPre}>
-                  {state.currentBuffer + '|'}
+                  {state.syncRoot.currentBuffer + '|'}
                 </pre>
               </Paper>
               <Paper className={classes.displayItem}>
@@ -168,18 +114,16 @@ export default function App(): React.ReactNode {
                   <TableBody>
                     <TableRow>
                       <TableCell>characters</TableCell>
-                      <TableCell>{state.currentBuffer.length}</TableCell>
+                      <TableCell>
+                        {state.syncRoot.currentBuffer.length}
+                      </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell>words</TableCell>
-                      <TableCell>{wordCount(state.currentBuffer)}</TableCell>
-                    </TableRow>
-                    {/* <TableRow>
-                      <TableCell>bytes</TableCell>
                       <TableCell>
-                        {new Blob([state.currentBuffer]).size}
+                        {wordCount(state.syncRoot.currentBuffer)}
                       </TableCell>
-                    </TableRow> */}
+                    </TableRow>
                   </TableBody>
                 </Table>
               </Paper>

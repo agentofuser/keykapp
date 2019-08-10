@@ -1,5 +1,4 @@
 import { makeStyles } from '@material-ui/styles'
-import { getObjectId } from 'automerge'
 import { map, partition, reverse, sortBy, zip } from 'fp-ts/es6/Array'
 import { fold, Option } from 'fp-ts/es6/Option'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
@@ -7,15 +6,14 @@ import * as React from 'react'
 import { allKeyswitches } from '../constants'
 import {
   AppAction,
+  AppState,
   Keybinding,
   Keyswitch,
   Layout,
   RightHand,
   Waypoint,
-  WaypointUuid,
-  SyncRoot,
 } from '../types'
-import Button from './Button'
+import HuffmanButton from './HuffmanButton'
 
 const useStyles = makeStyles({
   keypad: {
@@ -57,12 +55,7 @@ function loadBalancer(
   )
 
   keybindings = keybindings.concat(
-    zip(
-      sortedAscCostKeyswitches,
-      map((waypoint: Waypoint): WaypointUuid => getObjectId(waypoint))(
-        sortedDescWeightWaypoints
-      )
-    )
+    zip(sortedAscCostKeyswitches, sortedDescWeightWaypoints)
   )
 
   // FIXME
@@ -90,7 +83,7 @@ export function layout(waypointOption: Option<Waypoint>): Layout {
 }
 
 interface KeypadProps {
-  state: SyncRoot
+  state: AppState
   dispatch: React.Dispatch<AppAction>
   layout: Layout
 }
@@ -108,12 +101,12 @@ export default function Keypad({
 
   const hand = map(
     (keybinding: Keybinding): React.ReactElement => (
-      <Button
+      <HuffmanButton
         state={state}
         dispatch={dispatch}
         keybinding={keybinding}
         key={`react-collection-key-${keybinding[0].key}`}
-      ></Button>
+      ></HuffmanButton>
     )
   )
 

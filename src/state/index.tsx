@@ -1,84 +1,100 @@
 import * as Automerge from 'automerge'
-import { foldMap, getMonoid, last } from 'fp-ts/es6/Array'
-import { fold, fromNullable, none, Option } from 'fp-ts/es6/Option'
+import { last } from 'fp-ts/es6/Array'
+import { head } from 'fp-ts/es6/NonEmptyArray'
+import { Option } from 'fp-ts/es6/Option'
+import produce from 'immer'
 import { getKappById } from '../kapps'
+import { zoomInto, zoomOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
 import {
   AppAction,
-  AppReducer,
   AppState,
+  AppSyncRoot,
+  AppTempRoot,
   Kapp,
-  SyncRoot,
   Waypoint,
-  WaypointUuid,
 } from '../types'
 
-export const logAction: AppReducer = (prevState, action): AppState => {
-  const nextState = Automerge.change(prevState, (doc: SyncRoot): void => {
-    doc.appActionLog.push(action)
-  })
-
-  return nextState
-}
-
-export function getWaypointByUuid(
-  state: AppState,
-  waypointUuid: WaypointUuid
-): Waypoint {
-  const waypoint = Automerge.getObjectById(state, waypointUuid)
-
-  if (!waypoint) {
-    throw new Error('Keybinding refers to unavailable waypoint')
-  }
-
-  return waypoint
-}
-
-export function kappLog(state: SyncRoot): Kapp[] {
-  const M = getMonoid<Kapp>()
-  const log = foldMap(M)((appAction: AppAction): Kapp[] => {
-    const waypoint = getWaypointByUuid(state, appAction.data.keybinding[1])
-    const id = waypoint.value.kappIdv0
-    if (id) {
-      return [getKappById(id)]
-    } else {
-      return []
-    }
-  })(state.appActionLog)
-
-  return log
-}
-
 export function makeInitialAppState(): AppState {
-  const userLog: AppAction[] = []
   const initialHuffmanRoot = newHuffmanRoot({})
-  // Use a tmp to get an UUID for the rootWaypoint first and then use
-  // it in waypointBreadcrumbs
-  const tmpInitialAppState: AppState = Automerge.from(
-    {
-      appActionLog: userLog,
-      currentBuffer: '',
-      rootWaypoint: initialHuffmanRoot,
-      waypointBreadcrumbs: [],
-    },
-    { freeze: false }
-  )
-  const initialAppState = Automerge.change(
-    tmpInitialAppState,
-    (doc: SyncRoot): void => {
-      const rootWaypointUuid = Automerge.getObjectId(doc.rootWaypoint)
-      doc.waypointBreadcrumbs = [rootWaypointUuid]
-    }
-  )
+
+  const initialAppState: AppState = {
+    syncRoot: Automerge.from({ kappIdv0Log: [], currentBuffer: '' }),
+    tempRoot: { waypointBreadcrumbs: [initialHuffmanRoot] },
+  }
   return initialAppState
 }
 
 export function currentWaypoint(state: AppState): Option<Waypoint> {
-  const waypointUuidOption = last(state.waypointBreadcrumbs)
-  const waypoint = fold(
-    (): Option<Waypoint> => none,
-    (waypointUuid: Automerge.UUID): Option<Waypoint> =>
-      fromNullable(Automerge.getObjectById(state, waypointUuid))
-  )(waypointUuidOption)
-  return waypoint
+  const waypointOption = last(state.tempRoot.waypointBreadcrumbs)
+  return waypointOption
+}
+
+export function logKappExecution(draftState: AppSyncRoot, kapp: Kapp): void {
+  draftState.kappIdv0Log.push(kapp.idv0)
+}
+
+export function rootWaypoint(state: AppState): Waypoint {
+  return head(state.tempRoot.waypointBreadcrumbs)
+}
+
+export function appReducer(prevState: AppState, action: AppAction): AppState {
+  const nextSyncRoot = Automerge.change(
+    prevState.syncRoot,
+    (draftState: AppSyncRoot): void => {
+      const [_keyswitch, waypoint] = action.data.keybinding
+
+      const kappIdv0 = waypoint.value.kappIdv0
+      if (kappIdv0) {
+        const kapp = getKappById(kappIdv0)
+
+        if (kapp) {
+          kapp.instruction(draftState, action)
+
+          logKappExecution(draftState, kapp)
+        } else {
+          throw new Error('Could not find kapp from id given.')
+        }
+      }
+    }
+  )
+
+  const nextTempRoot = produce(
+    prevState.tempRoot,
+    (draftState: AppTempRoot): void => {
+      const [_keyswitch, waypoint] = action.data.keybinding
+
+      const kappIdv0 = waypoint.value.kappIdv0
+      if (!kappIdv0) {
+        zoomInto(waypoint)(draftState, action)
+      } else {
+        const kapp = getKappById(kappIdv0)
+
+        if (kapp) {
+          // kapp.instruction(draftState, action)
+
+          // logKappExecution(draftState, kapp)
+
+          // Update huffman tree based on kapp's updated weight calculated from
+          // the kappLog
+          draftState.waypointBreadcrumbs = [
+            newHuffmanRoot({ state: prevState }),
+          ]
+
+          zoomOutToRoot(draftState, action)
+        } else {
+          throw new Error('Could not find kapp from id given.')
+        }
+      }
+    }
+  )
+
+  const nextState =
+    nextSyncRoot === prevState.syncRoot && nextTempRoot === prevState.tempRoot
+      ? prevState
+      : { syncRoot: nextSyncRoot, tempRoot: nextTempRoot }
+
+  console.log({ nextState })
+
+  return nextState
 }

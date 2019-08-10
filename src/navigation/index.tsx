@@ -1,16 +1,19 @@
-import * as Automerge from 'automerge'
 import { isNonEmpty } from 'fp-ts/es6/Array'
-import { AppAction, AppReducer, AppState, SyncRoot, Waypoint } from '../types'
+import { head } from 'fp-ts/es6/NonEmptyArray'
+import {
+  AppAction,
+  AppTempRoot,
+  DraftTempRootMutator,
+  Waypoint,
+} from '../types'
 
-export function zoomInto(waypoint: Waypoint): AppReducer {
+export function zoomInto(waypoint: Waypoint): DraftTempRootMutator {
   return function navigateReducer(
-    prevState: AppState,
+    draftState: AppTempRoot,
     _action: AppAction
-  ): AppState {
+  ): void {
     if (isNonEmpty(waypoint.forest)) {
-      return Automerge.change(prevState, (doc: SyncRoot): void => {
-        doc.waypointBreadcrumbs.push(Automerge.getObjectId(waypoint))
-      })
+      draftState.waypointBreadcrumbs.push(waypoint)
     } else {
       throw new Error('Cannot navigate to leaf waypoint')
     }
@@ -18,21 +21,15 @@ export function zoomInto(waypoint: Waypoint): AppReducer {
 }
 
 export function zoomOutToRoot(
-  prevState: AppState,
+  draftState: AppTempRoot,
   _action: AppAction
-): AppState {
-  return Automerge.change(prevState, (doc: SyncRoot): void => {
-    doc.waypointBreadcrumbs = [Automerge.getObjectId(doc.rootWaypoint)]
-  })
+): void {
+  draftState.waypointBreadcrumbs = [head(draftState.waypointBreadcrumbs)]
 }
 
 export function zoomOutToParent(
-  prevState: AppState,
+  draftState: AppTempRoot,
   _action: AppAction
-): AppState {
-  // return { ...prevState, currentWaypoint: prevState.currentWaypoint.value.parent }
-  const nextState = Automerge.change(prevState, (doc: SyncRoot): void => {
-    doc.waypointBreadcrumbs.pop()
-  })
-  return nextState
+): void {
+  draftState.waypointBreadcrumbs.pop()
 }
