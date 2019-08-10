@@ -150,7 +150,7 @@ interface NewHuffmanRootParams {
 
 export function newHuffmanRoot({
   state = null,
-  width = allKeyswitches.length - 2,
+  width = allKeyswitches.length,
   kapps = userlandKapps,
 }: NewHuffmanRootParams): Waypoint {
   const huffmanOrphanLeaves = map(

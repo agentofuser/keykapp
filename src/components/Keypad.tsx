@@ -38,32 +38,17 @@ function loadBalancer(
   // the center, not all at the left
   const sortedDescWeightWaypoints = reverse(waypoints)
 
-  // FIXME
-  // const navUpKeybinding = [keyswitches[0], navUpWaypointBuilder()]
-  // let keybindings: Keybinding[] = [navUpKeybinding]
   let keybindings: Keybinding[] = []
-
-  // leave first and last keyswitches for 'back' and 'home'
-  const dynamicKeyswitches = keyswitches.slice(1, -1)
 
   const lowestActuationCost = ord.contramap(
     ordNumber,
     (keyswitch: Keyswitch): number => keyswitch.actuationCost
   )
-  const sortedAscCostKeyswitches = sortBy([lowestActuationCost])(
-    dynamicKeyswitches
-  )
+  const sortedAscCostKeyswitches = sortBy([lowestActuationCost])(keyswitches)
 
   keybindings = keybindings.concat(
     zip(sortedAscCostKeyswitches, sortedDescWeightWaypoints)
   )
-
-  // FIXME
-  // const navRootKeybinding = [
-  //   keyswitches[keyswitches.length - 1],
-  //   navRootWaypointBuilder(),
-  // ]
-  // keybindings.push(navRootKeybinding)
 
   const ascendingIndex = ord.contramap(
     ordNumber,
