@@ -17,5 +17,5 @@ export const asciiIdv0Path = `${idv0UserlandPrefix}literals/ascii/`
 export const idv0SystemPrefix = '/system/kapp/'
 
 export const manualWeights: { [name: string]: number } = {}
-manualWeights[`${idv0UserlandPrefix}char/delete`] = 40
+manualWeights[`${idv0UserlandPrefix}char/delete`] = 80
 manualWeights[`${idv0UserlandPrefix}text/copy`] = 40
