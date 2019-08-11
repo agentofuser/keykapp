@@ -9,6 +9,7 @@ import { getKappById } from '../kapps'
 import { reachableKapps } from '../navigation/huffman'
 import { AppAction, Kapp, Keybinding, LeftHand, RightHand } from '../types'
 import { KappLegend } from './Legend'
+import { stringClamper } from '../kitchensink/purefns'
 
 const useStyles = makeStyles({
   button: {
@@ -26,20 +27,6 @@ const useStyles = makeStyles({
     justifyContent: 'center',
   },
 })
-
-function clampString(str: string): string {
-  const maxLength = 150
-  if (str.length > maxLength) {
-    const clamped = str
-      .slice(0, maxLength)
-      .split(' ')
-      .slice(0, -1)
-      .join(' ')
-    return clamped + ' [...]'
-  } else {
-    return str
-  }
-}
 
 interface ButtonProps {
   dispatch: React.Dispatch<AppAction>
@@ -85,8 +72,8 @@ export default function HuffmanButton({
           {kappIdv0 ? (
             <KappLegend title={getKappById(kappIdv0).legend}></KappLegend>
           ) : (
-            <Typography align="center" style={{ fontFamily: 'monospace' }}>
-              {clampString(
+            <Typography align="left" style={{ fontFamily: 'monospace' }}>
+              {stringClamper(150)(
                 map((kapp: Kapp): string => kapp.shortAsciiName)(
                   reachableKapps(keybinding[1])
                 ).join(' ')

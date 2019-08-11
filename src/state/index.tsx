@@ -4,6 +4,7 @@ import { head } from 'fp-ts/es6/NonEmptyArray'
 import { Option } from 'fp-ts/es6/Option'
 import produce from 'immer'
 import { getKappById } from '../kapps'
+import { stringClamper } from '../kitchensink/purefns'
 import { zoomInto, zoomOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
 import {
@@ -15,11 +16,16 @@ import {
   Waypoint,
 } from '../types'
 
+const placeholderText = `Formal epistemology uses formal methods from decision theory, logic, probability theory and computability theory to model and reason about issues of epistemological interest. Work in this area spans several academic fields, including philosophy, computer science, economics, and statistics. The focus of formal epistemology has tended to differ somewhat from that of traditional epistemology, with topics like uncertainty, induction, and belief revision garnering more attention than the analysis of knowledge, skepticism, and issues with justification.`
+
 export function makeInitialAppState(): AppState {
   const initialHuffmanRoot = newHuffmanRoot({})
 
   const initialAppState: AppState = {
-    syncRoot: Automerge.from({ kappIdv0Log: [], currentBuffer: '' }),
+    syncRoot: Automerge.from({
+      kappIdv0Log: [],
+      currentBuffer: stringClamper(280)(placeholderText),
+    }),
     tempRoot: { waypointBreadcrumbs: [initialHuffmanRoot] },
   }
   return initialAppState

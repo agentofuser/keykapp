@@ -15,7 +15,7 @@ import { fold, none, Option, toNullable } from 'fp-ts/es6/Option'
 import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
-import { wordCount } from '../kitchensink/purefns'
+import { wordCount, stringClamper } from '../kitchensink/purefns'
 import { appReducer, currentWaypoint, makeInitialAppState } from '../state'
 import { AppState, Keybinding } from '../types'
 
@@ -41,12 +41,15 @@ const useStyles = makeStyles((theme: Theme) => ({
     border: 0,
   },
   outputBuffer: {
-    padding: theme.spacing(2, 2),
+    padding: theme.spacing(1, 4),
+    height: 376,
   },
   outputBufferPre: {
+    overflow: 'hidden',
+    wordWrap: 'break-word',
     whiteSpace: 'pre-wrap',
-    fontSize: 22,
-    margin: '1rem',
+    fontSize: 20,
+    lineHeight: 2,
   },
 }))
 
@@ -104,7 +107,7 @@ export default function App(): React.ReactNode {
               </Paper>
               <Paper className={classes.outputBuffer}>
                 <pre className={classes.outputBufferPre}>
-                  {state.syncRoot.currentBuffer + '|'}
+                  {stringClamper(280)(state.syncRoot.currentBuffer) + '|'}
                 </pre>
               </Paper>
               <Paper className={classes.displayItem}>
