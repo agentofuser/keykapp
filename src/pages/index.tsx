@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     height: 768,
     display: 'grid',
     gridTemplateColumns: '1fr',
-    gridTemplateRows: '1.5fr 1fr',
+    gridTemplateRows: '1fr 1fr',
     gridColumnGap: '16px',
     gridRowGap: '16px',
   },
@@ -129,7 +129,6 @@ export default function App(): React.ReactNode {
               </Paper>
             </div>
             <Keypad
-              state={state}
               dispatch={dispatch}
               layout={layout(currentWaypoint(state))}
             />

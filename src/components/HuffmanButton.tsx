@@ -12,7 +12,7 @@ import { KappLegend } from './Legend'
 
 const useStyles = makeStyles({
   button: {
-    height: 180,
+    height: '100%',
   },
   buttonActionArea: {
     width: '100%',
@@ -23,12 +23,12 @@ const useStyles = makeStyles({
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
   },
 })
 
 function clampString(str: string): string {
-  const maxLength = 50
+  const maxLength = 150
   if (str.length > maxLength) {
     const clamped = str
       .slice(0, maxLength)
@@ -85,7 +85,7 @@ export default function HuffmanButton({
           {kappIdv0 ? (
             <KappLegend title={getKappById(kappIdv0).legend}></KappLegend>
           ) : (
-            <Typography align="center">
+            <Typography align="center" style={{ fontFamily: 'monospace' }}>
               {clampString(
                 map((kapp: Kapp): string => kapp.shortAsciiName)(
                   reachableKapps(keybinding[1])
@@ -93,10 +93,6 @@ export default function HuffmanButton({
               )}
             </Typography>
           )}
-
-          <Typography align="center" color="textSecondary">
-            {keybinding[0].key}
-          </Typography>
         </CardContent>
       </CardActionArea>
     </Card>

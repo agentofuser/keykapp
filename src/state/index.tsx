@@ -94,7 +94,5 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
       ? prevState
       : { syncRoot: nextSyncRoot, tempRoot: nextTempRoot }
 
-  console.log({ nextState })
-
   return nextState
 }
