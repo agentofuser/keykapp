@@ -7,14 +7,7 @@ import { map } from 'fp-ts/es6/Array'
 import * as React from 'react'
 import { getKappById } from '../kapps'
 import { reachableKapps } from '../navigation/huffman'
-import {
-  AppAction,
-  Kapp,
-  Keybinding,
-  LeftHand,
-  RightHand,
-  AppState,
-} from '../types'
+import { AppAction, Kapp, Keybinding, LeftHand, RightHand } from '../types'
 import { KappLegend } from './Legend'
 
 const useStyles = makeStyles({
@@ -49,13 +42,11 @@ function clampString(str: string): string {
 }
 
 interface ButtonProps {
-  state: AppState
   dispatch: React.Dispatch<AppAction>
   keybinding: Keybinding
 }
 
 export default function HuffmanButton({
-  state,
   dispatch,
   keybinding,
 }: ButtonProps): React.ReactElement {

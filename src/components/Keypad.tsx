@@ -6,7 +6,6 @@ import * as React from 'react'
 import { allKeyswitches } from '../constants'
 import {
   AppAction,
-  AppState,
   Keybinding,
   Keyswitch,
   Layout,
@@ -68,13 +67,11 @@ export function layout(waypointOption: Option<Waypoint>): Layout {
 }
 
 interface KeypadProps {
-  state: AppState
   dispatch: React.Dispatch<AppAction>
   layout: Layout
 }
 
 export default function Keypad({
-  state,
   dispatch,
   layout,
 }: KeypadProps): React.ReactElement {
@@ -87,7 +84,6 @@ export default function Keypad({
   const hand = map(
     (keybinding: Keybinding): React.ReactElement => (
       <HuffmanButton
-        state={state}
         dispatch={dispatch}
         keybinding={keybinding}
         key={`react-collection-key-${keybinding[0].key}`}
