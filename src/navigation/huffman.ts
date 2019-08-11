@@ -120,13 +120,37 @@ export function mAryHuffmanTreeBuilder(
   return function treeFromNonEmptyArrayOfTrees(
     xs: NonEmptyArray<Waypoint>
   ): Waypoint {
+    // This crucial part taken from
+    // https://github.com/lydell/n-ary-huffman/blob/master/index.coffee
+    // ###
+    // Copyright 2014, 2015, 2016 Simon Lydell
+    // X11 (“MIT”) Licensed. (See LICENSE.)
+    //
+    // A `numBranches`-ary tree can be formed by `1 + (numBranches - 1) * n`
+    // elements: There is the root of the tree (`1`), and each branch point adds
+    // `numBranches` elements to the total number or elements, but replaces itself
+    // (`numBranches - 1`). `n` is the number of points where the tree branches
+    // (therefore, `n` is an integer). In order to create the tree using
+    // `numElements` elements, we need to find the smallest `n` such that `1 +
+    // (numBranches - 1) * n == numElements + padding`. We need to add `padding`
+    // since `n` is an integer and there might not be an integer `n` that makes
+    // the left-hand side equal to `numElements`. Solving for `padding` gives
+    // `padding = 1 + (numBranches - 1) * n - numElements`. Since `padding >= 0`
+    // (we won’t reduce the number of elements, only add extra dummy ones), it
+    // follows that `n >= (numElements - 1) / (numBranches - 1)`. The smallest
+    // integer `n = numBranchPoints` is then:
+    const numElements = xs.length
+    const numBranches = m
+    const numBranchPoints = Math.ceil((numElements - 1) / (numBranches - 1))
+    // The above gives the padding:
+    const numPadding = 1 + (numBranches - 1) * numBranchPoints - numElements
+
     let result: Waypoint
 
     if (xs.length === 1) {
       result = head(xs)
     } else {
-      const modM = xs.length % m
-      const takeN = modM === 0 ? m : modM + 1
+      const takeN = numPadding > 0 ? numBranches - numPadding : numBranches
       const [forest, tail] = splitAt(takeN)(sortByHuffmanWeightAsc(xs))
 
       const tree = make(

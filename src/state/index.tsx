@@ -77,10 +77,6 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
         const kapp = getKappById(kappIdv0)
 
         if (kapp) {
-          // kapp.instruction(draftState, action)
-
-          // logKappExecution(draftState, kapp)
-
           // Update huffman tree based on kapp's updated weight calculated from
           // the kappLog
           draftState.waypointBreadcrumbs = [
