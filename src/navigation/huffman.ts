@@ -53,7 +53,7 @@ function huffmanWeightFromKapp(state: AppState | null, kapp: Kapp): number {
     manualWeight = manualWeights[idv0] || 1
   }
 
-  const finalWeight = twitterCount + manualWeight + logCount
+  const finalWeight = twitterCount + manualWeight + 10 * logCount
 
   return finalWeight
 }
