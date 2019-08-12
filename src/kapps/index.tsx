@@ -112,3 +112,8 @@ export function getKappById(id: string): Kapp {
     throw new Error('Could not find kapp by id.')
   }
 }
+
+export function findKappById(id: string): Kapp | null {
+  const kapp = KappStore.get(id)
+  return kapp || null
+}

@@ -3,7 +3,7 @@ import { last } from 'fp-ts/es6/Array'
 import { head } from 'fp-ts/es6/NonEmptyArray'
 import { Option } from 'fp-ts/es6/Option'
 import produce from 'immer'
-import { getKappById } from '../kapps'
+import { findKappById } from '../kapps'
 import { stringClamper } from '../kitchensink/purefns'
 import { zoomInto, zoomOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
@@ -45,28 +45,29 @@ export function rootWaypoint(state: AppState): Waypoint {
 }
 
 export function appReducer(prevState: AppState, action: AppAction): AppState {
-  const nextSyncRoot = Automerge.change(
-    prevState.syncRoot,
-    (draftState: AppSyncRoot): void => {
-      const [_keyswitch, waypoint] = action.data.keybinding
+  const [_keyswitch, waypoint] = action.data.keybinding
+  const kappIdv0 = waypoint.value.kappIdv0
+  const kapp = kappIdv0 && findKappById(kappIdv0)
 
-      const kappIdv0 = waypoint.value.kappIdv0
-      if (kappIdv0) {
-        const kapp = getKappById(kappIdv0)
-
+  let nextSyncRoot = prevState.syncRoot
+  if (kappIdv0 && kapp) {
+    nextSyncRoot = Automerge.change(
+      prevState.syncRoot,
+      kappIdv0,
+      (draftState: AppSyncRoot): void => {
         kapp.instruction(draftState, action)
 
         logKappExecution(draftState, kapp)
       }
-    }
-  )
+    )
+
+    let changes = Automerge.getChanges(prevState.syncRoot, nextSyncRoot)
+    console.log(JSON.stringify(changes, null, 2))
+  }
 
   const nextTempRoot = produce(
     prevState.tempRoot,
     (draftState: AppTempRoot): void => {
-      const [_keyswitch, waypoint] = action.data.keybinding
-
-      const kappIdv0 = waypoint.value.kappIdv0
       if (!kappIdv0) {
         zoomInto(waypoint)(draftState, action)
       } else {
