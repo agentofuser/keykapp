@@ -54,13 +54,9 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
       if (kappIdv0) {
         const kapp = getKappById(kappIdv0)
 
-        if (kapp) {
-          kapp.instruction(draftState, action)
+        kapp.instruction(draftState, action)
 
-          logKappExecution(draftState, kapp)
-        } else {
-          throw new Error('Could not find kapp from id given.')
-        }
+        logKappExecution(draftState, kapp)
       }
     }
   )
@@ -74,19 +70,11 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
       if (!kappIdv0) {
         zoomInto(waypoint)(draftState, action)
       } else {
-        const kapp = getKappById(kappIdv0)
+        // Update huffman tree based on kapp's updated weight calculated from
+        // the kappLog
+        draftState.waypointBreadcrumbs = [newHuffmanRoot({ state: prevState })]
 
-        if (kapp) {
-          // Update huffman tree based on kapp's updated weight calculated from
-          // the kappLog
-          draftState.waypointBreadcrumbs = [
-            newHuffmanRoot({ state: prevState }),
-          ]
-
-          zoomOutToRoot(draftState, action)
-        } else {
-          throw new Error('Could not find kapp from id given.')
-        }
+        zoomOutToRoot(draftState, action)
       }
     }
   )
