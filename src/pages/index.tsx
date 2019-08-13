@@ -10,10 +10,8 @@ import Box from '@material-ui/core/Box'
 import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
-import * as BrowserFS from 'browserfs'
 import { findFirst } from 'fp-ts/es6/Array'
 import { fold, none, Option, toNullable } from 'fp-ts/es6/Option'
-import * as git from 'isomorphic-git'
 import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
@@ -24,6 +22,7 @@ import {
   currentWaypoint,
   loadSyncRootFromBrowserGit,
   makeInitialAppState,
+  setupGit,
 } from '../state'
 import { Keybinding } from '../types'
 
@@ -63,35 +62,9 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 // Set up browser-local git repository
 let isGitReady = false
-const setupGit = new Promise((resolve): void => {
-  BrowserFS.configure(
-    {
-      fs: 'AsyncMirror',
-      options: {
-        sync: { fs: 'InMemory' },
-        async: {
-          fs: 'IndexedDB',
-          options: {
-            storeName: 'keykappUser',
-          },
-        },
-      },
-    },
-    async function(e): Promise<void> {
-      if (e) return console.error(e)
-      window.fs = BrowserFS.BFSRequire('fs')
-      git.plugins.set('fs', window.fs)
-      await git.init({ dir: '/' })
-
-      console.info('git is ready.')
-      isGitReady = true
-      resolve()
-    }
-  )
+setupGit().then((): void => {
+  isGitReady = true
 })
-;(async (): Promise<void> => {
-  await setupGit
-})()
 
 export default function App(): React.ReactNode {
   const [state, dispatch] = React.useReducer(appReducer, makeInitialAppState())

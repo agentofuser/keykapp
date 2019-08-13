@@ -17,9 +17,44 @@ import {
   Kapp,
   Waypoint,
 } from '../types'
+import * as BrowserFS from 'browserfs'
 
 const placeholderText = `Formal epistemology uses formal methods from decision theory, logic, probability theory and computability theory to model and reason about issues of epistemological interest. Work in this area spans several academic fields, including philosophy, computer science, economics, and statistics. The focus of formal epistemology has tended to differ somewhat from that of traditional epistemology, with topics like uncertainty, induction, and belief revision garnering more attention than the analysis of knowledge, skepticism, and issues with justification.`
 // const placeholderText = ''
+
+export function setupGit(): Promise<boolean> {
+  return new Promise((resolve, reject): void => {
+    BrowserFS.configure(
+      {
+        fs: 'AsyncMirror',
+        options: {
+          sync: { fs: 'InMemory' },
+          async: {
+            fs: 'IndexedDB',
+            options: {
+              storeName: 'keykappUser',
+            },
+          },
+        },
+      },
+      async function(e): Promise<void> {
+        let isGitReady = false
+        if (e) {
+          reject(isGitReady)
+          console.error(e)
+          return
+        }
+        window.fs = BrowserFS.BFSRequire('fs')
+        git.plugins.set('fs', window.fs)
+        await git.init({ dir: '/' })
+
+        console.info('git is ready.')
+        isGitReady = true
+        resolve(isGitReady)
+      }
+    )
+  })
+}
 
 function commitChanges(
   messageTitle: string,
