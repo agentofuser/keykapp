@@ -81,7 +81,7 @@ const setupGit = new Promise((resolve): void => {
       if (e) return console.error(e)
       window.fs = BrowserFS.BFSRequire('fs')
       git.plugins.set('fs', window.fs)
-      await git.init({ dir: '$input((/))' })
+      await git.init({ dir: '/' })
 
       console.info('git is ready.')
       isGitReady = true
