@@ -104,7 +104,10 @@ export async function loadSyncRootFromBrowserGit(
 
       const syncRootChanges = reduce(
         [],
-        (allChanges: any[], commit: git.CommitDescription): any[] => {
+        (
+          allChanges: Automerge.Change[],
+          commit: git.CommitDescription
+        ): Automerge.Change[] => {
           const payload = commit.message
             .split('\n')
             .slice(2)
