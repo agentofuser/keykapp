@@ -1,8 +1,10 @@
 import * as Automerge from 'automerge'
-import { last } from 'fp-ts/es6/Array'
+import { last, reduce } from 'fp-ts/es6/Array'
 import { head } from 'fp-ts/es6/NonEmptyArray'
 import { Option } from 'fp-ts/es6/Option'
 import produce from 'immer'
+import * as git from 'isomorphic-git'
+import { Dispatch } from 'react'
 import { findKappById } from '../kapps'
 import { stringClamper } from '../kitchensink/purefns'
 import { zoomInto, zoomOutToRoot } from '../navigation'
@@ -16,19 +18,87 @@ import {
   Waypoint,
 } from '../types'
 
-const placeholderText = `Formal epistemology uses formal methods from decision theory, logic, probability theory and computability theory to model and reason about issues of epistemological interest. Work in this area spans several academic fields, including philosophy, computer science, economics, and statistics. The focus of formal epistemology has tended to differ somewhat from that of traditional epistemology, with topics like uncertainty, induction, and belief revision garnering more attention than the analysis of knowledge, skepticism, and issues with justification.`
+// const placeholderText = `Formal epistemology uses formal methods from decision theory, logic, probability theory and computability theory to model and reason about issues of epistemological interest. Work in this area spans several academic fields, including philosophy, computer science, economics, and statistics. The focus of formal epistemology has tended to differ somewhat from that of traditional epistemology, with topics like uncertainty, induction, and belief revision garnering more attention than the analysis of knowledge, skepticism, and issues with justification.`
+const placeholderText = ''
+
+function commitChanges(
+  messageTitle: string,
+  changes: Automerge.Change[]
+): Promise<string> {
+  const serializedChanges = JSON.stringify(changes, null, 2)
+  return git.commit({
+    dir: '$input((/))',
+    author: {
+      name: '$input((Agent of User))',
+      email: '$input((git@agentofuser.com))',
+    },
+    message: `${messageTitle}\n\n${serializedChanges}`,
+  })
+}
 
 export function makeInitialAppState(): AppState {
   const initialHuffmanRoot = newHuffmanRoot({})
 
-  const initialAppState: AppState = {
-    syncRoot: Automerge.from({
-      kappIdv0Log: [],
-      currentBuffer: stringClamper(280)(placeholderText),
-    }),
-    tempRoot: { waypointBreadcrumbs: [initialHuffmanRoot] },
+  const syncRoot = null
+
+  const tempRoot: AppTempRoot = {
+    waypointBreadcrumbs: [initialHuffmanRoot],
   }
+
+  const initialAppState: AppState = { syncRoot, tempRoot }
   return initialAppState
+}
+
+export function makeInitialSyncRoot(): AppSyncRoot {
+  return Automerge.from({
+    kappIdv0Log: [],
+    currentBuffer: stringClamper(280)(placeholderText),
+  })
+}
+
+export async function loadSyncRootFromBrowserGit(
+  state: AppState,
+  dispatch: Dispatch<AppAction>
+): Promise<void> {
+  if (!state.syncRoot) {
+    let syncRoot: AppSyncRoot | null = null
+    try {
+      let commits = await git.log({
+        dir: '$input((/))',
+      })
+
+      const syncRootChanges = reduce(
+        [],
+        (allChanges: any[], commit: git.CommitDescription): any[] => {
+          const payload = commit.message
+            .split('\n')
+            .slice(2)
+            .join('\n')
+
+          let changes = JSON.parse(payload)
+          return allChanges.concat(changes)
+        }
+      )(commits)
+
+      syncRoot = Automerge.applyChanges(Automerge.init(), syncRootChanges)
+    } catch (_e) {
+      const initialSyncRoot = makeInitialSyncRoot()
+      let initialChanges = Automerge.getChanges(
+        Automerge.init(),
+        initialSyncRoot
+      )
+      await commitChanges('initialSyncRoot', initialChanges)
+
+      syncRoot = initialSyncRoot
+    } finally {
+      if (syncRoot) {
+        dispatch({
+          type: 'LoadSyncRootFromBrowserGit',
+          data: { timestamp: Date.now(), syncRoot },
+        })
+      }
+    }
+  }
 }
 
 export function currentWaypoint(state: AppState): Option<Waypoint> {
@@ -45,40 +115,58 @@ export function rootWaypoint(state: AppState): Waypoint {
 }
 
 export function appReducer(prevState: AppState, action: AppAction): AppState {
-  const [_keyswitch, waypoint] = action.data.keybinding
-  const kappIdv0 = waypoint.value.kappIdv0
-  const kapp = kappIdv0 && findKappById(kappIdv0)
-
   let nextSyncRoot = prevState.syncRoot
-  if (kappIdv0 && kapp) {
-    nextSyncRoot = Automerge.change(
-      prevState.syncRoot,
-      kappIdv0,
-      (draftState: AppSyncRoot): void => {
-        kapp.instruction(draftState, action)
+  let nextTempRoot = prevState.tempRoot
 
-        logKappExecution(draftState, kapp)
+  switch (action.type) {
+    case 'LoadSyncRootFromBrowserGit':
+      if (!prevState.syncRoot) {
+        nextSyncRoot = action.data.syncRoot
       }
-    )
+      break
+    case 'KeyswitchUp':
+      const [_keyswitch, waypoint] = action.data.keybinding
+      const kappIdv0 = waypoint.value.kappIdv0
+      const kapp = kappIdv0 && findKappById(kappIdv0)
 
-    let changes = Automerge.getChanges(prevState.syncRoot, nextSyncRoot)
-    console.log(JSON.stringify(changes, null, 2))
+      if (prevState.syncRoot && kappIdv0 && kapp) {
+        nextSyncRoot = Automerge.change(
+          prevState.syncRoot,
+          kappIdv0,
+          (draftState: AppSyncRoot): void => {
+            kapp.instruction(draftState, action)
+
+            logKappExecution(draftState, kapp)
+          }
+        )
+
+        let changes = Automerge.getChanges(prevState.syncRoot, nextSyncRoot)
+
+        commitChanges(kappIdv0, changes)
+      }
+
+      nextTempRoot = produce(
+        prevState.tempRoot,
+        (draftState: AppTempRoot): void => {
+          if (!kappIdv0) {
+            zoomInto(waypoint)(draftState, action)
+          } else {
+            // Update huffman tree based on kapp's updated weight calculated from
+            // the kappLog
+            draftState.waypointBreadcrumbs = [
+              newHuffmanRoot({ state: prevState }),
+            ]
+
+            zoomOutToRoot(draftState, action)
+          }
+        }
+      )
+
+      break
+
+    default:
+      break
   }
-
-  const nextTempRoot = produce(
-    prevState.tempRoot,
-    (draftState: AppTempRoot): void => {
-      if (!kappIdv0) {
-        zoomInto(waypoint)(draftState, action)
-      } else {
-        // Update huffman tree based on kapp's updated weight calculated from
-        // the kappLog
-        draftState.waypointBreadcrumbs = [newHuffmanRoot({ state: prevState })]
-
-        zoomOutToRoot(draftState, action)
-      }
-    }
-  )
 
   const nextState =
     nextSyncRoot === prevState.syncRoot && nextTempRoot === prevState.tempRoot

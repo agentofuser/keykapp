@@ -15,10 +15,10 @@ import { foldMap as foldMapTree, make } from 'fp-ts/es6/Tree'
 import { allKeyswitches, asciiIdv0Path, manualWeights } from '../constants'
 import { charCounts } from '../datasets/tweet'
 import { getKappById, userlandKapps } from '../kapps'
-import { Kapp, Waypoint, WaypointValue, AppState } from '../types'
+import { AppState, Kapp, Waypoint, WaypointValue } from '../types'
 
 function kappLogCount(state: AppState, kapp: Kapp): number {
-  const log = state.syncRoot.kappIdv0Log
+  const log = state.syncRoot ? state.syncRoot.kappIdv0Log : []
   return filter(
     (loggedKappIdv0: string): boolean => loggedKappIdv0 === kapp.idv0
   )(log).length

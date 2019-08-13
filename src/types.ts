@@ -1,6 +1,6 @@
 import * as Automerge from 'automerge'
-import { Tree } from 'fp-ts/es6/tree'
 import { NonEmptyArray } from 'fp-ts/es6/NonEmptyArray'
+import { Tree } from 'fp-ts/es6/tree'
 
 export type Legend = string
 export type Instruction = DraftSyncRootMutator
@@ -37,13 +37,23 @@ export type Waypoint = Tree<WaypointValue>
 export type Keybinding = [Keyswitch, Waypoint]
 export type Layout = Keybinding[]
 
-export interface AppAction {
-  type: string
+export interface KeyswitchUp {
+  type: 'KeyswitchUp'
   data: {
     timestamp: number
     keybinding: Keybinding
   }
 }
+
+export interface LoadSyncRootFromBrowserGit {
+  type: 'LoadSyncRootFromBrowserGit'
+  data: {
+    timestamp: number
+    syncRoot: AppSyncRoot
+  }
+}
+
+export type AppAction = KeyswitchUp | LoadSyncRootFromBrowserGit
 
 export interface AppSyncRoot {
   kappIdv0Log: string[]
@@ -55,7 +65,7 @@ export interface AppTempRoot {
 }
 
 export interface AppState {
-  syncRoot: Automerge.Doc<AppSyncRoot>
+  syncRoot: Automerge.Doc<AppSyncRoot> | null
   tempRoot: AppTempRoot
 }
 

@@ -10,14 +10,22 @@ import Box from '@material-ui/core/Box'
 import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
+import * as BrowserFS from 'browserfs'
 import { findFirst } from 'fp-ts/es6/Array'
 import { fold, none, Option, toNullable } from 'fp-ts/es6/Option'
+import * as git from 'isomorphic-git'
 import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
-import { wordCount, stringClamper } from '../kitchensink/purefns'
-import { appReducer, currentWaypoint, makeInitialAppState } from '../state'
-import { AppState, Keybinding } from '../types'
+import { sleep } from '../kitchensink/effectfns'
+import { stringClamper, wordCount } from '../kitchensink/purefns'
+import {
+  appReducer,
+  currentWaypoint,
+  loadSyncRootFromBrowserGit,
+  makeInitialAppState,
+} from '../state'
+import { Keybinding } from '../types'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
@@ -53,9 +61,40 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }))
 
+// Set up browser-local git repository
+let isGitReady = false
+const setupGit = new Promise((resolve): void => {
+  BrowserFS.configure(
+    {
+      fs: 'AsyncMirror',
+      options: {
+        sync: { fs: 'InMemory' },
+        async: {
+          fs: 'IndexedDB',
+          options: {
+            storeName: 'keykappUser',
+          },
+        },
+      },
+    },
+    async function(e): Promise<void> {
+      if (e) return console.error(e)
+      window.fs = BrowserFS.BFSRequire('fs')
+      git.plugins.set('fs', window.fs)
+      await git.init({ dir: '$input((/))' })
+
+      console.info('git is ready.')
+      isGitReady = true
+      resolve()
+    }
+  )
+})
+;(async (): Promise<void> => {
+  await setupGit
+})()
+
 export default function App(): React.ReactNode {
-  const initialAppState: AppState = makeInitialAppState()
-  const [state, dispatch] = React.useReducer(appReducer, initialAppState)
+  const [state, dispatch] = React.useReducer(appReducer, makeInitialAppState())
 
   function onKeyUp(event: KeyboardEvent): void {
     event.stopPropagation()
@@ -82,10 +121,22 @@ export default function App(): React.ReactNode {
     )(keybinding)
   }
 
-  React.useEffect(() => {
+  React.useEffect((): void => {
+    console.info('Loading state from git...')
+
+    const isSyncRootLoaded = !!state.syncRoot
+
+    sleep(1000).then((): void => {
+      if (isGitReady && !isSyncRootLoaded) {
+        loadSyncRootFromBrowserGit(state, dispatch)
+      }
+    })
+  })
+
+  React.useEffect((): (() => void) => {
     window.addEventListener('keyup', onKeyUp)
 
-    return () => {
+    return (): void => {
       window.removeEventListener('keyup', onKeyUp)
     }
   })
@@ -107,7 +158,9 @@ export default function App(): React.ReactNode {
               </Paper>
               <Paper className={classes.outputBuffer}>
                 <pre className={classes.outputBufferPre}>
-                  {stringClamper(280)(state.syncRoot.currentBuffer) + '|'}
+                  {state.syncRoot
+                    ? stringClamper(280)(state.syncRoot.currentBuffer) + '|'
+                    : 'Loading...'}
                 </pre>
               </Paper>
               <Paper className={classes.displayItem}>
@@ -118,13 +171,17 @@ export default function App(): React.ReactNode {
                     <TableRow>
                       <TableCell>characters</TableCell>
                       <TableCell>
-                        {state.syncRoot.currentBuffer.length}
+                        {state.syncRoot
+                          ? state.syncRoot.currentBuffer.length
+                          : 'Loading...'}
                       </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell>words</TableCell>
                       <TableCell>
-                        {wordCount(state.syncRoot.currentBuffer)}
+                        {state.syncRoot
+                          ? wordCount(state.syncRoot.currentBuffer)
+                          : 'Loading...'}
                       </TableCell>
                     </TableRow>
                   </TableBody>

@@ -6,10 +6,10 @@ import { makeStyles } from '@material-ui/styles'
 import { map } from 'fp-ts/es6/Array'
 import * as React from 'react'
 import { getKappById } from '../kapps'
+import { stringClamper } from '../kitchensink/purefns'
 import { reachableKapps } from '../navigation/huffman'
 import { AppAction, Kapp, Keybinding, LeftHand, RightHand } from '../types'
 import { KappLegend } from './Legend'
-import { stringClamper } from '../kitchensink/purefns'
 
 const useStyles = makeStyles({
   button: {
