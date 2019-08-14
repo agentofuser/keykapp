@@ -4,18 +4,6 @@ import { idv0UserlandPrefix } from '../constants'
 import { AppAction, AppSyncRoot, DraftSyncRootMutator, Kapp } from '../types'
 import { newlineChar, printableAsciiChars } from './literals'
 
-const mapLastWord = (
-  wordMapper: (word: string) => string
-): DraftSyncRootMutator => (
-  draftState: AppSyncRoot,
-  _action: AppAction
-): void => {
-  draftState.currentBuffer = draftState.currentBuffer.replace(
-    /\w+$/,
-    (lastWord: string): string => wordMapper(lastWord)
-  )
-}
-
 const mapLastChar = (
   charMapper: (char: string) => string
 ): DraftSyncRootMutator => (
@@ -61,22 +49,22 @@ export const userlandKapps: Kapp[] = [
   ...printableAsciiChars,
   newlineChar,
   {
-    idv0: `${idv0UserlandPrefix}word/upcase`,
-    shortAsciiName: ':word-upcase',
-    legend: 'upcase word',
-    instruction: mapLastWord((word: string): string => word.toUpperCase()),
-  },
-  {
-    idv0: `${idv0UserlandPrefix}word/downcase`,
-    shortAsciiName: ':word-downcase',
-    legend: 'downcase word',
-    instruction: mapLastWord((word: string): string => word.toLowerCase()),
-  },
-  {
     idv0: `${idv0UserlandPrefix}wordish/delete`,
     shortAsciiName: ':wordish-delete',
     legend: 'delete to prev word',
     instruction: deleteChunkBackwards,
+  },
+  {
+    idv0: `${idv0UserlandPrefix}char/upcase`,
+    shortAsciiName: ':char-upcase',
+    legend: 'upcase char',
+    instruction: mapLastChar((char: string): string => char.toUpperCase()),
+  },
+  {
+    idv0: `${idv0UserlandPrefix}char/downcase`,
+    shortAsciiName: ':char-downcase',
+    legend: 'downcase char',
+    instruction: mapLastChar((char: string): string => char.toLowerCase()),
   },
   {
     idv0: `${idv0UserlandPrefix}char/delete`,
