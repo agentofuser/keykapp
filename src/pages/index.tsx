@@ -15,6 +15,7 @@ import { fold, none, Option, toNullable } from 'fp-ts/es6/Option'
 import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
+import { findKappById } from '../kapps'
 import { sleep } from '../kitchensink/effectfns'
 import { stringClamper, wordCount } from '../kitchensink/purefns'
 import {
@@ -34,6 +35,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     gridTemplateRows: '1fr 1fr',
     gridColumnGap: '16px',
     gridRowGap: '16px',
+    fontFamily: 'monospace',
   },
   display: {
     display: 'grid',
@@ -57,6 +59,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     whiteSpace: 'pre-wrap',
     fontSize: 20,
     lineHeight: 2,
+  },
+  logVisualization: {
+    fontSize: 16,
   },
 }))
 
@@ -116,6 +121,16 @@ export default function App(): React.ReactNode {
 
   const classes = useStyles()
 
+  const logVisualization = state.syncRoot
+    ? state.syncRoot.kappIdv0Log
+        .map((id): string => {
+          const kapp = findKappById(id)
+          return kapp ? kapp.shortAsciiName : ''
+        })
+        .slice(-12)
+        .join('\n')
+    : ''
+
   return (
     <React.Fragment>
       <Helmet title="Keykapp"></Helmet>
@@ -127,7 +142,10 @@ export default function App(): React.ReactNode {
           <div className={classes.mainGridContainer}>
             <div className={classes.display}>
               <Paper className={classes.displayItem}>
-                <Typography>commandNgrams</Typography>
+                <Typography>kapp history</Typography>
+                <pre className={classes.logVisualization}>
+                  {logVisualization}
+                </pre>
               </Paper>
               <Paper className={classes.outputBuffer}>
                 <pre className={classes.outputBufferPre}>
