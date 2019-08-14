@@ -25,16 +25,6 @@ const mapBuffer = (
   draftState.currentBuffer = bufferMapper(draftState.currentBuffer)
 }
 
-const deleteChunkBackwards: DraftSyncRootMutator = (
-  draftState,
-  _action
-): void => {
-  draftState.currentBuffer = draftState.currentBuffer.replace(
-    /(\s*\S+|\s+)$/,
-    ''
-  )
-}
-
 // TODO this should be an async task or something to handle effects
 const copyCurrentBufferToClipboard: DraftSyncRootMutator = (
   draftState,
@@ -49,12 +39,6 @@ const copyCurrentBufferToClipboard: DraftSyncRootMutator = (
 export const userlandKapps: Kapp[] = [
   ...printableAsciiChars,
   newlineChar,
-  {
-    idv0: `${idv0UserlandPrefix}wordish/delete`,
-    shortAsciiName: ':wordish-delete',
-    legend: 'delete to prev word',
-    instruction: deleteChunkBackwards,
-  },
   {
     idv0: `${idv0UserlandPrefix}char/upcase`,
     shortAsciiName: ':upcase',
