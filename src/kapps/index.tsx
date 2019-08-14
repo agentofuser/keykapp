@@ -41,8 +41,9 @@ const copyCurrentBufferToClipboard: DraftSyncRootMutator = (
   _action
 ): void => {
   const copied = copy(draftState.currentBuffer)
-  const statusMsg = copied ? '[!copied]' : "[!couldn't copy]"
-  draftState.currentBuffer = draftState.currentBuffer + ` ${statusMsg}`
+  if (!copied) {
+    console.error('Could not copy to clipboard.')
+  }
 }
 
 export const userlandKapps: Kapp[] = [

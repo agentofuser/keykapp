@@ -39,26 +39,9 @@ export default function HuffmanButton({
 }: ButtonProps): React.ReactElement {
   const classes = useStyles()
 
-  let gridColumn: number
-  switch (keybinding[0].hand) {
-    case LeftHand:
-      gridColumn = keybinding[0].index + 1
-      break
-
-    case RightHand:
-      gridColumn = keybinding[0].index + 1 - 4
-      break
-    default:
-      throw new Error('Missing hand assignment for keybinding')
-      break
-  }
-
   const kappIdv0 = keybinding[1].value.kappIdv0
   return (
-    <Card
-      className={classes.button}
-      style={{ gridColumn: `${gridColumn} / ${gridColumn + 1}` }}
-    >
+    <Card className={classes.button}>
       <CardActionArea
         onMouseUp={(): void =>
           dispatch({
@@ -73,7 +56,7 @@ export default function HuffmanButton({
             <KappLegend title={getKappById(kappIdv0).legend}></KappLegend>
           ) : (
             <Typography align="left" style={{ fontFamily: 'monospace' }}>
-              {stringClamper(150)(
+              {stringClamper(200)(
                 map((kapp: Kapp): string => kapp.shortAsciiName)(
                   reachableKapps(keybinding[1])
                 ).join(' ')
