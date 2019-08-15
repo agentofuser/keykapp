@@ -8,7 +8,7 @@ import * as React from 'react'
 import { getKappById } from '../kapps'
 import { stringClamper } from '../kitchensink/purefns'
 import { reachableKapps } from '../navigation/huffman'
-import { AppAction, Kapp, Keybinding, LeftHand, RightHand } from '../types'
+import { AppAction, Kapp, Keybinding } from '../types'
 import { KappLegend } from './Legend'
 
 const useStyles = makeStyles({

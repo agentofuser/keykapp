@@ -62,6 +62,7 @@ export interface AppSyncRoot {
 
 export interface AppTempRoot {
   waypointBreadcrumbs: NonEmptyArray<Waypoint>
+  sequenceFrequencies: Map<string, number>
 }
 
 export interface AppState {

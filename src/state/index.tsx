@@ -1,9 +1,11 @@
 import * as Automerge from 'automerge'
+import * as BrowserFS from 'browserfs'
 import { last, reduce } from 'fp-ts/es6/Array'
 import { head } from 'fp-ts/es6/NonEmptyArray'
 import { Option } from 'fp-ts/es6/Option'
 import produce from 'immer'
 import * as git from 'isomorphic-git'
+import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
 import { findKappById } from '../kapps'
 import { stringClamper } from '../kitchensink/purefns'
@@ -17,7 +19,6 @@ import {
   Kapp,
   Waypoint,
 } from '../types'
-import * as BrowserFS from 'browserfs'
 
 const placeholderText = `Formal epistemology uses formal methods from decision theory, logic, probability theory and computability theory to model and reason about issues of epistemological interest. Work in this area spans several academic fields, including philosophy, computer science, economics, and statistics. The focus of formal epistemology has tended to differ somewhat from that of traditional epistemology, with topics like uncertainty, induction, and belief revision garnering more attention than the analysis of knowledge, skepticism, and issues with justification.`
 // const placeholderText = ''
@@ -78,6 +79,7 @@ export function makeInitialAppState(): AppState {
 
   const tempRoot: AppTempRoot = {
     waypointBreadcrumbs: [initialHuffmanRoot],
+    sequenceFrequencies: new Map(),
   }
 
   const initialAppState: AppState = { syncRoot, tempRoot }
@@ -160,6 +162,23 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
     case 'LoadSyncRootFromBrowserGit':
       if (!prevState.syncRoot) {
         nextSyncRoot = action.data.syncRoot
+        nextTempRoot = produce(
+          nextTempRoot,
+          (draftState: AppTempRoot): void => {
+            draftState.sequenceFrequencies = reduce(
+              new Map(),
+              (
+                seqFreqs: Map<string, number>,
+                trigram: string[]
+              ): Map<string, number> => {
+                const seq = trigram.join('\n')
+                const freq = (seqFreqs.get(seq) || 0) + 1
+                return seqFreqs.set(seq, freq)
+              }
+            )(nGram.trigram(nextSyncRoot ? nextSyncRoot.kappIdv0Log : []))
+          }
+        )
+        console.log({ nextTempRoot })
       }
       break
     case 'KeyswitchUp':
@@ -183,22 +202,21 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
         commitChanges(kappIdv0, changes)
       }
 
-      nextTempRoot = produce(
-        prevState.tempRoot,
-        (draftState: AppTempRoot): void => {
-          if (!kappIdv0) {
-            zoomInto(waypoint)(draftState, action)
-          } else {
-            // Update huffman tree based on kapp's updated weight calculated from
-            // the kappLog
-            draftState.waypointBreadcrumbs = [
-              newHuffmanRoot({ state: prevState }),
-            ]
+      nextTempRoot = produce(nextTempRoot, (draftState: AppTempRoot): void => {
+        if (!kappIdv0) {
+          zoomInto(waypoint)(draftState, action)
+        } else {
+          // Update huffman tree based on kapp's updated weight calculated from
+          // the kappLog
+          draftState.waypointBreadcrumbs = [
+            newHuffmanRoot({
+              state: { syncRoot: nextSyncRoot, tempRoot: draftState },
+            }),
+          ]
 
-            zoomOutToRoot(draftState, action)
-          }
+          zoomOutToRoot(draftState, action)
         }
-      )
+      })
 
       break
 

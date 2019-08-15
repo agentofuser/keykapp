@@ -33,6 +33,7 @@
     "gatsby-plugin-typescript": "^2.1.2",
     "immer": "^3.2.0",
     "isomorphic-git": "^0.60.1",
+    "n-gram": "^1.1.1",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-helmet": "^5.2.1",

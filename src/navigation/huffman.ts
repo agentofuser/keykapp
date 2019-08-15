@@ -43,17 +43,39 @@ function kappTwitterCount(kapp: Kapp): number {
   return twitterCount
 }
 
+function tailTrigram(state: AppState, kapp: Kapp): string {
+  if (!state.syncRoot) {
+    return ''
+  }
+  const logTail = state.syncRoot.kappIdv0Log.slice(-2)
+  console.log(logTail.map(id => getKappById(id).shortAsciiName).join('\n'))
+  const trigram = [...logTail, kapp.idv0].join('\n')
+  return trigram
+}
+
+function tailSequenceFrequency(state: AppState, kapp: Kapp): number {
+  const trigram = tailTrigram(state, kapp)
+  const frequency = state.tempRoot.sequenceFrequencies.get(trigram) || 0
+  return frequency
+}
+
 function huffmanWeightFromKapp(state: AppState | null, kapp: Kapp): number {
   const idv0 = kapp.idv0
   let manualWeight = 0
   let twitterCount = kappTwitterCount(kapp)
   let logCount = state ? kappLogCount(state, kapp) : 0
+  let sequenceCount = state ? tailSequenceFrequency(state, kapp) : 0
+
+  if (state && sequenceCount > 2) {
+    console.log(tailTrigram(state, kapp), kapp.shortAsciiName)
+  }
 
   if (!idv0.match(asciiIdv0Path)) {
     manualWeight = manualWeights[idv0] || 1
   }
 
-  const finalWeight = twitterCount + manualWeight + 10 * logCount
+  const finalWeight =
+    twitterCount + manualWeight + 10 * logCount + 1000 * sequenceCount
 
   return finalWeight
 }
