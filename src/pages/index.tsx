@@ -29,7 +29,7 @@ import { Keybinding } from '../types'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
-    height: 768,
+    height: 800,
     display: 'grid',
     gridTemplateColumns: '1fr',
     gridTemplateRows: '1fr 1fr',
@@ -51,7 +51,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   outputBuffer: {
     padding: theme.spacing(1, 4),
-    height: 376,
   },
   outputBufferPre: {
     overflow: 'hidden',

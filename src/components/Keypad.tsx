@@ -18,9 +18,10 @@ const useStyles = makeStyles({
   keypad: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
-    gridColumnGap: '64px',
+    gridColumnGap: '50px',
     justifyContent: 'center',
-    margin: '0 128px',
+    margin: '0 280px',
+    height: '100%',
   },
   hand: {
     display: 'grid',
