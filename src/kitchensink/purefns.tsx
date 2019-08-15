@@ -17,3 +17,6 @@ export function stringClamper(maxLength: number): (str: string) => string {
     }
   }
 }
+
+export const sumReducer = (sum: number, element: number): number =>
+  sum + element

@@ -81,3 +81,5 @@ export type DraftTempRootMutator = (
   draftState: AppTempRoot,
   action: AppAction
 ) => void
+
+export type nGrammer = (log: string[]) => string[][]

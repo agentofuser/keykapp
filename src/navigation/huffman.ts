@@ -5,6 +5,9 @@ import {
   getMonoid,
   isNonEmpty,
   map,
+  mapWithIndex,
+  range,
+  reduce,
   sortBy,
   splitAt,
 } from 'fp-ts/es6/Array'
@@ -12,9 +15,15 @@ import { cons, head, NonEmptyArray } from 'fp-ts/es6/NonEmptyArray'
 import { fold, fromNullable } from 'fp-ts/es6/Option'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
 import { foldMap as foldMapTree, make } from 'fp-ts/es6/Tree'
-import { allKeyswitches, asciiIdv0Path, manualWeights } from '../constants'
+import {
+  allKeyswitches,
+  asciiIdv0Path,
+  manualWeights,
+  nGramRange,
+} from '../constants'
 import { charCounts } from '../datasets/tweet'
-import { getKappById, userlandKapps } from '../kapps'
+import { getKappById, userlandKapps, showKappsFromIds } from '../kapps'
+import { sumReducer } from '../kitchensink/purefns'
 import { AppState, Kapp, Waypoint, WaypointValue } from '../types'
 
 function kappLogCount(state: AppState, kapp: Kapp): number {
@@ -43,20 +52,26 @@ function kappTwitterCount(kapp: Kapp): number {
   return twitterCount
 }
 
-function tailTrigram(state: AppState, kapp: Kapp): string {
+function tailKGram(k: number, state: AppState, kapp: Kapp): string {
   if (!state.syncRoot) {
     return ''
   }
-  const logTail = state.syncRoot.kappIdv0Log.slice(-2)
-  console.log(logTail.map(id => getKappById(id).shortAsciiName).join('\n'))
-  const trigram = [...logTail, kapp.idv0].join('\n')
-  return trigram
+  const logTail = state.syncRoot.kappIdv0Log.slice(-k)
+  const kGram = [...logTail, kapp.idv0].join('\n')
+  return kGram
 }
 
-function tailSequenceFrequency(state: AppState, kapp: Kapp): number {
-  const trigram = tailTrigram(state, kapp)
-  const frequency = state.tempRoot.sequenceFrequencies.get(trigram) || 0
-  return frequency
+function tailSequenceFrequencies(state: AppState, kapp: Kapp): number[] {
+  const tailKGrams = map((k: number): string => tailKGram(k, state, kapp))(
+    nGramRange
+  )
+  return tailKGrams.map((kGram: string): number => {
+    const frequency = state.tempRoot.sequenceFrequencies.get(kGram) || 0
+    if (frequency > 1) {
+      console.log({ kGram: showKappsFromIds(kGram.split('\n')), frequency })
+    }
+    return frequency
+  })
 }
 
 function huffmanWeightFromKapp(state: AppState | null, kapp: Kapp): number {
@@ -64,18 +79,27 @@ function huffmanWeightFromKapp(state: AppState | null, kapp: Kapp): number {
   let manualWeight = 0
   let twitterCount = kappTwitterCount(kapp)
   let logCount = state ? kappLogCount(state, kapp) : 0
-  let sequenceCount = state ? tailSequenceFrequency(state, kapp) : 0
-
-  if (state && sequenceCount > 2) {
-    console.log(tailTrigram(state, kapp), kapp.shortAsciiName)
-  }
+  let sequenceCounts = state ? tailSequenceFrequencies(state, kapp) : []
 
   if (!idv0.match(asciiIdv0Path)) {
     manualWeight = manualWeights[idv0] || 1
   }
 
+  const sequenceWeight = reduce(0, sumReducer)(
+    mapWithIndex((i, n: number): number => n * (10 ^ (i + 4)))(sequenceCounts)
+  )
+
   const finalWeight =
-    twitterCount + manualWeight + 10 * logCount + 1000 * sequenceCount
+    twitterCount + manualWeight + 10 * logCount + sequenceWeight
+
+  if (sequenceWeight > 0)
+    console.log({
+      twitterCount,
+      manualWeight,
+      logCount,
+      sequenceWeight,
+      finalWeight,
+    })
 
   return finalWeight
 }

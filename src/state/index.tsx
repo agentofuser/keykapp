@@ -1,12 +1,13 @@
 import * as Automerge from 'automerge'
 import * as BrowserFS from 'browserfs'
-import { last, reduce } from 'fp-ts/es6/Array'
+import { last, map, reduce } from 'fp-ts/es6/Array'
 import { head } from 'fp-ts/es6/NonEmptyArray'
 import { Option } from 'fp-ts/es6/Option'
 import produce from 'immer'
 import * as git from 'isomorphic-git'
 import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
+import { nGramRange } from '../constants'
 import { findKappById } from '../kapps'
 import { stringClamper } from '../kitchensink/purefns'
 import { zoomInto, zoomOutToRoot } from '../navigation'
@@ -17,6 +18,7 @@ import {
   AppSyncRoot,
   AppTempRoot,
   Kapp,
+  nGrammer,
   Waypoint,
 } from '../types'
 
@@ -154,6 +156,28 @@ export function rootWaypoint(state: AppState): Waypoint {
   return head(state.tempRoot.waypointBreadcrumbs)
 }
 
+function updateSequenceFrequencies(
+  draftState: AppTempRoot,
+  kappLog: string[]
+): void {
+  const kGrammers = map((k): nGrammer => nGram(k))(nGramRange)
+  draftState.sequenceFrequencies = reduce(
+    new Map(),
+    (
+      seqFreqs: Map<string, number>,
+      kGrammer: nGrammer
+    ): Map<string, number> => {
+      const kGrams = kGrammer(kappLog)
+      kGrams.forEach((kGram: string[]): void => {
+        const key = kGram.join('\n')
+        const value = (seqFreqs.get(key) || 0) + 1
+        seqFreqs.set(key, value)
+      })
+      return seqFreqs
+    }
+  )(kGrammers)
+}
+
 export function appReducer(prevState: AppState, action: AppAction): AppState {
   let nextSyncRoot = prevState.syncRoot
   let nextTempRoot = prevState.tempRoot
@@ -165,20 +189,10 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
         nextTempRoot = produce(
           nextTempRoot,
           (draftState: AppTempRoot): void => {
-            draftState.sequenceFrequencies = reduce(
-              new Map(),
-              (
-                seqFreqs: Map<string, number>,
-                trigram: string[]
-              ): Map<string, number> => {
-                const seq = trigram.join('\n')
-                const freq = (seqFreqs.get(seq) || 0) + 1
-                return seqFreqs.set(seq, freq)
-              }
-            )(nGram.trigram(nextSyncRoot ? nextSyncRoot.kappIdv0Log : []))
+            const kappLog = nextSyncRoot ? nextSyncRoot.kappIdv0Log : []
+            updateSequenceFrequencies(draftState, kappLog)
           }
         )
-        console.log({ nextTempRoot })
       }
       break
     case 'KeyswitchUp':

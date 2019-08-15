@@ -1,5 +1,5 @@
 import * as copy from 'copy-text-to-clipboard'
-import { map } from 'fp-ts/es6/Array'
+import { filter, map } from 'fp-ts/es6/Array'
 import { idv0UserlandPrefix } from '../constants'
 import { AppAction, AppSyncRoot, DraftSyncRootMutator, Kapp } from '../types'
 import { newlineChar, printableAsciiChars } from './literals'
@@ -89,4 +89,14 @@ export function getKappById(id: string): Kapp {
 export function findKappById(id: string): Kapp | null {
   const kapp = KappStore.get(id)
   return kapp || null
+}
+
+export function selectKappsFromIds(ids: string[]): Kapp[] {
+  return filter(Boolean)(map(findKappById)(ids))
+}
+
+export function showKappsFromIds(ids: string[]): string {
+  return map((kapp: Kapp): string => kapp.shortAsciiName)(
+    selectKappsFromIds(ids)
+  ).join('')
 }

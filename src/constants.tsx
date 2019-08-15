@@ -1,4 +1,5 @@
 import { Keyswitch, LeftHand, RightHand } from './types'
+import { range } from 'fp-ts/es6/Array'
 
 export const allKeyswitches: Keyswitch[] = [
   // { index: 0, key: 'a', actuationCost: 4, hand: LeftHand },
@@ -19,3 +20,5 @@ export const idv0SystemPrefix = '/system/kapp/'
 export const manualWeights: { [name: string]: number } = {}
 manualWeights[`${idv0UserlandPrefix}char/delete`] = 80
 manualWeights[`${idv0UserlandPrefix}text/copy`] = 40
+
+export const nGramRange = range(2, 16)
