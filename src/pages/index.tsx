@@ -16,7 +16,6 @@ import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
 import { findKappById } from '../kapps'
-import { sleep } from '../kitchensink/effectfns'
 import { stringClamper, wordCount } from '../kitchensink/purefns'
 import {
   appReducer,
@@ -64,11 +63,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }))
 
-// Set up browser-local git repository
-let isGitReady = false
-setupGit().then((): void => {
-  isGitReady = true
-})
+let hasGitSetupStarted = false
 
 export default function App(): React.ReactNode {
   const [state, dispatch] = React.useReducer(appReducer, makeInitialAppState())
@@ -99,15 +94,19 @@ export default function App(): React.ReactNode {
   }
 
   React.useEffect((): void => {
-    console.info('Loading state from git...')
-
-    const isSyncRootLoaded = !!state.syncRoot
-
-    sleep(1000).then((): void => {
-      if (isGitReady && !isSyncRootLoaded) {
-        loadSyncRootFromBrowserGit(state, dispatch)
-      }
-    })
+    // Set up browser-local git repository
+    if (!hasGitSetupStarted) {
+      hasGitSetupStarted = true
+      console.info('Setting up local git repo...')
+      setupGit().then((): void => {
+        console.info('Git repo is ready.')
+        const isSyncRootLoaded = !!state.syncRoot
+        if (!isSyncRootLoaded) {
+          console.info('Loading state from git log...')
+          loadSyncRootFromBrowserGit(state, dispatch)
+        }
+      })
+    }
   })
 
   React.useEffect((): (() => void) => {

@@ -51,7 +51,6 @@ export function setupGit(): Promise<boolean> {
         git.plugins.set('fs', window.fs)
         await git.init({ dir: '/' })
 
-        console.info('git is ready.')
         isGitReady = true
         resolve(isGitReady)
       }
@@ -105,6 +104,7 @@ export async function loadSyncRootFromBrowserGit(
       let commits = await git.log({
         dir: '/',
       })
+      console.info(`Loaded ${commits.length} commits from git log.`)
 
       const syncRootChanges = reduce(
         [],

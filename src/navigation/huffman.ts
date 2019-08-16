@@ -6,7 +6,6 @@ import {
   isNonEmpty,
   map,
   mapWithIndex,
-  range,
   reduce,
   sortBy,
   splitAt,
@@ -22,7 +21,7 @@ import {
   nGramRange,
 } from '../constants'
 import { charCounts } from '../datasets/tweet'
-import { getKappById, userlandKapps, showKappsFromIds } from '../kapps'
+import { getKappById, userlandKapps } from '../kapps'
 import { sumReducer } from '../kitchensink/purefns'
 import { AppState, Kapp, Waypoint, WaypointValue } from '../types'
 
@@ -68,7 +67,7 @@ function tailSequenceFrequencies(state: AppState, kapp: Kapp): number[] {
   return tailKGrams.map((kGram: string): number => {
     const frequency = state.tempRoot.sequenceFrequencies.get(kGram) || 0
     if (frequency > 1) {
-      console.log({ kGram: showKappsFromIds(kGram.split('\n')), frequency })
+      // console.log({ kGram: showKappsFromIds(kGram.split('\n')), frequency })
     }
     return frequency
   })
@@ -92,14 +91,14 @@ function huffmanWeightFromKapp(state: AppState | null, kapp: Kapp): number {
   const finalWeight =
     twitterCount + manualWeight + 10 * logCount + sequenceWeight
 
-  if (sequenceWeight > 0)
-    console.log({
-      twitterCount,
-      manualWeight,
-      logCount,
-      sequenceWeight,
-      finalWeight,
-    })
+  // if (sequenceWeight > 0)
+  //   console.log({
+  //     twitterCount,
+  //     manualWeight,
+  //     logCount,
+  //     sequenceWeight,
+  //     finalWeight,
+  //   })
 
   return finalWeight
 }
