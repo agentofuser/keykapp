@@ -108,6 +108,7 @@ export async function loadSyncRootFromBrowserGit(
       })
       console.info(`Loaded ${commits.length} commits from git log.`)
 
+      console.info('Parsing commit messages into Automerge changes...')
       const syncRootChanges = reduce(
         [],
         (
@@ -124,7 +125,12 @@ export async function loadSyncRootFromBrowserGit(
         }
       )(commits)
 
-      syncRoot = Automerge.applyChanges(Automerge.init(), syncRootChanges)
+      console.info('Done parsing Automerge changes.')
+
+      console.info('Applying Automerge changes to base state...')
+      const initialSyncRoot = makeInitialSyncRoot()
+      syncRoot = Automerge.applyChanges(initialSyncRoot, syncRootChanges)
+      console.info('Finished applying changes.')
     } catch (_e) {
       const initialSyncRoot = makeInitialSyncRoot()
       let initialChanges = Automerge.getChanges(
@@ -188,6 +194,7 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
     case 'LoadSyncRootFromBrowserGit':
       if (!prevState.syncRoot) {
         nextSyncRoot = action.data.syncRoot
+        console.info('Calculating n-grams for kapp prediction...')
         nextTempRoot = produce(
           nextTempRoot,
           (draftState: AppTempRoot): void => {
@@ -195,6 +202,7 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
             updateSequenceFrequencies(draftState, kappLog)
           }
         )
+        console.info('Done calculating n-grams. Keykapp is ready to use.')
       }
       break
     case 'KeyswitchUp':
