@@ -86,7 +86,7 @@ function huffmanWeightFromKapp(state: AppState | null, kapp: Kapp): number {
   }
 
   const sequenceWeight = reduce(0, sumReducer)(
-    mapWithIndex((i, n: number): number => n * (10 ^ (i + 4)))(sequenceCounts)
+    mapWithIndex((i, n: number): number => n * 10 ** (i + 2))(sequenceCounts)
   )
 
   const finalWeight =
