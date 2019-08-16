@@ -91,6 +91,8 @@ export function makeInitialSyncRoot(): AppSyncRoot {
   return Automerge.from({
     kappIdv0Log: [],
     currentBuffer: stringClamper(280)(placeholderText),
+    textTree: [new Automerge.Text()],
+    textTreeBreadcrumbs: [0],
   })
 }
 

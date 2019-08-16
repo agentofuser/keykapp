@@ -55,9 +55,16 @@ export interface LoadSyncRootFromBrowserGit {
 
 export type AppAction = KeyswitchUp | LoadSyncRootFromBrowserGit
 
+// TODO figure out how to define a recursive type like
+// type TextTree = Automerge.List<TextTreeItem>
+// type TextTreeItem = Automerge.Text | TextTree
+export type TextTree = any[]
+
 export interface AppSyncRoot {
   kappIdv0Log: string[]
   currentBuffer: string
+  textTree: TextTree
+  textTreeBreadcrumbs: number[] // stack of int list indices
 }
 
 export interface AppTempRoot {
