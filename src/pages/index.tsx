@@ -119,15 +119,14 @@ export default function App(): React.ReactNode {
 
   const classes = useStyles()
 
-  const logVisualization = state.syncRoot
-    ? state.syncRoot.kappIdv0Log
-        .map((id): string => {
-          const kapp = findKappById(id)
-          return kapp ? kapp.shortAsciiName : ''
-        })
-        .slice(-12)
-        .join('\n')
-    : ''
+  const kappLog = state.syncRoot ? state.syncRoot.kappIdv0Log : []
+  const logVisualization = kappLog
+    .map((id): string => {
+      const kapp = findKappById(id)
+      return kapp ? kapp.shortAsciiName : ''
+    })
+    .slice(-12)
+    .join('\n')
 
   return (
     <React.Fragment>
@@ -141,6 +140,7 @@ export default function App(): React.ReactNode {
             <div className={classes.display}>
               <Paper className={classes.displayItem}>
                 <Typography>kapp history</Typography>
+                {kappLog.length} actions
                 <pre className={classes.logVisualization}>
                   {logVisualization}
                 </pre>
