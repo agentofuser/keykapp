@@ -1,12 +1,16 @@
 import { map } from 'fp-ts/es6/Array'
 import { asciiIdv0Path } from '../constants'
 import { AppAction, AppSyncRoot, DraftSyncRootMutator, Kapp } from '../types'
+import { currentSexpAtom } from '../state'
 
 const pushLiteral = (literal: string): DraftSyncRootMutator => (
   draftState: AppSyncRoot,
   _action: AppAction
 ): void => {
-  draftState.currentBuffer = draftState.currentBuffer + literal
+  const text = currentSexpAtom(draftState)
+  if (text && text.insertAt) {
+    text.insertAt(text.length, literal)
+  }
 }
 
 // This list doesn't include tab and newline. These are the character codes

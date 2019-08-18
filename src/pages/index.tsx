@@ -19,6 +19,7 @@ import { findKappById } from '../kapps'
 import { stringClamper, wordCount } from '../kitchensink/purefns'
 import {
   appReducer,
+  currentSexpAtom,
   currentWaypoint,
   loadSyncRootFromBrowserGit,
   makeInitialAppState,
@@ -128,6 +129,10 @@ export default function App(): React.ReactNode {
     .slice(-12)
     .join('\n')
 
+  const currentAtom = state.syncRoot ? currentSexpAtom(state.syncRoot) : null
+
+  const atomContent = currentAtom ? currentAtom.join('') : ''
+
   return (
     <React.Fragment>
       <Helmet title="Keykapp"></Helmet>
@@ -148,7 +153,7 @@ export default function App(): React.ReactNode {
               <Paper className={classes.outputBuffer}>
                 <pre className={classes.outputBufferPre}>
                   {state.syncRoot
-                    ? stringClamper(280)(state.syncRoot.currentBuffer) + '|'
+                    ? stringClamper(280)(atomContent) + '|'
                     : 'Loading...'}
                 </pre>
               </Paper>
@@ -160,16 +165,14 @@ export default function App(): React.ReactNode {
                     <TableRow>
                       <TableCell>characters</TableCell>
                       <TableCell>
-                        {state.syncRoot
-                          ? state.syncRoot.currentBuffer.length
-                          : 'Loading...'}
+                        {state.syncRoot ? atomContent.length : 'Loading...'}
                       </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell>words</TableCell>
                       <TableCell>
                         {state.syncRoot
-                          ? wordCount(state.syncRoot.currentBuffer)
+                          ? wordCount(atomContent)
                           : 'Loading...'}
                       </TableCell>
                     </TableRow>

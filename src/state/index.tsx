@@ -20,6 +20,8 @@ import {
   Kapp,
   nGrammer,
   Waypoint,
+  SexpList,
+  SexpAtom,
 } from '../types'
 
 const placeholderText = `Formal epistemology uses formal methods from decision theory, logic, probability theory and computability theory to model and reason about issues of epistemological interest. Work in this area spans several academic fields, including philosophy, computer science, economics, and statistics. The focus of formal epistemology has tended to differ somewhat from that of traditional epistemology, with topics like uncertainty, induction, and belief revision garnering more attention than the analysis of knowledge, skepticism, and issues with justification.`
@@ -90,9 +92,24 @@ export function makeInitialAppState(): AppState {
 export function makeInitialSyncRoot(): AppSyncRoot {
   return Automerge.from({
     kappIdv0Log: [],
-    currentBuffer: stringClamper(280)(placeholderText),
-    textTree: [new Automerge.Text()],
-    textTreeBreadcrumbs: [0],
+    currentBuffer: 'deprecated',
+    sexp: [new Automerge.Text(stringClamper(280)(placeholderText))],
+    currentSexpListPath: [],
+    currentSexpAtomIndx: 0,
+  })
+}
+
+function migrateSyncRootSchema(syncRoot: AppSyncRoot): AppSyncRoot | null {
+  return Automerge.change(syncRoot, (doc: AppSyncRoot): void => {
+    if (doc.sexp === undefined || doc.sexp.length === 0) {
+      doc.sexp = [new Automerge.Text('')]
+    }
+    if (doc.currentSexpListPath === undefined) {
+      doc.currentSexpListPath = []
+    }
+    if (doc.currentSexpAtomIndx === undefined) {
+      doc.currentSexpAtomIndx = 0
+    }
   })
 }
 
@@ -128,8 +145,10 @@ export async function loadSyncRootFromBrowserGit(
       console.info('Done parsing Automerge changes.')
 
       console.info('Applying Automerge changes to base state...')
-      const initialSyncRoot = makeInitialSyncRoot()
-      syncRoot = Automerge.applyChanges(initialSyncRoot, syncRootChanges)
+      syncRoot = Automerge.applyChanges(Automerge.init(), syncRootChanges)
+
+      syncRoot = migrateSyncRootSchema(syncRoot)
+
       console.info('Finished applying changes.')
     } catch (_e) {
       const initialSyncRoot = makeInitialSyncRoot()
@@ -154,6 +173,21 @@ export async function loadSyncRootFromBrowserGit(
 export function currentWaypoint(state: AppState): Option<Waypoint> {
   const waypointOption = last(state.tempRoot.waypointBreadcrumbs)
   return waypointOption
+}
+
+export function currentSexpList(syncRoot: AppSyncRoot): SexpList {
+  let selectedList = syncRoot.sexp
+  for (let index of syncRoot.currentSexpListPath) {
+    selectedList = selectedList[index]
+  }
+  return selectedList
+}
+
+export function currentSexpAtom(syncRoot: AppSyncRoot): SexpAtom | null {
+  const list = currentSexpList(syncRoot)
+  const index = syncRoot.currentSexpAtomIndx
+  const atom = index !== null ? list[index] : null
+  return atom
 }
 
 export function logKappExecution(draftState: AppSyncRoot, kapp: Kapp): void {

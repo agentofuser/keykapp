@@ -3,6 +3,8 @@ import { filter, map } from 'fp-ts/es6/Array'
 import { idv0UserlandPrefix } from '../constants'
 import { AppAction, AppSyncRoot, DraftSyncRootMutator, Kapp } from '../types'
 import { newlineChar, printableAsciiChars } from './literals'
+import { currentSexpAtom, currentSexpList } from '../state'
+import * as Automerge from 'automerge'
 
 const mapLastChar = (
   charMapper: (char: string) => string
@@ -10,10 +12,14 @@ const mapLastChar = (
   draftState: AppSyncRoot,
   _action: AppAction
 ): void => {
-  draftState.currentBuffer = draftState.currentBuffer.replace(
-    /[\s\S]$/,
-    (lastChar: string): string => charMapper(lastChar)
-  )
+  const text = currentSexpAtom(draftState)
+  if (text) {
+    const lastIdx = text.length - 1
+    const lastChar = text.get(lastIdx)
+
+    if (text.deleteAt) text.deleteAt(lastIdx)
+    if (text.insertAt) text.insertAt(lastIdx, charMapper(lastChar))
+  }
 }
 
 const mapBuffer = (
@@ -22,15 +28,22 @@ const mapBuffer = (
   draftState: AppSyncRoot,
   _action: AppAction
 ): void => {
-  draftState.currentBuffer = bufferMapper(draftState.currentBuffer)
+  const list = currentSexpList(draftState)
+  const atom = currentSexpAtom(draftState)
+  const idx = draftState.currentSexpAtomIndx
+  if (atom && idx !== null) {
+    list[idx] = new Automerge.Text(bufferMapper(atom.join('')))
+  }
 }
 
 // TODO this should be an async task or something to handle effects
-const copyCurrentBufferToClipboard: DraftSyncRootMutator = (
+const copyCurrentSexpAtomToClipboard: DraftSyncRootMutator = (
   draftState,
   _action
 ): void => {
-  const copied = copy(draftState.currentBuffer)
+  let copied = false
+  const atom = currentSexpAtom(draftState)
+  if (atom) copied = copy(atom.join(''))
   if (!copied) {
     console.error('Could not copy to clipboard.')
   }
@@ -67,7 +80,7 @@ export const userlandKapps: Kapp[] = [
     idv0: `${idv0UserlandPrefix}text/copy`,
     shortAsciiName: ':copy-all',
     legend: 'copy text to clipboard',
-    instruction: copyCurrentBufferToClipboard,
+    instruction: copyCurrentSexpAtomToClipboard,
   },
 ]
 
