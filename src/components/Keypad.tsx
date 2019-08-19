@@ -18,17 +18,15 @@ const useStyles = makeStyles({
   keypad: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
-    gridColumnGap: '50px',
+    gridColumnGap: '1em',
     justifyContent: 'center',
-    margin: '0 280px',
     height: '100%',
   },
   hand: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gridColumnGap: '12px',
-    gridTemplateRows: 'repeat(1, 1fr)',
-    gridRowGap: '12px',
+    gridTemplateColumns: 'repeat(1, 1fr)',
+    gridTemplateRows: 'repeat(2, 1fr)',
+    gridRowGap: '1em',
     justifyContent: 'center',
   },
 })
@@ -97,9 +95,7 @@ export default function Keypad({
 
   return (
     <div className={classes.keypad}>
-      <div className={classes.hand}>
-        {[...hand(left).slice(2), ...hand(left).slice(0, 2)]}
-      </div>
+      <div className={classes.hand}>{hand(left).reverse()}</div>
       <div className={classes.hand}>{hand(right)}</div>
     </div>
   )

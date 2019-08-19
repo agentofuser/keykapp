@@ -1,22 +1,12 @@
-import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  Theme,
-} from '@material-ui/core'
-import Box from '@material-ui/core/Box'
+import { Paper, Theme } from '@material-ui/core'
 import Container from '@material-ui/core/Container'
-import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
 import { findFirst } from 'fp-ts/es6/Array'
 import { fold, none, Option, toNullable } from 'fp-ts/es6/Option'
 import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
-import { findKappById } from '../kapps'
-import { stringClamper, wordCount } from '../kitchensink/purefns'
+import { stringClamper } from '../kitchensink/purefns'
 import {
   appReducer,
   currentSexpAtom,
@@ -29,38 +19,23 @@ import { Keybinding } from '../types'
 
 const useStyles = makeStyles((theme: Theme) => ({
   mainGridContainer: {
-    height: 800,
-    display: 'grid',
-    gridTemplateColumns: '1fr',
-    gridTemplateRows: '1fr 1fr',
-    gridColumnGap: '16px',
-    gridRowGap: '16px',
+    display: 'flex',
+    flexDirection: 'column',
     fontFamily: 'monospace',
   },
-  display: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 2fr 1fr',
-    gridColumnGap: '16px',
-  },
-  displayItem: {
-    padding: theme.spacing(2, 2),
-  },
-  appStateViz: {
-    width: '100%',
-    border: 0,
-  },
+  display: {},
+  displayItem: {},
   outputBuffer: {
-    padding: theme.spacing(1, 4),
+    height: 180,
+    margin: '1em 0',
+    padding: theme.spacing(0, 1),
   },
   outputBufferPre: {
     overflow: 'hidden',
     wordWrap: 'break-word',
     whiteSpace: 'pre-wrap',
-    fontSize: 20,
-    lineHeight: 2,
-  },
-  logVisualization: {
     fontSize: 16,
+    lineHeight: 1.75,
   },
 }))
 
@@ -120,15 +95,6 @@ export default function App(): React.ReactNode {
 
   const classes = useStyles()
 
-  const kappLog = state.syncRoot ? state.syncRoot.kappIdv0Log : []
-  const logVisualization = kappLog
-    .map((id): string => {
-      const kapp = findKappById(id)
-      return kapp ? kapp.shortAsciiName : ''
-    })
-    .slice(-12)
-    .join('\n')
-
   const currentAtom = state.syncRoot ? currentSexpAtom(state.syncRoot) : null
 
   const atomContent = currentAtom ? currentAtom.join('') : ''
@@ -136,56 +102,22 @@ export default function App(): React.ReactNode {
   return (
     <React.Fragment>
       <Helmet title="Keykapp"></Helmet>
-      <Container maxWidth="lg">
-        <Box my={4}>
-          <Typography variant="h5" component="h1" gutterBottom>
-            Keykapp
-          </Typography>
-          <div className={classes.mainGridContainer}>
-            <div className={classes.display}>
-              <Paper className={classes.displayItem}>
-                <Typography>kapp history</Typography>
-                {kappLog.length} actions
-                <pre className={classes.logVisualization}>
-                  {logVisualization}
-                </pre>
-              </Paper>
-              <Paper className={classes.outputBuffer}>
-                <pre className={classes.outputBufferPre}>
-                  {state.syncRoot
-                    ? stringClamper(280)(atomContent) + '|'
-                    : 'Loading...'}
-                </pre>
-              </Paper>
-              <Paper className={classes.displayItem}>
-                <Typography>stats</Typography>
-
-                <Table>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>characters</TableCell>
-                      <TableCell>
-                        {state.syncRoot ? atomContent.length : 'Loading...'}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>words</TableCell>
-                      <TableCell>
-                        {state.syncRoot
-                          ? wordCount(atomContent)
-                          : 'Loading...'}
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </Paper>
-            </div>
-            <Keypad
-              dispatch={dispatch}
-              layout={layout(currentWaypoint(state))}
-            />
+      <Container maxWidth="sm">
+        <div className={classes.mainGridContainer}>
+          <div className={classes.display}>
+            <Paper className={classes.outputBuffer}>
+              <pre className={classes.outputBufferPre}>
+                {state.syncRoot
+                  ? stringClamper(140)(atomContent) + '|'
+                  : 'Loading...'}
+              </pre>
+            </Paper>
           </div>
-        </Box>
+          <Keypad
+            dispatch={dispatch}
+            layout={layout(currentWaypoint(state))}
+          />
+        </div>
       </Container>
     </React.Fragment>
   )

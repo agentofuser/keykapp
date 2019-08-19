@@ -93,7 +93,7 @@ export function makeInitialSyncRoot(): AppSyncRoot {
   return Automerge.from({
     kappIdv0Log: [],
     currentBuffer: 'deprecated',
-    sexp: [new Automerge.Text(stringClamper(280)(placeholderText))],
+    sexp: [new Automerge.Text(stringClamper(140)(placeholderText))],
     currentSexpListPath: [],
     currentSexpAtomIndx: 0,
   })

@@ -13,7 +13,7 @@ import { KappLegend } from './Legend'
 
 const useStyles = makeStyles({
   button: {
-    height: '100%',
+    height: 160,
   },
   buttonActionArea: {
     width: '100%',
@@ -57,8 +57,11 @@ export default function HuffmanButton({
           {kappIdv0 ? (
             <KappLegend title={getKappById(kappIdv0).legend}></KappLegend>
           ) : (
-            <Typography align={textAlign} style={{ fontFamily: 'monospace' }}>
-              {stringClamper(1000)(
+            <Typography
+              align={textAlign}
+              style={{ fontFamily: 'monospace', fontSize: 12 }}
+            >
+              {stringClamper(100)(
                 map((kapp: Kapp): string => kapp.shortAsciiName)(
                   reachableKapps(keybinding[1])
                 ).join(' ')
