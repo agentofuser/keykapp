@@ -13,12 +13,14 @@ const mapLastChar = (
   _action: AppAction
 ): void => {
   const text = currentSexpAtom(draftState)
-  if (text) {
+  if (text && text.length > 0) {
     const lastIdx = text.length - 1
     const lastChar = text.get(lastIdx)
 
     if (text.deleteAt) text.deleteAt(lastIdx)
-    if (text.insertAt) text.insertAt(lastIdx, charMapper(lastChar))
+    const replacementChar = charMapper(lastChar)
+    if (text.insertAt && replacementChar)
+      text.insertAt(lastIdx, replacementChar)
   }
 }
 
