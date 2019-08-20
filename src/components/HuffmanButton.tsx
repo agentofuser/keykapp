@@ -1,29 +1,19 @@
 import Card from '@material-ui/core/Card'
 import CardActionArea from '@material-ui/core/CardActionArea'
-import CardContent from '@material-ui/core/CardContent'
 import { makeStyles } from '@material-ui/styles'
 import { map } from 'fp-ts/es6/Array'
 import * as React from 'react'
 import { getKappById } from '../kapps'
+import { stringClamper } from '../kitchensink/purefns'
 import { reachableKapps } from '../navigation/huffman'
 import { AppAction, Kapp, Keybinding, LeftHand } from '../types'
 import { KappLegend } from './Legend'
-import { stringClamper } from '../kitchensink/purefns'
 
 const useStyles = makeStyles({
   button: {
-    height: '100%',
+    padding: '1em',
   },
-  buttonActionArea: {
-    width: '100%',
-    height: '100%',
-  },
-  buttonContent: {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-  },
+  buttonActionArea: {},
   reachableKapps: {
     fontFamily: 'monospace',
     fontSize: 12,
@@ -54,19 +44,17 @@ export default function HuffmanButton({
         }
         className={classes.buttonActionArea}
       >
-        <CardContent className={classes.buttonContent}>
-          {kappIdv0 ? (
-            <KappLegend title={getKappById(kappIdv0).legend}></KappLegend>
-          ) : (
-            <div className={classes.reachableKapps} style={{ textAlign }}>
-              {stringClamper(90)(
-                map((kapp: Kapp): string => kapp.shortAsciiName)(
-                  reachableKapps(keybinding[1])
-                ).join(' ')
-              )}
-            </div>
-          )}
-        </CardContent>
+        {kappIdv0 ? (
+          <KappLegend title={getKappById(kappIdv0).legend}></KappLegend>
+        ) : (
+          <div className={classes.reachableKapps} style={{ textAlign }}>
+            {stringClamper(142)(
+              map((kapp: Kapp): string => kapp.shortAsciiName)(
+                reachableKapps(keybinding[1])
+              ).join(' ')
+            )}
+          </div>
+        )}
       </CardActionArea>
     </Card>
   )

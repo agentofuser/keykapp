@@ -28,6 +28,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   outputBuffer: {
     height: '100%',
+    overflow: 'auto',
     padding: theme.spacing(0, 1),
   },
   outputBufferPre: {
