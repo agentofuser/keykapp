@@ -18,16 +18,16 @@ import {
 import { Keybinding } from '../types'
 
 const useStyles = makeStyles((theme: Theme) => ({
-  mainGridContainer: {
-    display: 'flex',
-    flexDirection: 'column',
+  container: {
+    height: '100%',
     fontFamily: 'monospace',
   },
-  display: {},
-  displayItem: {},
+  display: {
+    height: '50%',
+    paddingBottom: '1em',
+  },
   outputBuffer: {
-    height: 180,
-    margin: '1em 0',
+    height: '100%',
     padding: theme.spacing(0, 1),
   },
   outputBufferPre: {
@@ -102,22 +102,17 @@ export default function App(): React.ReactNode {
   return (
     <React.Fragment>
       <Helmet title="Keykapp"></Helmet>
-      <Container maxWidth="sm">
-        <div className={classes.mainGridContainer}>
-          <div className={classes.display}>
-            <Paper className={classes.outputBuffer}>
-              <pre className={classes.outputBufferPre}>
-                {state.syncRoot
-                  ? stringClamper(140)(atomContent) + '|'
-                  : 'Loading...'}
-              </pre>
-            </Paper>
-          </div>
-          <Keypad
-            dispatch={dispatch}
-            layout={layout(currentWaypoint(state))}
-          />
+      <Container className={classes.container} maxWidth="sm">
+        <div className={classes.display}>
+          <Paper className={classes.outputBuffer}>
+            <pre className={classes.outputBufferPre}>
+              {state.syncRoot
+                ? stringClamper(140)(atomContent) + '|'
+                : 'Loading...'}
+            </pre>
+          </Paper>
         </div>
+        <Keypad dispatch={dispatch} layout={layout(currentWaypoint(state))} />
       </Container>
     </React.Fragment>
   )

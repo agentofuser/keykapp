@@ -20,14 +20,14 @@ const useStyles = makeStyles({
     gridTemplateColumns: 'repeat(2, 1fr)',
     gridColumnGap: '1em',
     justifyContent: 'center',
-    height: '100%',
+    height: '50%',
   },
   hand: {
+    height: '100%',
     display: 'grid',
     gridTemplateColumns: 'repeat(1, 1fr)',
     gridTemplateRows: 'repeat(2, 1fr)',
     gridRowGap: '1em',
-    justifyContent: 'center',
   },
 })
 

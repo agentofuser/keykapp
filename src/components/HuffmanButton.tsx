@@ -1,19 +1,18 @@
 import Card from '@material-ui/core/Card'
 import CardActionArea from '@material-ui/core/CardActionArea'
 import CardContent from '@material-ui/core/CardContent'
-import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/styles'
 import { map } from 'fp-ts/es6/Array'
 import * as React from 'react'
 import { getKappById } from '../kapps'
-import { stringClamper } from '../kitchensink/purefns'
 import { reachableKapps } from '../navigation/huffman'
 import { AppAction, Kapp, Keybinding, LeftHand } from '../types'
 import { KappLegend } from './Legend'
+import { stringClamper } from '../kitchensink/purefns'
 
 const useStyles = makeStyles({
   button: {
-    height: 160,
+    height: '100%',
   },
   buttonActionArea: {
     width: '100%',
@@ -24,8 +23,10 @@ const useStyles = makeStyles({
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'top',
-    overflow: 'hidden',
+  },
+  reachableKapps: {
+    fontFamily: 'monospace',
+    fontSize: 12,
   },
 })
 
@@ -57,16 +58,13 @@ export default function HuffmanButton({
           {kappIdv0 ? (
             <KappLegend title={getKappById(kappIdv0).legend}></KappLegend>
           ) : (
-            <Typography
-              align={textAlign}
-              style={{ fontFamily: 'monospace', fontSize: 12 }}
-            >
-              {stringClamper(100)(
+            <div className={classes.reachableKapps} style={{ textAlign }}>
+              {stringClamper(90)(
                 map((kapp: Kapp): string => kapp.shortAsciiName)(
                   reachableKapps(keybinding[1])
                 ).join(' ')
               )}
-            </Typography>
+            </div>
           )}
         </CardContent>
       </CardActionArea>
