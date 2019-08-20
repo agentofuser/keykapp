@@ -4,7 +4,6 @@ import { makeStyles } from '@material-ui/styles'
 import { map } from 'fp-ts/es6/Array'
 import * as React from 'react'
 import { getKappById } from '../kapps'
-import { stringClamper } from '../kitchensink/purefns'
 import { reachableKapps } from '../navigation/huffman'
 import { AppAction, Kapp, Keybinding, LeftHand } from '../types'
 import { KappLegend } from './Legend'
@@ -16,7 +15,7 @@ const useStyles = makeStyles({
   buttonActionArea: {},
   reachableKapps: {
     fontFamily: 'monospace',
-    fontSize: 12,
+    fontSize: 10,
   },
 })
 
@@ -48,11 +47,21 @@ export default function HuffmanButton({
           <KappLegend title={getKappById(kappIdv0).legend}></KappLegend>
         ) : (
           <div className={classes.reachableKapps} style={{ textAlign }}>
-            {stringClamper(142)(
-              map((kapp: Kapp): string => kapp.shortAsciiName)(
-                reachableKapps(keybinding[1])
-              ).join(' ')
-            )}
+            {map(
+              (kapp: Kapp): React.ReactNode => (
+                <React.Fragment>
+                  <span
+                    style={{
+                      lineHeight: 1.5,
+                      backgroundColor: '#eee',
+                      color: 'black',
+                    }}
+                  >
+                    {kapp.shortAsciiName}
+                  </span>{' '}
+                </React.Fragment>
+              )
+            )(reachableKapps(keybinding[1]))}
           </div>
         )}
       </CardActionArea>
