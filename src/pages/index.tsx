@@ -31,10 +31,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     padding: theme.spacing(0, 1),
   },
   outputBufferPre: {
-    overflow: 'hidden',
     wordWrap: 'break-word',
     whiteSpace: 'pre-wrap',
-    fontSize: 16,
+    fontSize: 14,
     lineHeight: 1.75,
   },
 }))
@@ -107,7 +106,7 @@ export default function App(): React.ReactNode {
           <Paper className={classes.outputBuffer}>
             <pre className={classes.outputBufferPre}>
               {state.syncRoot
-                ? stringClamper(140)(atomContent) + '|'
+                ? stringClamper(280)(atomContent) + '|'
                 : 'Loading...'}
             </pre>
           </Paper>

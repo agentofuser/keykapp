@@ -9,7 +9,6 @@ import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
 import { nGramRange } from '../constants'
 import { findKappById } from '../kapps'
-import { stringClamper } from '../kitchensink/purefns'
 import { zoomInto, zoomOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
 import {
@@ -19,9 +18,9 @@ import {
   AppTempRoot,
   Kapp,
   nGrammer,
-  Waypoint,
-  SexpList,
   SexpAtom,
+  SexpList,
+  Waypoint,
 } from '../types'
 
 const placeholderText = `Formal epistemology uses formal methods from decision theory, logic, probability theory and computability theory to model and reason about issues of epistemological interest. Work in this area spans several academic fields, including philosophy, computer science, economics, and statistics. The focus of formal epistemology has tended to differ somewhat from that of traditional epistemology, with topics like uncertainty, induction, and belief revision garnering more attention than the analysis of knowledge, skepticism, and issues with justification.`
@@ -93,7 +92,7 @@ export function makeInitialSyncRoot(): AppSyncRoot {
   return Automerge.from({
     kappIdv0Log: [],
     currentBuffer: 'deprecated',
-    sexp: [new Automerge.Text(stringClamper(140)(placeholderText))],
+    sexp: [new Automerge.Text(placeholderText)],
     currentSexpListPath: [],
     currentSexpAtomIndx: 0,
   })
