@@ -3,6 +3,7 @@ import CardActionArea from '@material-ui/core/CardActionArea'
 import { makeStyles } from '@material-ui/styles'
 import { map } from 'fp-ts/es6/Array'
 import * as React from 'react'
+import useDimensions from 'react-use-dimensions'
 import { getKappById } from '../kapps'
 import { reachableKapps } from '../navigation/huffman'
 import { AppAction, Kapp, Keybinding, LeftHand } from '../types'
@@ -12,10 +13,23 @@ const useStyles = makeStyles({
   button: {
     padding: '1em',
   },
-  buttonActionArea: {},
-  reachableKapps: {
+  buttonActionArea: {
+    position: 'absolute',
+    height: '100%',
+  },
+  multilegendDiv: {
+    position: 'absolute',
+    height: '100%',
+    top: 0,
     fontFamily: 'monospace',
-    fontSize: 10,
+    fontSize: '14px',
+  },
+  multilegendP: {
+    margin: 0,
+    display: '-webkit-box',
+    WebkitBoxOrient: 'vertical',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
 })
 
@@ -30,6 +44,23 @@ export default function HuffmanButton({
 }: ButtonProps): React.ReactElement {
   const classes = useStyles()
   const textAlign = keybinding[0].hand === LeftHand ? 'right' : 'left'
+
+  const [multilegendDivRef, multilegendDivSize] = useDimensions()
+  const multilegendPRef = React.useRef(null)
+
+  // multiline clamp hack adapted from
+  // https://stackoverflow.com/a/41144187/11343832
+  React.useLayoutEffect((): void => {
+    const multilegendLineClamp = multilegendDivSize.height
+      ? Math.round(multilegendDivSize.height / (14 * 1.5))
+      : 4
+
+    const p: HTMLParagraphElement | null = multilegendPRef.current
+    const pStyle = p ? p.style : null
+    if (pStyle) {
+      pStyle.WebkitLineClamp = multilegendLineClamp
+    }
+  })
 
   const kappIdv0 = keybinding[1].value.kappIdv0
   return (
@@ -46,22 +77,27 @@ export default function HuffmanButton({
         {kappIdv0 ? (
           <KappLegend title={getKappById(kappIdv0).legend}></KappLegend>
         ) : (
-          <div className={classes.reachableKapps} style={{ textAlign }}>
-            {map(
-              (kapp: Kapp): React.ReactNode => (
-                <React.Fragment>
-                  <span
-                    style={{
-                      lineHeight: 1.5,
-                      backgroundColor: '#eee',
-                      color: 'black',
-                    }}
-                  >
-                    {kapp.shortAsciiName}
-                  </span>{' '}
-                </React.Fragment>
-              )
-            )(reachableKapps(keybinding[1]))}
+          <div ref={multilegendDivRef} className={classes.multilegendDiv}>
+            <p
+              ref={multilegendPRef}
+              className={classes.multilegendP}
+              style={{ textAlign, lineHeight: 1.5 }}
+            >
+              {map(
+                (kapp: Kapp): React.ReactNode => (
+                  <React.Fragment>
+                    <span
+                      style={{
+                        backgroundColor: '#eee',
+                        color: 'black',
+                      }}
+                    >
+                      {kapp.shortAsciiName}
+                    </span>{' '}
+                  </React.Fragment>
+                )
+              )(reachableKapps(keybinding[1]))}
+            </p>
           </div>
         )}
       </CardActionArea>
