@@ -120,7 +120,7 @@ export function showKappsFromIds(ids: string[]): string {
 // from https://stackoverflow.com/a/21682946/11343832
 function intToHSL(int: number): string {
   var shortened = int % 360
-  return 'hsl(' + shortened + ',90%,80%)'
+  return 'hsl(' + shortened + ',90%,90%)'
 }
 
 export function kappColor(kapp: Kapp): string {
