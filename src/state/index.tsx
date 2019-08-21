@@ -2,7 +2,7 @@ import * as Automerge from 'automerge'
 import * as BrowserFS from 'browserfs'
 import { last, map, reduce } from 'fp-ts/es6/Array'
 import { head } from 'fp-ts/es6/NonEmptyArray'
-import { Option } from 'fp-ts/es6/Option'
+import { Option, fold } from 'fp-ts/es6/Option'
 import produce from 'immer'
 import * as git from 'isomorphic-git'
 import * as nGram from 'n-gram'
@@ -17,7 +17,7 @@ import {
   AppSyncRoot,
   AppTempRoot,
   Kapp,
-  nGrammer,
+  NGrammer,
   SexpAtom,
   SexpList,
   Waypoint,
@@ -198,15 +198,15 @@ export function rootWaypoint(state: AppState): Waypoint {
 }
 
 function updateSequenceFrequencies(
-  draftState: AppTempRoot,
+  draftTempRoot: AppTempRoot,
   kappLog: string[]
 ): void {
-  const kGrammers = map((k): nGrammer => nGram(k))(nGramRange)
-  draftState.sequenceFrequencies = reduce(
-    new Map(),
+  const kGrammers = map((k): NGrammer => nGram(k))(nGramRange)
+  draftTempRoot.sequenceFrequencies = reduce(
+    draftTempRoot.sequenceFrequencies,
     (
       seqFreqs: Map<string, number>,
-      kGrammer: nGrammer
+      kGrammer: NGrammer
     ): Map<string, number> => {
       const kGrams = kGrammer(kappLog)
       kGrams.forEach((kGram: string[]): void => {
@@ -217,6 +217,23 @@ function updateSequenceFrequencies(
       return seqFreqs
     }
   )(kGrammers)
+}
+
+function updateTailSequenceFrequencies(
+  nextSyncRoot: Automerge.FreezeObject<AppSyncRoot> | null,
+  draftTempRoot: AppTempRoot
+): void {
+  const lookbackMaxOption = last(nGramRange)
+  fold(
+    (): void => {},
+    (lookbackMax: number): void => {
+      const lookbackIndex = -lookbackMax
+      const kappLog = nextSyncRoot
+        ? nextSyncRoot.kappIdv0Log.slice(lookbackIndex)
+        : []
+      updateSequenceFrequencies(draftTempRoot, kappLog)
+    }
+  )(lookbackMaxOption)
 }
 
 export function appReducer(prevState: AppState, action: AppAction): AppState {
@@ -230,9 +247,9 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
         console.info('Calculating n-grams for kapp prediction...')
         nextTempRoot = produce(
           nextTempRoot,
-          (draftState: AppTempRoot): void => {
+          (draftTempRoot: AppTempRoot): void => {
             const kappLog = nextSyncRoot ? nextSyncRoot.kappIdv0Log : []
-            updateSequenceFrequencies(draftState, kappLog)
+            updateSequenceFrequencies(draftTempRoot, kappLog)
           }
         )
         console.info('Done calculating n-grams. Keykapp is ready to use.')
@@ -247,10 +264,10 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
         nextSyncRoot = Automerge.change(
           prevState.syncRoot,
           kappIdv0,
-          (draftState: AppSyncRoot): void => {
-            kapp.instruction(draftState, action)
+          (draftSyncRoot: AppSyncRoot): void => {
+            kapp.instruction(draftSyncRoot, action)
 
-            logKappExecution(draftState, kapp)
+            logKappExecution(draftSyncRoot, kapp)
           }
         )
 
@@ -259,21 +276,25 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
         commitChanges(kappIdv0, changes)
       }
 
-      nextTempRoot = produce(nextTempRoot, (draftState: AppTempRoot): void => {
-        if (!kappIdv0) {
-          zoomInto(waypoint)(draftState, action)
-        } else {
-          // Update huffman tree based on kapp's updated weight calculated from
-          // the kappLog
-          draftState.waypointBreadcrumbs = [
-            newHuffmanRoot({
-              state: { syncRoot: nextSyncRoot, tempRoot: draftState },
-            }),
-          ]
+      nextTempRoot = produce(
+        nextTempRoot,
+        (draftTempRoot: AppTempRoot): void => {
+          if (!kappIdv0) {
+            zoomInto(waypoint)(draftTempRoot, action)
+          } else {
+            updateTailSequenceFrequencies(nextSyncRoot, draftTempRoot)
+            // Update huffman tree based on kapp's updated weight calculated
+            // from the kappLog
+            draftTempRoot.waypointBreadcrumbs = [
+              newHuffmanRoot({
+                state: { syncRoot: nextSyncRoot, tempRoot: draftTempRoot },
+              }),
+            ]
 
-          zoomOutToRoot(draftState, action)
+            zoomOutToRoot(draftTempRoot, action)
+          }
         }
-      })
+      )
 
       break
 

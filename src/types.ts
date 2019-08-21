@@ -91,4 +91,4 @@ export type DraftTempRootMutator = (
   action: AppAction
 ) => void
 
-export type nGrammer = (log: string[]) => string[][]
+export type NGrammer = (log: string[]) => string[][]
