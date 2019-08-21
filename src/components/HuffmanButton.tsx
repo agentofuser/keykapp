@@ -50,7 +50,7 @@ export default function HuffmanButton({
   // https://stackoverflow.com/a/41144187/11343832
   React.useLayoutEffect((): void => {
     const multilegendLineClamp = multilegendDivSize.height
-      ? Math.round(multilegendDivSize.height / (14 * 1.5))
+      ? Math.floor(multilegendDivSize.height / (14 * 1.5))
       : 4
 
     const p: HTMLParagraphElement | null = multilegendPRef.current
