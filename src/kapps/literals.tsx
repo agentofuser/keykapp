@@ -16,7 +16,7 @@ const pushLiteral = (literal: string): DraftSyncRootMutator => (
 // This list doesn't include tab and newline. These are the character codes
 // from 32 to 126.
 const ascii32To126 =
-  ' !"#$%&\'()*+,-./0123456789:;<=>?@[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
+  ' !"#$%&\'()*+,-./0123456789:;<=>?@[\\]^_`ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz{|}~'
 
 export const printableAsciiChars: Kapp[] = map(
   (char: string): Kapp => ({
