@@ -4,11 +4,10 @@ import { makeStyles } from '@material-ui/styles'
 import { mapWithIndex } from 'fp-ts/es6/Array'
 import * as React from 'react'
 import useDimensions from 'react-use-dimensions'
-import { getKappById } from '../kapps'
+import { getKappById, kappColor } from '../kapps'
 import { reachableKapps } from '../navigation/huffman'
 import { AppAction, Kapp, Keybinding, LeftHand } from '../types'
 import { KappLegend } from './Legend'
-import * as murmurhash from '../kitchensink/murmurhash'
 
 const useStyles = makeStyles({
   button: {
@@ -35,12 +34,6 @@ const useStyles = makeStyles({
 interface ButtonProps {
   dispatch: React.Dispatch<AppAction>
   keybinding: Keybinding
-}
-
-// from https://stackoverflow.com/a/21682946/11343832
-function intToHSL(int: number): string {
-  var shortened = int % 360
-  return 'hsl(' + shortened + ',100%,90%)'
 }
 
 export default function HuffmanButton({
@@ -80,7 +73,7 @@ export default function HuffmanButton({
         className={classes.buttonActionArea}
       >
         {kappIdv0 ? (
-          <KappLegend title={getKappById(kappIdv0).legend}></KappLegend>
+          <KappLegend kapp={getKappById(kappIdv0)}></KappLegend>
         ) : (
           <div ref={multilegendDivRef} className={classes.multilegendDiv}>
             <p
@@ -93,7 +86,7 @@ export default function HuffmanButton({
                   <React.Fragment key={i}>
                     <span
                       style={{
-                        backgroundColor: intToHSL(murmurhash(kapp.idv0, 42)),
+                        backgroundColor: kappColor(kapp),
                         color: 'black',
                       }}
                     >

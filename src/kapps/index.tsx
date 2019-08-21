@@ -1,5 +1,6 @@
 import * as copy from 'copy-text-to-clipboard'
 import { filter, map } from 'fp-ts/es6/Array'
+import murmurhash from '../kitchensink/murmurhash'
 import { idv0UserlandPrefix } from '../constants'
 import { AppAction, AppSyncRoot, DraftSyncRootMutator, Kapp } from '../types'
 import { newlineChar, printableAsciiChars } from './literals'
@@ -114,4 +115,14 @@ export function showKappsFromIds(ids: string[]): string {
   return map((kapp: Kapp): string => kapp.shortAsciiName)(
     selectKappsFromIds(ids)
   ).join('')
+}
+
+// from https://stackoverflow.com/a/21682946/11343832
+function intToHSL(int: number): string {
+  var shortened = int % 360
+  return 'hsl(' + shortened + ',90%,80%)'
+}
+
+export function kappColor(kapp: Kapp): string {
+  return intToHSL(murmurhash(kapp.idv0, 42))
 }
