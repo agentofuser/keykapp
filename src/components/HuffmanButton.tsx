@@ -19,10 +19,9 @@ const useStyles = makeStyles({
   multilegendDiv: {
     height: '100%',
     top: 0,
-    fontFamily: 'monospace',
-    fontSize: '14px',
   },
   multilegendP: {
+    fontFamily: 'monospace',
     margin: 0,
     display: '-webkit-box',
     WebkitBoxOrient: 'vertical',
@@ -49,13 +48,16 @@ export default function HuffmanButton({
   // multiline clamp hack adapted from
   // https://stackoverflow.com/a/41144187/11343832
   React.useLayoutEffect((): void => {
-    const multilegendLineClamp = multilegendDivSize.height
-      ? Math.floor(multilegendDivSize.height / (14 * 1.5))
-      : 4
-
-    const p: HTMLParagraphElement | null = multilegendPRef.current
+    const p = multilegendPRef.current
     const pStyle = p ? p.style : null
     if (pStyle) {
+      const fontSize = parseFloat(pStyle.fontSize.replace(/[^\d.]/g, ''))
+      const lineHeight = parseFloat(pStyle.lineHeight.replace(/[^\d.]/g, ''))
+
+      const multilegendLineClamp = multilegendDivSize.height
+        ? Math.floor(multilegendDivSize.height / (fontSize * lineHeight))
+        : 4
+
       pStyle.WebkitLineClamp = multilegendLineClamp
     }
   })
@@ -79,7 +81,7 @@ export default function HuffmanButton({
             <p
               ref={multilegendPRef}
               className={classes.multilegendP}
-              style={{ textAlign, lineHeight: 1.5 }}
+              style={{ textAlign, fontSize: 16, lineHeight: 1.5 }}
             >
               {mapWithIndex(
                 (i: number, kapp: Kapp): React.ReactNode => (
