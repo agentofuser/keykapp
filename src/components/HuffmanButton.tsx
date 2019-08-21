@@ -1,7 +1,7 @@
 import Card from '@material-ui/core/Card'
 import CardActionArea from '@material-ui/core/CardActionArea'
 import { makeStyles } from '@material-ui/styles'
-import { map } from 'fp-ts/es6/Array'
+import { mapWithIndex } from 'fp-ts/es6/Array'
 import * as React from 'react'
 import useDimensions from 'react-use-dimensions'
 import { getKappById } from '../kapps'
@@ -14,11 +14,9 @@ const useStyles = makeStyles({
     padding: '1em',
   },
   buttonActionArea: {
-    position: 'absolute',
     height: '100%',
   },
   multilegendDiv: {
-    position: 'absolute',
     height: '100%',
     top: 0,
     fontFamily: 'monospace',
@@ -83,9 +81,9 @@ export default function HuffmanButton({
               className={classes.multilegendP}
               style={{ textAlign, lineHeight: 1.5 }}
             >
-              {map(
-                (kapp: Kapp): React.ReactNode => (
-                  <React.Fragment>
+              {mapWithIndex(
+                (i: number, kapp: Kapp): React.ReactNode => (
+                  <React.Fragment key={i}>
                     <span
                       style={{
                         backgroundColor: '#eee',
