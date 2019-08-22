@@ -3,9 +3,11 @@ import { map, partition, reverse, sortBy, zip } from 'fp-ts/es6/Array'
 import { fold, Option } from 'fp-ts/es6/Option'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
 import * as React from 'react'
+import { currentWaypoint } from '../state'
 import { allKeyswitches } from '../constants'
 import {
   AppAction,
+  AppState,
   Keybinding,
   Keyswitch,
   Layout,
@@ -70,18 +72,18 @@ export function layout(waypointOption: Option<Waypoint>): Layout {
 
 interface KeypadProps {
   dispatch: React.Dispatch<AppAction>
-  layout: Layout
+  state: AppState
 }
 
 export default function Keypad({
   dispatch,
-  layout,
+  state,
 }: KeypadProps): React.ReactElement {
   const classes = useStyles()
 
   const { left, right } = partition(
     (keybinding: Keybinding): boolean => keybinding[0].hand === RightHand
-  )(layout)
+  )(layout(currentWaypoint(state)))
 
   const hand = map(
     (keybinding: Keybinding): React.ReactElement => (

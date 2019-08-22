@@ -112,7 +112,7 @@ export default function App(): React.ReactNode {
             </pre>
           </Paper>
         </div>
-        <Keypad dispatch={dispatch} layout={layout(currentWaypoint(state))} />
+        <Keypad dispatch={dispatch} state={state} />
       </Container>
     </React.Fragment>
   )

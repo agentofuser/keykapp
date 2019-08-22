@@ -9,11 +9,11 @@ import {
 
 export function zoomInto(waypoint: Waypoint): DraftTempRootMutator {
   return function navigateReducer(
-    draftState: AppTempRoot,
+    draftTempRoot: AppTempRoot,
     _action: AppAction
   ): void {
     if (isNonEmpty(waypoint.forest)) {
-      draftState.waypointBreadcrumbs.push(waypoint)
+      draftTempRoot.waypointBreadcrumbs.push(waypoint)
     } else {
       throw new Error('Cannot navigate to leaf waypoint')
     }
@@ -21,15 +21,17 @@ export function zoomInto(waypoint: Waypoint): DraftTempRootMutator {
 }
 
 export function zoomOutToRoot(
-  draftState: AppTempRoot,
+  draftTempRoot: AppTempRoot,
   _action: AppAction
 ): void {
-  draftState.waypointBreadcrumbs = [head(draftState.waypointBreadcrumbs)]
+  draftTempRoot.waypointBreadcrumbs = [head(draftTempRoot.waypointBreadcrumbs)]
 }
 
 export function zoomOutToParent(
-  draftState: AppTempRoot,
+  draftTempRoot: AppTempRoot,
   _action: AppAction
 ): void {
-  draftState.waypointBreadcrumbs.pop()
+  if (draftTempRoot.waypointBreadcrumbs.length > 1) {
+    draftTempRoot.waypointBreadcrumbs.pop()
+  }
 }

@@ -219,7 +219,8 @@ interface NewHuffmanRootParams {
 
 export function newHuffmanRoot({
   state = null,
-  width = allKeyswitches.length,
+  // subtract one to leave a keyswitch for system kapps
+  width = allKeyswitches.length - 1,
   kapps = userlandKapps,
 }: NewHuffmanRootParams): Waypoint {
   const huffmanOrphanLeaves = map(
