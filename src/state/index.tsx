@@ -223,17 +223,22 @@ function updateTailSequenceFrequencies(
   nextSyncRoot: Automerge.FreezeObject<AppSyncRoot> | null,
   draftTempRoot: AppTempRoot
 ): void {
-  const lookbackMaxOption = last(nGramRange)
-  fold(
-    (): void => {},
-    (lookbackMax: number): void => {
-      const lookbackIndex = -lookbackMax
-      const kappLog = nextSyncRoot
-        ? nextSyncRoot.kappIdv0Log.slice(lookbackIndex)
-        : []
-      updateSequenceFrequencies(draftTempRoot, kappLog)
-    }
-  )(lookbackMaxOption)
+  if (!nextSyncRoot) return
+  const seqFreqs = draftTempRoot.sequenceFrequencies
+  nGramRange
+    .filter((k: number): boolean => k <= nextSyncRoot.kappIdv0Log.length)
+    .map((k: number): string[] => {
+      const lookbackIndex = -k
+
+      const logSlice = nextSyncRoot.kappIdv0Log.slice(lookbackIndex)
+      return logSlice
+    })
+    .forEach((kGram: string[]): void => {
+      const key = kGram.join('\n')
+      const value = (seqFreqs.get(key) || 0) + 1
+
+      seqFreqs.set(key, value)
+    })
 }
 
 export function appReducer(prevState: AppState, action: AppAction): AppState {
