@@ -66,7 +66,7 @@ export default function HuffmanButton({
       const totalChars = p.innerText.split('').length
 
       if (totalChars < maxChars / 3) {
-        p.style.fontSize = `${24}px`
+        p.style.fontSize = `${22}px`
       }
 
       const multilegendLineClamp = divHeight
@@ -96,7 +96,7 @@ export default function HuffmanButton({
             <p
               ref={multilegendPRef}
               className={classes.multilegendP}
-              style={{ textAlign, fontSize: 20, lineHeight: 1.5 }}
+              style={{ textAlign, fontSize: 18, lineHeight: 1.5 }}
             >
               <span
                 ref={offscreenSpan}

@@ -39,7 +39,7 @@ export function KappLegend({ kapp }: KappLegendProps): React.ReactElement {
           align="center"
           style={{
             fontFamily: 'monospace',
-            fontSize: 26,
+            fontSize: 24,
           }}
         >
           {title}
