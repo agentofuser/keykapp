@@ -1,7 +1,7 @@
+import { makeStyles, Paper, Typography } from '@material-ui/core'
 import * as React from 'react'
-import { Paper, Typography, makeStyles } from '@material-ui/core'
-import { Kapp } from '../types'
 import { kappColor } from '../kapps'
+import { Kapp } from '../types'
 
 const useStyles = makeStyles(theme => ({
   string: {
@@ -18,21 +18,30 @@ export interface KappLegendProps {
 
 export function KappLegend({ kapp }: KappLegendProps): React.ReactElement {
   const classes = useStyles()
+  const titleRef = React.useRef(null)
   const title = kapp.legend
+
   return (
     <div
       style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        minWidth: '100%',
+        height: '100%',
       }}
     >
       <Paper
         className={title.length === 1 ? classes.char : classes.string}
         style={{ backgroundColor: kappColor(kapp) }}
       >
-        <Typography align="center" style={{ fontFamily: 'monospace' }}>
+        <Typography
+          ref={titleRef}
+          align="center"
+          style={{
+            fontFamily: 'monospace',
+            fontSize: 26,
+          }}
+        >
           {title}
         </Typography>
       </Paper>

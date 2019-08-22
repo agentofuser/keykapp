@@ -20,3 +20,8 @@ export function stringClamper(maxLength: number): (str: string) => string {
 
 export const sumReducer = (sum: number, element: number): number =>
   sum + element
+
+// Parse string with value in pixels
+export function parsePx(str: string): number {
+  return parseFloat(str.replace(/[^\d.]/g, ''))
+}

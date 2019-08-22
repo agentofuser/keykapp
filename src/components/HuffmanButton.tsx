@@ -5,6 +5,8 @@ import { mapWithIndex } from 'fp-ts/es6/Array'
 import * as React from 'react'
 import useDimensions from 'react-use-dimensions'
 import { getKappById, kappColor } from '../kapps'
+import { getStyle } from '../kitchensink/effectfns'
+import { parsePx } from '../kitchensink/purefns'
 import { reachableKapps } from '../navigation/huffman'
 import { AppAction, Kapp, Keybinding, LeftHand } from '../types'
 import { KappLegend } from './Legend'
@@ -22,6 +24,7 @@ const useStyles = makeStyles({
   },
   multilegendP: {
     fontFamily: 'monospace',
+    wordWrap: 'break-word',
     margin: 0,
     display: '-webkit-box',
     WebkitBoxOrient: 'vertical',
@@ -44,21 +47,33 @@ export default function HuffmanButton({
 
   const [multilegendDivRef, multilegendDivSize] = useDimensions()
   const multilegendPRef = React.useRef(null)
+  const offscreenSpan = React.useRef(null)
 
   // multiline clamp hack adapted from
   // https://stackoverflow.com/a/41144187/11343832
   React.useLayoutEffect((): void => {
     const p = multilegendPRef.current
-    const pStyle = p ? p.style : null
-    if (pStyle) {
-      const fontSize = parseFloat(pStyle.fontSize.replace(/[^\d.]/g, ''))
-      const lineHeight = parseFloat(pStyle.lineHeight.replace(/[^\d.]/g, ''))
+    const span = offscreenSpan.current
+    if (p && span) {
+      const divHeight = multilegendDivSize.height
+      const divWidth = multilegendDivSize.width
+      const lineHeight = parsePx(getStyle(p, 'line-height'))
+      const charWidth = parsePx(getStyle(span, 'width'))
 
-      const multilegendLineClamp = multilegendDivSize.height
-        ? Math.floor(multilegendDivSize.height / (fontSize * lineHeight))
-        : 4
+      const maxChars = Math.floor(
+        (divHeight * divWidth) / (lineHeight * charWidth)
+      )
+      const totalChars = p.innerText.split('').length
 
-      pStyle.WebkitLineClamp = multilegendLineClamp
+      if (totalChars < maxChars / 3) {
+        p.style.fontSize = `${24}px`
+      }
+
+      const multilegendLineClamp = divHeight
+        ? Math.floor(divHeight / lineHeight)
+        : 1
+
+      p.style.WebkitLineClamp = multilegendLineClamp
     }
   })
 
@@ -81,8 +96,14 @@ export default function HuffmanButton({
             <p
               ref={multilegendPRef}
               className={classes.multilegendP}
-              style={{ textAlign, fontSize: 16, lineHeight: 1.5 }}
+              style={{ textAlign, fontSize: 20, lineHeight: 1.5 }}
             >
+              <span
+                ref={offscreenSpan}
+                style={{ position: 'absolute', top: -2000 }}
+              >
+                h
+              </span>
               {mapWithIndex(
                 (i: number, kapp: Kapp): React.ReactNode => (
                   <React.Fragment key={i}>
