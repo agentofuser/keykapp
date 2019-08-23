@@ -31,7 +31,7 @@ export interface SystemKapp {
   idv0: string
   shortAsciiName: string
   legend: Legend
-  instruction: DraftTempRootMutator
+  instruction: DraftAppStateMutator
 }
 
 export interface HuffmanWeighted {
@@ -96,8 +96,8 @@ export type DraftSyncRootMutator = (
   action: AppAction
 ) => void
 
-export type DraftTempRootMutator = (
-  draftState: AppTempRoot,
+export type DraftAppStateMutator = (
+  draftState: AppState,
   action: AppAction
 ) => void
 

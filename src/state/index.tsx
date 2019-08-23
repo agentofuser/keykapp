@@ -7,7 +7,7 @@ import produce from 'immer'
 import * as git from 'isomorphic-git'
 import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
-import { nGramRange, gitRepoDir } from '../constants'
+import { gitRepoDir, nGramRange } from '../constants'
 import { findKappById } from '../kapps'
 import { zoomInto, zoomOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
@@ -262,7 +262,7 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
       // a menu is a non-leaf waypoint
       if (isMenuWaypoint) {
         nextState = produce(nextState, (draftState: AppState): void => {
-          zoomInto(waypoint)(draftState.tempRoot, action)
+          zoomInto(waypoint)(draftState, action)
         })
       } else if (kappIdv0 && kapp) {
         if (
@@ -296,12 +296,10 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
               }),
             ]
 
-            zoomOutToRoot(draftState.tempRoot, action)
+            zoomOutToRoot(draftState, action)
           })
         } else if (kapp.type === 'SystemKapp') {
-          nextState = produce(nextState, (draftState: AppState): void => {
-            kapp.instruction(draftState.tempRoot, action)
-          })
+          kapp.instruction(nextState, action)
         }
       }
 
