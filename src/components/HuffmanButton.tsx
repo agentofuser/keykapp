@@ -56,18 +56,7 @@ export default function HuffmanButton({
     const span = offscreenSpan.current
     if (p && span) {
       const divHeight = multilegendDivSize.height
-      const divWidth = multilegendDivSize.width
       const lineHeight = parsePx(getStyle(p, 'line-height'))
-      const charWidth = parsePx(getStyle(span, 'width'))
-
-      const maxChars = Math.floor(
-        (divHeight * divWidth) / (lineHeight * charWidth)
-      )
-      const totalChars = p.innerText.split('').length
-
-      if (totalChars < maxChars / 3) {
-        p.style.fontSize = `${22}px`
-      }
 
       const multilegendLineClamp = divHeight
         ? Math.floor(divHeight / lineHeight)
