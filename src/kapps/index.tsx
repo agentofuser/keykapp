@@ -3,10 +3,11 @@ import * as copy from 'copy-text-to-clipboard'
 import { filter, map } from 'fp-ts/es6/Array'
 import { idv0SystemPrefix, idv0UserlandPrefix } from '../constants'
 import murmurhash from '../kitchensink/murmurhash'
-import { zoomOutToParent } from '../navigation'
+import { zoomOutToParent, zoomOutToRoot } from '../navigation'
 import { currentSexpAtom, currentSexpList } from '../state'
 import {
   AppAction,
+  AppState,
   AppSyncRoot,
   DraftSyncRootMutator,
   Kapp,
@@ -107,9 +108,48 @@ export const menuUpKapp: SystemKapp = {
   legend: '🔼:menu-up',
   instruction: zoomOutToParent,
 }
-export const systemKapps = [menuUpKapp]
+
+function undoInstruction(draftState: AppState, _action: AppAction): void {
+  const syncRoot = draftState.syncRoot
+  if (!syncRoot) return
+
+  if (Automerge.canUndo(syncRoot)) {
+    draftState.syncRoot = Automerge.undo(syncRoot)
+  }
+  zoomOutToRoot(draftState, _action)
+}
+
+function redoInstruction(draftState: AppState, _action: AppAction): void {
+  const syncRoot = draftState.syncRoot
+  if (!syncRoot) return
+
+  if (Automerge.canRedo(syncRoot)) {
+    draftState.syncRoot = Automerge.redo(syncRoot)
+  }
+  zoomOutToRoot(draftState, _action)
+}
+
+export const undoKapp: SystemKapp = {
+  type: 'SystemKapp',
+  idv0: `${idv0SystemPrefix}syncRoot/undo`,
+  shortAsciiName: ':undo',
+  legend: '↩️:undo',
+  instruction: undoInstruction,
+}
+
+export const redoKapp: SystemKapp = {
+  type: 'SystemKapp',
+  idv0: `${idv0SystemPrefix}syncRoot/redo`,
+  shortAsciiName: ':redo',
+  legend: '↪️:redo',
+  instruction: redoInstruction,
+}
+
+export const systemKapps: SystemKapp[] = [menuUpKapp, undoKapp, redoKapp]
 
 export const allKapps: Kapp[] = [...userlandKapps, ...systemKapps]
+
+export const huffmanKapps: Kapp[] = [...userlandKapps, undoKapp, redoKapp]
 
 export const KappStore: Map<string, Kapp> = new Map(
   map((kapp: Kapp): [string, Kapp] => [kapp.idv0, kapp])(allKapps)

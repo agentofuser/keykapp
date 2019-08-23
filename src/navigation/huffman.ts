@@ -21,7 +21,7 @@ import {
   nGramRange,
 } from '../constants'
 import { charCounts } from '../datasets/tweet'
-import { getKappById, userlandKapps } from '../kapps'
+import { getKappById, huffmanKapps } from '../kapps'
 import { sumReducer } from '../kitchensink/purefns'
 import { AppState, Kapp, Waypoint, WaypointValue } from '../types'
 
@@ -221,7 +221,7 @@ export function newHuffmanRoot({
   state = null,
   // subtract one to leave a keyswitch for system kapps
   width = allKeyswitches.length - 1,
-  kapps = userlandKapps,
+  kapps = huffmanKapps,
 }: NewHuffmanRootParams): Waypoint {
   const huffmanOrphanLeaves = map(
     (kapp: Kapp): Waypoint => makeOrphanLeafWaypoint(state, kapp)

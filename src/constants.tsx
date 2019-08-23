@@ -20,6 +20,8 @@ export const idv0SystemPrefix = '/system/kapp/'
 export const manualWeights: { [name: string]: number } = {}
 manualWeights[`${idv0UserlandPrefix}char/delete`] = 80
 manualWeights[`${idv0UserlandPrefix}text/copy`] = 40
+manualWeights[`${idv0SystemPrefix}syncRoot/undo`] = 200
+manualWeights[`${idv0SystemPrefix}syncRoot/redo`] = 200
 
 export const nGramRange = range(2, 16)
 
