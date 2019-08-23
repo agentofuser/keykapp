@@ -23,8 +23,8 @@ import {
   Waypoint,
 } from '../types'
 
-const placeholderText = `Formal epistemology uses formal methods from decision theory, logic, probability theory and computability theory to model and reason about issues of epistemological interest. Work in this area spans several academic fields, including philosophy, computer science, economics, and statistics. The focus of formal epistemology has tended to differ somewhat from that of traditional epistemology, with topics like uncertainty, induction, and belief revision garnering more attention than the analysis of knowledge, skepticism, and issues with justification.`
-// const placeholderText = ''
+const placeholderText =
+  'Hi there! Welcome to Keykapp :) Make yourself at home, and please give me feedback at twitter.com/keykapp. Thank you for stopping by! — @agentofuser'
 
 export function setupGit(): Promise<boolean> {
   return new Promise((resolve, reject): void => {
