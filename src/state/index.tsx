@@ -99,17 +99,21 @@ export function makeInitialSyncRoot(): AppSyncRoot {
 }
 
 function migrateSyncRootSchema(syncRoot: AppSyncRoot): AppSyncRoot | null {
-  return Automerge.change(syncRoot, (doc: AppSyncRoot): void => {
-    if (doc.sexp === undefined || doc.sexp.length === 0) {
-      doc.sexp = [new Automerge.Text('')]
+  return Automerge.change(
+    syncRoot,
+    'migrateSyncRootSchema',
+    (doc: AppSyncRoot): void => {
+      if (doc.sexp === undefined || doc.sexp.length === 0) {
+        doc.sexp = [new Automerge.Text('')]
+      }
+      if (doc.currentSexpListPath === undefined) {
+        doc.currentSexpListPath = []
+      }
+      if (doc.currentSexpAtomIndx === undefined) {
+        doc.currentSexpAtomIndx = 0
+      }
     }
-    if (doc.currentSexpListPath === undefined) {
-      doc.currentSexpListPath = []
-    }
-    if (doc.currentSexpAtomIndx === undefined) {
-      doc.currentSexpAtomIndx = 0
-    }
-  })
+  )
 }
 
 export async function loadSyncRootFromBrowserGit(
