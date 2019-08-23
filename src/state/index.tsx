@@ -7,7 +7,7 @@ import produce from 'immer'
 import * as git from 'isomorphic-git'
 import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
-import { nGramRange } from '../constants'
+import { nGramRange, gitRepoDir } from '../constants'
 import { findKappById } from '../kapps'
 import { zoomInto, zoomOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
@@ -50,7 +50,7 @@ export function setupGit(): Promise<boolean> {
         }
         window.fs = BrowserFS.BFSRequire('fs')
         git.plugins.set('fs', window.fs)
-        await git.init({ dir: '/' })
+        await git.init({ dir: gitRepoDir })
 
         isGitReady = true
         resolve(isGitReady)
@@ -65,7 +65,7 @@ function commitChanges(
 ): Promise<string> {
   const serializedChanges = JSON.stringify(changes, null, 2)
   return git.commit({
-    dir: '/',
+    dir: gitRepoDir,
     author: {
       name: 'Keykapp Syncbot',
       email: 'syncbot@keykapp.com',
@@ -120,7 +120,7 @@ export async function loadSyncRootFromBrowserGit(
     let syncRoot: AppSyncRoot | null = null
     try {
       let commits = await git.log({
-        dir: '/',
+        dir: gitRepoDir,
       })
       console.info(`Loaded ${commits.length} commits from git log.`)
 

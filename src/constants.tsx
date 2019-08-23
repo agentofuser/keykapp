@@ -22,3 +22,5 @@ manualWeights[`${idv0UserlandPrefix}char/delete`] = 80
 manualWeights[`${idv0UserlandPrefix}text/copy`] = 40
 
 export const nGramRange = range(2, 16)
+
+export const gitRepoDir = '/keykapp/syncRootLog/'
