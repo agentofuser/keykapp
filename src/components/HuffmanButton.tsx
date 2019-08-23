@@ -111,6 +111,8 @@ export default function HuffmanButton({
                       style={{
                         backgroundColor: kappColor(kapp),
                         color: 'black',
+                        borderLeft: `6px solid ${kappColor(kapp)}`,
+                        borderRight: `6px solid ${kappColor(kapp)}`,
                       }}
                     >
                       {kapp.shortAsciiName}

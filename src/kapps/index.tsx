@@ -140,11 +140,11 @@ export function showKappsFromIds(ids: string[]): string {
 }
 
 // from https://stackoverflow.com/a/21682946/11343832
-function intToHSL(int: number): string {
+function intToHSL(int: number, saturation = 100, lighting = 80): string {
   var shortened = int % 360
-  return 'hsl(' + shortened + ',90%,90%)'
+  return 'hsl(' + shortened + `,${saturation}%,${lighting}%)`
 }
 
-export function kappColor(kapp: Kapp): string {
-  return intToHSL(murmurhash(kapp.idv0, 42))
+export function kappColor(kapp: Kapp, saturation = 90, lighting = 87): string {
+  return intToHSL(murmurhash(kapp.idv0, 42), saturation, lighting)
 }
