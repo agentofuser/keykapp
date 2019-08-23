@@ -100,8 +100,8 @@ export default function Keypad({
 
   return (
     <div className={classes.keypad}>
-      <div className={classes.hand}>{hand(left).reverse()}</div>
-      <div className={classes.hand}>{hand(right)}</div>
+      <div className={classes.hand}>{hand(left)}</div>
+      <div className={classes.hand}>{hand(right).reverse()}</div>
     </div>
   )
 }
