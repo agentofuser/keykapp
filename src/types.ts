@@ -3,7 +3,6 @@ import { NonEmptyArray } from 'fp-ts/es6/NonEmptyArray'
 import { Tree } from 'fp-ts/es6/tree'
 
 export type Legend = string
-export type Instruction = DraftSyncRootMutator
 
 export type LeftHand = 'LeftHand'
 export type RightHand = 'RightHand'
@@ -17,11 +16,22 @@ export interface Keyswitch {
   actuationCost: number
 }
 
-export interface Kapp {
+export type Kapp = UserlandKapp | SystemKapp
+
+export interface UserlandKapp {
+  type: 'UserlandKapp'
   idv0: string
   shortAsciiName: string
   legend: Legend
-  instruction: Instruction
+  instruction: DraftSyncRootMutator
+}
+
+export interface SystemKapp {
+  type: 'SystemKapp'
+  idv0: string
+  shortAsciiName: string
+  legend: Legend
+  instruction: DraftTempRootMutator
 }
 
 export interface HuffmanWeighted {
@@ -71,7 +81,7 @@ export interface AppSyncRoot {
 
 export interface AppTempRoot {
   waypointBreadcrumbs: NonEmptyArray<Waypoint>
-  sequenceFrequencies: Map<string, number>
+  sequenceFrequencies: { [key: string]: number }
 }
 
 export interface AppState {

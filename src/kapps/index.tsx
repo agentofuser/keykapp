@@ -1,11 +1,19 @@
+import * as Automerge from 'automerge'
 import * as copy from 'copy-text-to-clipboard'
 import { filter, map } from 'fp-ts/es6/Array'
+import { idv0SystemPrefix, idv0UserlandPrefix } from '../constants'
 import murmurhash from '../kitchensink/murmurhash'
-import { idv0UserlandPrefix } from '../constants'
-import { AppAction, AppSyncRoot, DraftSyncRootMutator, Kapp } from '../types'
-import { newlineChar, printableAsciiChars } from './literals'
+import { zoomOutToParent } from '../navigation'
 import { currentSexpAtom, currentSexpList } from '../state'
-import * as Automerge from 'automerge'
+import {
+  AppAction,
+  AppSyncRoot,
+  DraftSyncRootMutator,
+  Kapp,
+  SystemKapp,
+  UserlandKapp,
+} from '../types'
+import { newlineChar, printableAsciiChars } from './literals'
 
 const mapLastChar = (
   charMapper: (char: string) => string
@@ -52,42 +60,56 @@ const copyCurrentSexpAtomToClipboard: DraftSyncRootMutator = (
   }
 }
 
-export const userlandKapps: Kapp[] = [
+export const userlandKapps: UserlandKapp[] = [
   ...printableAsciiChars,
   newlineChar,
   {
+    type: 'UserlandKapp',
     idv0: `${idv0UserlandPrefix}char/upcase`,
     shortAsciiName: ':upcase',
-    legend: 'upcase char',
+    legend: ':upcase',
     instruction: mapLastChar((char: string): string => char.toUpperCase()),
   },
   {
+    type: 'UserlandKapp',
     idv0: `${idv0UserlandPrefix}char/downcase`,
     shortAsciiName: ':downcase',
-    legend: 'downcase char',
+    legend: ':downcase',
     instruction: mapLastChar((char: string): string => char.toLowerCase()),
   },
   {
+    type: 'UserlandKapp',
     idv0: `${idv0UserlandPrefix}char/delete`,
-    shortAsciiName: ':delete',
-    legend: 'delete character',
+    shortAsciiName: ':backspace',
+    legend: ':backspace',
     instruction: mapLastChar((_char: string): string => ''),
   },
   {
-    idv0: `${idv0UserlandPrefix}text/delete-all`,
-    shortAsciiName: ':delete-all',
-    legend: 'delete all text',
+    type: 'UserlandKapp',
+    idv0: `${idv0UserlandPrefix}text/clear`,
+    shortAsciiName: ':clear',
+    legend: '∅:clear',
     instruction: mapBuffer((_buffer: string): string => ''),
   },
   {
+    type: 'UserlandKapp',
     idv0: `${idv0UserlandPrefix}text/copy`,
-    shortAsciiName: ':copy-all',
-    legend: 'copy text to clipboard',
+    shortAsciiName: ':copy',
+    legend: '📋:copy',
     instruction: copyCurrentSexpAtomToClipboard,
   },
 ]
 
-export const allKapps: Kapp[] = userlandKapps
+export const menuUpKapp: SystemKapp = {
+  type: 'SystemKapp',
+  idv0: `${idv0SystemPrefix}menu/up`,
+  shortAsciiName: ':menu-up',
+  legend: '🔼:menu-up',
+  instruction: zoomOutToParent,
+}
+export const systemKapps = [menuUpKapp]
+
+export const allKapps: Kapp[] = [...userlandKapps, ...systemKapps]
 
 export const KappStore: Map<string, Kapp> = new Map(
   map((kapp: Kapp): [string, Kapp] => [kapp.idv0, kapp])(allKapps)

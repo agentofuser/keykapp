@@ -1,7 +1,12 @@
 import { map } from 'fp-ts/es6/Array'
 import { asciiIdv0Path } from '../constants'
-import { AppAction, AppSyncRoot, DraftSyncRootMutator, Kapp } from '../types'
 import { currentSexpAtom } from '../state'
+import {
+  AppAction,
+  AppSyncRoot,
+  DraftSyncRootMutator,
+  UserlandKapp,
+} from '../types'
 
 const pushLiteral = (literal: string): DraftSyncRootMutator => (
   draftState: AppSyncRoot,
@@ -18,8 +23,9 @@ const pushLiteral = (literal: string): DraftSyncRootMutator => (
 const ascii32To126 =
   ' !"#$%&\'()*+,-./0123456789:;<=>?@[\\]^_`ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz{|}~'
 
-export const printableAsciiChars: Kapp[] = map(
-  (char: string): Kapp => ({
+export const printableAsciiChars: UserlandKapp[] = map(
+  (char: string): UserlandKapp => ({
+    type: 'UserlandKapp',
     idv0: `${asciiIdv0Path}${char.charCodeAt(0)}`,
     shortAsciiName: char === ' ' ? ':space' : char,
     legend: char === ' ' ? 'space' : char,
@@ -27,7 +33,8 @@ export const printableAsciiChars: Kapp[] = map(
   })
 )(ascii32To126.split(''))
 
-export const newlineChar: Kapp = {
+export const newlineChar: UserlandKapp = {
+  type: 'UserlandKapp',
   idv0: `${asciiIdv0Path}${'\n'.charCodeAt(0)}`,
   shortAsciiName: ':newline',
   legend: 'newline',

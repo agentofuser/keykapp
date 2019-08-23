@@ -3,8 +3,10 @@ import { map, partition, reverse, sortBy, zip } from 'fp-ts/es6/Array'
 import { fold, Option } from 'fp-ts/es6/Option'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
 import * as React from 'react'
-import { currentWaypoint } from '../state'
+import { menuUpKapp } from '../kapps'
 import { allKeyswitches } from '../constants'
+import { makeOrphanLeafWaypoint } from '../navigation/huffman'
+import { currentWaypoint } from '../state'
 import {
   AppAction,
   AppState,
@@ -37,9 +39,10 @@ function loadBalancer(
   keyswitches: Keyswitch[],
   waypoints: Waypoint[]
 ): Layout {
-  // if there are less waypoints than keyswitches, put those waypoints at
-  // the center, not all at the left
-  const sortedDescWeightWaypoints = reverse(waypoints)
+  const zoomOutWaypoint = makeOrphanLeafWaypoint(null, menuUpKapp)
+  // reverse so that if there are less waypoints than keyswitches, we put those
+  // waypoints at the center, not all at the left
+  const sortedDescWeightWaypoints = reverse(waypoints).concat(zoomOutWaypoint)
 
   let keybindings: Keybinding[] = []
 

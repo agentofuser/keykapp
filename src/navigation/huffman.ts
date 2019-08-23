@@ -65,7 +65,7 @@ function tailSequenceFrequencies(state: AppState, kapp: Kapp): number[] {
     nGramRange
   )
   return tailKGrams.map((kGram: string): number => {
-    const frequency = state.tempRoot.sequenceFrequencies.get(kGram) || 0
+    const frequency = state.tempRoot.sequenceFrequencies[kGram] || 0
     if (frequency > 1) {
       // console.log({ kGram: showKappsFromIds(kGram.split('\n')), frequency })
     }

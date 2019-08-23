@@ -2,7 +2,7 @@ import * as Automerge from 'automerge'
 import * as BrowserFS from 'browserfs'
 import { last, map, reduce } from 'fp-ts/es6/Array'
 import { head } from 'fp-ts/es6/NonEmptyArray'
-import { Option, fold } from 'fp-ts/es6/Option'
+import { Option } from 'fp-ts/es6/Option'
 import produce from 'immer'
 import * as git from 'isomorphic-git'
 import * as nGram from 'n-gram'
@@ -81,7 +81,7 @@ export function makeInitialAppState(): AppState {
 
   const tempRoot: AppTempRoot = {
     waypointBreadcrumbs: [initialHuffmanRoot],
-    sequenceFrequencies: new Map(),
+    sequenceFrequencies: {},
   }
 
   const initialAppState: AppState = { syncRoot, tempRoot }
@@ -189,74 +189,66 @@ export function currentSexpAtom(syncRoot: AppSyncRoot): SexpAtom | null {
   return atom
 }
 
-export function logKappExecution(draftState: AppSyncRoot, kapp: Kapp): void {
-  draftState.kappIdv0Log.push(kapp.idv0)
+export function logKappExecution(
+  draftSyncRoot: AppSyncRoot,
+  kapp: Kapp
+): void {
+  draftSyncRoot.kappIdv0Log.push(kapp.idv0)
 }
 
 export function rootWaypoint(state: AppState): Waypoint {
   return head(state.tempRoot.waypointBreadcrumbs)
 }
 
-function updateSequenceFrequencies(
-  draftTempRoot: AppTempRoot,
-  kappLog: string[]
-): void {
+function updateSequenceFrequencies(draftState: AppState): void {
+  if (!draftState.syncRoot) return
+  const kappLog = draftState.syncRoot.kappIdv0Log
   const kGrammers = map((k): NGrammer => nGram(k))(nGramRange)
-  draftTempRoot.sequenceFrequencies = reduce(
-    draftTempRoot.sequenceFrequencies,
+  draftState.tempRoot.sequenceFrequencies = reduce(
+    draftState.tempRoot.sequenceFrequencies,
     (
-      seqFreqs: Map<string, number>,
+      seqFreqs: { [key: string]: number },
       kGrammer: NGrammer
-    ): Map<string, number> => {
+    ): { [key: string]: number } => {
       const kGrams = kGrammer(kappLog)
       kGrams.forEach((kGram: string[]): void => {
         const key = kGram.join('\n')
-        const value = (seqFreqs.get(key) || 0) + 1
-        seqFreqs.set(key, value)
+        const value = (seqFreqs[key] || 0) + 1
+        seqFreqs[key] = value
       })
       return seqFreqs
     }
   )(kGrammers)
 }
 
-function updateTailSequenceFrequencies(
-  nextSyncRoot: Automerge.FreezeObject<AppSyncRoot> | null,
-  draftTempRoot: AppTempRoot
-): void {
-  if (!nextSyncRoot) return
-  const seqFreqs = draftTempRoot.sequenceFrequencies
+function updateTailSequenceFrequencies(draftState: AppState): void {
+  if (draftState.syncRoot === null) return
+  const seqFreqs = draftState.tempRoot.sequenceFrequencies
+  const kappIdv0Log = draftState.syncRoot.kappIdv0Log
   nGramRange
-    .filter((k: number): boolean => k <= nextSyncRoot.kappIdv0Log.length)
+    .filter((k: number): boolean => k <= kappIdv0Log.length)
     .map((k: number): string[] => {
       const lookbackIndex = -k
 
-      const logSlice = nextSyncRoot.kappIdv0Log.slice(lookbackIndex)
+      const logSlice = kappIdv0Log.slice(lookbackIndex)
       return logSlice
     })
     .forEach((kGram: string[]): void => {
       const key = kGram.join('\n')
-      const value = (seqFreqs.get(key) || 0) + 1
+      const value = (seqFreqs[key] || 0) + 1
 
-      seqFreqs.set(key, value)
+      seqFreqs[key] = value
     })
 }
 
 export function appReducer(prevState: AppState, action: AppAction): AppState {
-  let nextSyncRoot = prevState.syncRoot
-  let nextTempRoot = prevState.tempRoot
-
+  let nextState = { ...prevState }
   switch (action.type) {
     case 'LoadSyncRootFromBrowserGit':
-      if (!prevState.syncRoot) {
-        nextSyncRoot = action.data.syncRoot
+      if (!nextState.syncRoot) {
+        nextState.syncRoot = action.data.syncRoot
         console.info('Calculating n-grams for kapp prediction...')
-        nextTempRoot = produce(
-          nextTempRoot,
-          (draftTempRoot: AppTempRoot): void => {
-            const kappLog = nextSyncRoot ? nextSyncRoot.kappIdv0Log : []
-            updateSequenceFrequencies(draftTempRoot, kappLog)
-          }
-        )
+        nextState = produce(nextState, updateSequenceFrequencies)
         console.info('Done calculating n-grams. Keykapp is ready to use.')
       }
       break
@@ -264,53 +256,60 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
       const [_keyswitch, waypoint] = action.data.keybinding
       const kappIdv0 = waypoint.value.kappIdv0
       const kapp = kappIdv0 && findKappById(kappIdv0)
+      const isKappWaypoint = !!kappIdv0
+      const isMenuWaypoint = !isKappWaypoint
 
-      if (prevState.syncRoot && kappIdv0 && kapp) {
-        nextSyncRoot = Automerge.change(
-          prevState.syncRoot,
-          kappIdv0,
-          (draftSyncRoot: AppSyncRoot): void => {
-            kapp.instruction(draftSyncRoot, action)
+      // a menu is a non-leaf waypoint
+      if (isMenuWaypoint) {
+        nextState = produce(nextState, (draftState: AppState): void => {
+          zoomInto(waypoint)(draftState.tempRoot, action)
+        })
+      } else if (kappIdv0 && kapp) {
+        if (
+          prevState.syncRoot &&
+          nextState.syncRoot &&
+          kapp.type === 'UserlandKapp'
+        ) {
+          nextState.syncRoot = Automerge.change(
+            prevState.syncRoot,
+            kappIdv0,
+            (draftSyncRoot: AppSyncRoot): void => {
+              kapp.instruction(draftSyncRoot, action)
+              logKappExecution(draftSyncRoot, kapp)
+            }
+          )
 
-            logKappExecution(draftSyncRoot, kapp)
-          }
-        )
+          let changes = Automerge.getChanges(
+            prevState.syncRoot,
+            nextState.syncRoot
+          )
 
-        let changes = Automerge.getChanges(prevState.syncRoot, nextSyncRoot)
+          commitChanges(kappIdv0, changes)
 
-        commitChanges(kappIdv0, changes)
-      }
-
-      nextTempRoot = produce(
-        nextTempRoot,
-        (draftTempRoot: AppTempRoot): void => {
-          if (!kappIdv0) {
-            zoomInto(waypoint)(draftTempRoot, action)
-          } else {
-            updateTailSequenceFrequencies(nextSyncRoot, draftTempRoot)
+          nextState = produce(nextState, (draftState: AppState): void => {
+            updateTailSequenceFrequencies(draftState)
             // Update huffman tree based on kapp's updated weight calculated
             // from the kappLog
-            draftTempRoot.waypointBreadcrumbs = [
+            draftState.tempRoot.waypointBreadcrumbs = [
               newHuffmanRoot({
-                state: { syncRoot: nextSyncRoot, tempRoot: draftTempRoot },
+                state: draftState,
               }),
             ]
 
-            zoomOutToRoot(draftTempRoot, action)
-          }
+            zoomOutToRoot(draftState.tempRoot, action)
+          })
+        } else if (kapp.type === 'SystemKapp') {
+          nextState = produce(nextState, (draftState: AppState): void => {
+            kapp.instruction(draftState.tempRoot, action)
+          })
         }
-      )
+      }
 
       break
 
     default:
       break
   }
-
-  const nextState =
-    nextSyncRoot === prevState.syncRoot && nextTempRoot === prevState.tempRoot
-      ? prevState
-      : { syncRoot: nextSyncRoot, tempRoot: nextTempRoot }
 
   return nextState
 }
