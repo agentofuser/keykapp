@@ -28,6 +28,7 @@ const useStyles = makeStyles({
     margin: 0,
     display: '-webkit-box',
     WebkitBoxOrient: 'vertical',
+    WebkitLineClamp: 1,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
   },
