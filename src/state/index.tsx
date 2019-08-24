@@ -290,18 +290,16 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
 
           commitChanges(kappIdv0, changes)
 
-          nextState = produce(nextState, (draftState: AppState): void => {
-            updateTailSequenceFrequencies(draftState)
-            // Update huffman tree based on kapp's updated weight calculated
-            // from the kappLog
-            draftState.tempRoot.waypointBreadcrumbs = [
-              newHuffmanRoot({
-                state: draftState,
-              }),
-            ]
+          updateTailSequenceFrequencies(nextState)
+          // Update huffman tree based on kapp's updated weight calculated
+          // from the kappLog
+          nextState.tempRoot.waypointBreadcrumbs = [
+            newHuffmanRoot({
+              state: nextState,
+            }),
+          ]
 
-            zoomOutToRoot(draftState, action)
-          })
+          zoomOutToRoot(nextState, action)
         } else if (kapp.type === 'SystemKapp') {
           kapp.instruction(nextState, action)
         }

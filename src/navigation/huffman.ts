@@ -49,7 +49,8 @@ function tailKGram(k: number, state: AppState, kapp: Kapp): string {
   }
   const { length } = state.syncRoot.kappIdv0Log
   const logTail = state.syncRoot.kappIdv0Log.slice(length - k + 1, length)
-  const kGram = [...logTail, kapp.idv0].join('\n')
+  logTail.push(kapp.idv0)
+  const kGram = logTail.join('\n')
   return kGram
 }
 
