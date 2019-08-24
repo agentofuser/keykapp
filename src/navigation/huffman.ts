@@ -1,5 +1,4 @@
 import {
-  filter,
   foldLeft,
   foldMap as foldMapArray,
   getMonoid,
@@ -25,13 +24,6 @@ import { getKappById, huffmanKapps } from '../kapps'
 import { sumReducer } from '../kitchensink/purefns'
 import { AppState, Kapp, Waypoint, WaypointValue } from '../types'
 
-function kappLogCount(state: AppState, kapp: Kapp): number {
-  const log = state.syncRoot ? state.syncRoot.kappIdv0Log : []
-  return filter(
-    (loggedKappIdv0: string): boolean => loggedKappIdv0 === kapp.idv0
-  )(log).length
-}
-
 function kappTwitterCount(kapp: Kapp): number {
   const idv0 = kapp.idv0
 
@@ -55,7 +47,8 @@ function tailKGram(k: number, state: AppState, kapp: Kapp): string {
   if (!state.syncRoot) {
     return ''
   }
-  const logTail = state.syncRoot.kappIdv0Log.slice(-k)
+  const { length } = state.syncRoot.kappIdv0Log
+  const logTail = state.syncRoot.kappIdv0Log.slice(length - k + 1, length)
   const kGram = [...logTail, kapp.idv0].join('\n')
   return kGram
 }
@@ -66,9 +59,6 @@ function tailSequenceFrequencies(state: AppState, kapp: Kapp): number[] {
   )
   return tailKGrams.map((kGram: string): number => {
     const frequency = state.tempRoot.sequenceFrequencies[kGram] || 0
-    if (frequency > 1) {
-      // console.log({ kGram: showKappsFromIds(kGram.split('\n')), frequency })
-    }
     return frequency
   })
 }
@@ -77,7 +67,6 @@ function huffmanWeightFromKapp(state: AppState | null, kapp: Kapp): number {
   const idv0 = kapp.idv0
   let manualWeight = 0
   let twitterCount = kappTwitterCount(kapp)
-  let logCount = state ? kappLogCount(state, kapp) : 0
   let sequenceCounts = state ? tailSequenceFrequencies(state, kapp) : []
 
   if (!idv0.match(asciiIdv0Path)) {
@@ -88,17 +77,7 @@ function huffmanWeightFromKapp(state: AppState | null, kapp: Kapp): number {
     mapWithIndex((i, n: number): number => n * 10 ** (i + 2))(sequenceCounts)
   )
 
-  const finalWeight =
-    twitterCount + manualWeight + 10 * logCount + sequenceWeight
-
-  // if (sequenceWeight > 0)
-  //   console.log({
-  //     twitterCount,
-  //     manualWeight,
-  //     logCount,
-  //     sequenceWeight,
-  //     finalWeight,
-  //   })
+  const finalWeight = twitterCount + manualWeight + sequenceWeight
 
   return finalWeight
 }
