@@ -158,7 +158,9 @@ export async function loadSyncRootFromBrowserGit(
         Automerge.init(),
         initialSyncRoot
       )
-      await commitChanges('initialSyncRoot', initialChanges)
+      if (initialChanges.length > 0) {
+        await commitChanges('initialSyncRoot', initialChanges)
+      }
 
       syncRoot = initialSyncRoot
     } finally {
@@ -265,12 +267,13 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
       // a menu is a non-leaf waypoint
       if (isMenuWaypoint) {
         zoomInto(waypoint)(nextState, action)
-      } else if (kappIdv0 && kapp) {
-        if (
-          prevState.syncRoot &&
-          nextState.syncRoot &&
-          kapp.type === 'UserlandKapp'
-        ) {
+      } else if (
+        kappIdv0 &&
+        kapp &&
+        prevState.syncRoot &&
+        nextState.syncRoot
+      ) {
+        if (kapp.type === 'UserlandKapp') {
           nextState.syncRoot = Automerge.change(
             prevState.syncRoot,
             kappIdv0,
@@ -279,13 +282,6 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
               logKappExecution(draftSyncRoot, kapp)
             }
           )
-
-          let changes = Automerge.getChanges(
-            prevState.syncRoot,
-            nextState.syncRoot
-          )
-
-          commitChanges(kappIdv0, changes)
 
           updateTailSequenceFrequencies(nextState)
           // Update huffman tree based on kapp's updated weight calculated
@@ -300,6 +296,12 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
         } else if (kapp.type === 'SystemKapp') {
           kapp.instruction(nextState, action)
         }
+
+        let changes = Automerge.getChanges(
+          prevState.syncRoot,
+          nextState.syncRoot
+        )
+        if (changes.length > 0) commitChanges(kappIdv0, changes)
       }
 
       break
