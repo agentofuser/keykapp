@@ -6,7 +6,7 @@ import { Option } from 'fp-ts/es6/Option'
 import * as git from 'isomorphic-git'
 import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
-import { gitRepoDir, nGramRange } from '../constants'
+import { gitRepoDir, incrementManualWeight, nGramRange } from '../constants'
 import { findKappById } from '../kapps'
 import { zoomInto, zoomOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
@@ -134,10 +134,11 @@ export async function loadSyncRootFromBrowserGit(
           allChanges: Automerge.Change[],
           commit: git.CommitDescription
         ): Automerge.Change[] => {
-          const payload = commit.message
-            .split('\n')
-            .slice(2)
-            .join('\n')
+          const lines = commit.message.split('\n')
+          const kappIdv0 = lines[0]
+          incrementManualWeight(kappIdv0)
+
+          const payload = lines.slice(2).join('\n')
 
           let changes = JSON.parse(payload)
           return allChanges.concat(changes)
@@ -301,7 +302,10 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
           prevState.syncRoot,
           nextState.syncRoot
         )
-        if (changes.length > 0) commitChanges(kappIdv0, changes)
+        if (changes.length > 0) {
+          commitChanges(kappIdv0, changes)
+          incrementManualWeight(kappIdv0)
+        }
       }
 
       break

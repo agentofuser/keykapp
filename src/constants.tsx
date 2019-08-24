@@ -21,10 +21,23 @@ export const undoIdv0 = `${idv0SystemPrefix}syncRoot/undo`
 export const redoIdv0 = `${idv0SystemPrefix}syncRoot/redo`
 
 export const manualWeights: { [name: string]: number } = {}
-manualWeights[`${idv0UserlandPrefix}char/delete`] = 80
 manualWeights[`${idv0UserlandPrefix}text/copy`] = 40
-manualWeights[undoIdv0] = 200
-manualWeights[redoIdv0] = 200
+manualWeights[undoIdv0] = 100
+manualWeights[redoIdv0] = 100
+
+export function incrementManualWeight(kappIdv0: string): void {
+  switch (kappIdv0) {
+    case undoIdv0:
+      manualWeights[undoIdv0] = manualWeights[undoIdv0] + 10
+
+      break
+    case redoIdv0:
+      manualWeights[redoIdv0] = manualWeights[redoIdv0] + 10
+      break
+    default:
+      break
+  }
+}
 
 export const nGramRange = range(1, 8)
 
