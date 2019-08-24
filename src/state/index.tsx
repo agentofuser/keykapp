@@ -3,7 +3,6 @@ import * as BrowserFS from 'browserfs'
 import { last, map, reduce } from 'fp-ts/es6/Array'
 import { head } from 'fp-ts/es6/NonEmptyArray'
 import { Option } from 'fp-ts/es6/Option'
-import produce from 'immer'
 import * as git from 'isomorphic-git'
 import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
@@ -252,7 +251,7 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
       if (!nextState.syncRoot) {
         nextState.syncRoot = action.data.syncRoot
         console.info('Calculating n-grams for kapp prediction...')
-        nextState = produce(nextState, updateSequenceFrequencies)
+        updateSequenceFrequencies(nextState)
         console.info('Done calculating n-grams. Keykapp is ready to use.')
       }
       break
@@ -265,9 +264,7 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
 
       // a menu is a non-leaf waypoint
       if (isMenuWaypoint) {
-        nextState = produce(nextState, (draftState: AppState): void => {
-          zoomInto(waypoint)(draftState, action)
-        })
+        zoomInto(waypoint)(nextState, action)
       } else if (kappIdv0 && kapp) {
         if (
           prevState.syncRoot &&

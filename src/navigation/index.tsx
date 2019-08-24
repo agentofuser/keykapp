@@ -1,13 +1,6 @@
 import { isNonEmpty } from 'fp-ts/es6/Array'
 import { head } from 'fp-ts/es6/NonEmptyArray'
-import produce from 'immer'
-import {
-  AppAction,
-  AppState,
-  AppTempRoot,
-  DraftAppStateMutator,
-  Waypoint,
-} from '../types'
+import { AppAction, AppState, DraftAppStateMutator, Waypoint } from '../types'
 
 export function zoomInto(waypoint: Waypoint): DraftAppStateMutator {
   return function navigateReducer(
@@ -15,12 +8,7 @@ export function zoomInto(waypoint: Waypoint): DraftAppStateMutator {
     _action: AppAction
   ): void {
     if (isNonEmpty(waypoint.forest)) {
-      draftState.tempRoot = produce(
-        draftState.tempRoot,
-        (draftTempRoot: AppTempRoot): void => {
-          draftTempRoot.waypointBreadcrumbs.push(waypoint)
-        }
-      )
+      draftState.tempRoot.waypointBreadcrumbs.push(waypoint)
     } else {
       throw new Error('Cannot navigate to leaf waypoint')
     }
@@ -28,14 +16,9 @@ export function zoomInto(waypoint: Waypoint): DraftAppStateMutator {
 }
 
 export function zoomOutToRoot(draftState: AppState, _action: AppAction): void {
-  draftState.tempRoot = produce(
-    draftState.tempRoot,
-    (draftTempRoot: AppTempRoot): void => {
-      draftTempRoot.waypointBreadcrumbs = [
-        head(draftTempRoot.waypointBreadcrumbs),
-      ]
-    }
-  )
+  draftState.tempRoot.waypointBreadcrumbs = [
+    head(draftState.tempRoot.waypointBreadcrumbs),
+  ]
 }
 
 export function zoomOutToParent(
@@ -43,11 +26,6 @@ export function zoomOutToParent(
   _action: AppAction
 ): void {
   if (draftState.tempRoot.waypointBreadcrumbs.length > 1) {
-    draftState.tempRoot = produce(
-      draftState.tempRoot,
-      (draftTempRoot: AppTempRoot): void => {
-        draftTempRoot.waypointBreadcrumbs.pop()
-      }
-    )
+    draftState.tempRoot.waypointBreadcrumbs.pop()
   }
 }
