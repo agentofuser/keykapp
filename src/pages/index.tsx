@@ -41,6 +41,29 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 let hasGitSetupStarted = false
 
+function VerticalCursor(): React.ReactElement {
+  return (
+    <span
+      style={{
+        border: '1px solid fuchsia',
+        borderTop: 'none',
+        borderBottom: 'none',
+        borderRight: 'none',
+      }}
+    >
+      {' '}
+    </span>
+  )
+}
+
+function DirectedCharCursor({ char }: { char: string }): React.ReactElement {
+  return (
+    <span style={{ border: '1px solid fuchsia', borderLeft: 'none' }}>
+      {char}
+    </span>
+  )
+}
+
 export default function App(): React.ReactNode {
   const [state, dispatch] = React.useReducer(appReducer, makeInitialAppState())
 
@@ -101,16 +124,26 @@ export default function App(): React.ReactNode {
   const unselectedText = atomContent ? atomContent.slice(0, -1) : ''
   const lastChar = atomContent ? atomContent.slice(-1) : ''
 
-  const textWithCursor = lastChar ? (
-    <React.Fragment>
-      {unselectedText}
-      <span style={{ border: '1px solid fuchsia', borderLeft: 'none' }}>
-        {lastChar}
-      </span>
-    </React.Fragment>
-  ) : (
-    <span style={{ color: 'fuchsia' }}>|</span>
-  )
+  const textWithCursor = ((): React.ReactNode => {
+    switch (lastChar) {
+      case '\n':
+        return (
+          <React.Fragment>
+            {atomContent}
+            <VerticalCursor />
+          </React.Fragment>
+        )
+      case '':
+        return <VerticalCursor />
+      default:
+        return (
+          <React.Fragment>
+            {unselectedText}
+            <DirectedCharCursor char={lastChar} />
+          </React.Fragment>
+        )
+    }
+  })()
 
   return (
     <React.Fragment>
