@@ -98,6 +98,19 @@ export default function App(): React.ReactNode {
   const currentAtom = state.syncRoot ? currentSexpAtom(state.syncRoot) : null
 
   const atomContent = currentAtom ? currentAtom.join('') : ''
+  const unselectedText = atomContent ? atomContent.slice(0, -1) : ''
+  const lastChar = atomContent ? atomContent.slice(-1) : ''
+
+  const textWithCursor = lastChar ? (
+    <React.Fragment>
+      {unselectedText}
+      <span style={{ border: '1px solid fuchsia', borderLeft: 'none' }}>
+        {lastChar}
+      </span>
+    </React.Fragment>
+  ) : (
+    <span style={{ color: 'fuchsia' }}>|</span>
+  )
 
   return (
     <React.Fragment>
@@ -106,9 +119,7 @@ export default function App(): React.ReactNode {
         <div className={classes.display}>
           <Paper className={classes.outputBuffer}>
             <pre className={classes.outputBufferPre}>
-              {state.syncRoot
-                ? stringClamper(280)(atomContent) + '|'
-                : 'Loading...'}
+              {state.syncRoot ? textWithCursor : 'Loading...'}
             </pre>
           </Paper>
         </div>
