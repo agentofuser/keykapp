@@ -9,7 +9,7 @@ import {
 } from '../constants'
 import murmurhash from '../kitchensink/murmurhash'
 import { zoomOutToParent, zoomOutToRoot } from '../navigation'
-import { currentSexp, currentSexpList } from '../state'
+import { currentSexpList, currentSexpTextAtom } from '../state'
 import {
   AppAction,
   AppState,
@@ -28,8 +28,8 @@ const mapLastChar = (
   draftState: AppSyncRoot,
   _action: AppAction
 ): void => {
-  const text = currentSexp(draftState)
-  if (!(text instanceof Automerge.Text)) return
+  const text = currentSexpTextAtom(draftState)
+  if (!text) return
 
   if (text && text.length > 0) {
     const lastIdx = text.length - 1
@@ -49,21 +49,21 @@ const mapBuffer = (
   _action: AppAction
 ): void => {
   const list = currentSexpList(draftState)
-  const atom = currentSexp(draftState)
-  const idx = draftState.sexpZoomCursorIdx
-  if (atom && idx !== null) {
-    list[idx] = new Automerge.Text(bufferMapper(atom.join('')))
+  const text = currentSexpTextAtom(draftState)
+  const zoomCursorIdx = draftState.sexpZoomCursorIdx
+  if (text && zoomCursorIdx > 0) {
+    list[zoomCursorIdx - 1] = new Automerge.Text(bufferMapper(text.join('')))
   }
 }
 
 // TODO this should be an async task or something to handle effects
-const copyCurrentSexpAtomToClipboard: DraftSyncRootMutator = (
+const copyCurrentSexpTextAtomToClipboard: DraftSyncRootMutator = (
   draftState,
   _action
 ): void => {
   let copied = false
-  const atom = currentSexp(draftState)
-  if (atom) copied = copy(atom.join(''))
+  const text = currentSexpTextAtom(draftState)
+  if (text) copied = copy(text.join(''))
   if (!copied) {
     console.error('Could not copy to clipboard.')
   }
@@ -106,7 +106,7 @@ export const userlandKapps: UserlandKapp[] = [
     idv0: `${idv0UserlandPrefix}text/copy`,
     shortAsciiName: ':copy',
     legend: '📋:copy',
-    instruction: copyCurrentSexpAtomToClipboard,
+    instruction: copyCurrentSexpTextAtomToClipboard,
   },
 ]
 

@@ -1,11 +1,12 @@
-import { Paper, Theme } from '@material-ui/core'
 import Container from '@material-ui/core/Container'
 import { makeStyles } from '@material-ui/styles'
+import * as Automerge from 'automerge'
 import { findFirst } from 'fp-ts/es6/Array'
 import { fold, none, Option, toNullable } from 'fp-ts/es6/Option'
 import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
+import SexpComponent from '../components/Sexp'
 import {
   appReducer,
   currentSexp,
@@ -16,7 +17,7 @@ import {
 } from '../state'
 import { Keybinding } from '../types'
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles(() => ({
   container: {
     height: '100%',
     fontFamily: 'monospace',
@@ -25,43 +26,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     height: '50%',
     paddingBottom: '1em',
   },
-  outputBuffer: {
-    height: '100%',
-    overflow: 'auto',
-    padding: theme.spacing(0, 1),
-  },
-  outputBufferPre: {
-    wordWrap: 'break-word',
-    whiteSpace: 'pre-wrap',
-    fontSize: 14,
-    lineHeight: 1.75,
-  },
 }))
 
 let hasGitSetupStarted = false
-
-function VerticalCursor(): React.ReactElement {
-  return (
-    <span
-      style={{
-        border: '1px solid fuchsia',
-        borderTop: 'none',
-        borderBottom: 'none',
-        borderRight: 'none',
-      }}
-    >
-      {' '}
-    </span>
-  )
-}
-
-function DirectedCharCursor({ char }: { char: string }): React.ReactElement {
-  return (
-    <span style={{ border: '1px solid fuchsia', borderLeft: 'none' }}>
-      {char}
-    </span>
-  )
-}
 
 export default function App(): React.ReactNode {
   const [state, dispatch] = React.useReducer(appReducer, makeInitialAppState())
@@ -117,44 +84,19 @@ export default function App(): React.ReactNode {
 
   const classes = useStyles()
 
-  const currentAtom = state.syncRoot ? currentSexp(state.syncRoot) : null
-
-  const atomContent = currentAtom ? currentAtom.join('') : ''
-  const unselectedText = atomContent ? atomContent.slice(0, -1) : ''
-  const lastChar = atomContent ? atomContent.slice(-1) : ''
-
-  const textWithCursor = ((): React.ReactNode => {
-    switch (lastChar) {
-      case '\n':
-        return (
-          <React.Fragment>
-            {atomContent}
-            <VerticalCursor />
-          </React.Fragment>
-        )
-      case '':
-        return <VerticalCursor />
-      default:
-        return (
-          <React.Fragment>
-            {unselectedText}
-            <DirectedCharCursor char={lastChar} />
-          </React.Fragment>
-        )
-    }
-  })()
+  let display
+  if (state.syncRoot) {
+    const sexp = currentSexp(state.syncRoot)
+    display = <SexpComponent sexp={sexp} />
+  } else {
+    display = <SexpComponent sexp={new Automerge.Text('Loading...')} />
+  }
 
   return (
     <React.Fragment>
       <Helmet title="Keykapp"></Helmet>
       <Container className={classes.container} maxWidth="sm">
-        <div className={classes.display}>
-          <Paper className={classes.outputBuffer}>
-            <pre className={classes.outputBufferPre}>
-              {state.syncRoot ? textWithCursor : 'Loading...'}
-            </pre>
-          </Paper>
-        </div>
+        <div className={classes.display}>{display}</div>
         <Keypad dispatch={dispatch} state={state} />
       </Container>
     </React.Fragment>

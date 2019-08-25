@@ -18,9 +18,9 @@ import {
   Kapp,
   NGrammer,
   Sexp,
+  SexpInfo,
   SexpList,
   Waypoint,
-  SexpInfo,
 } from '../types'
 
 const placeholderText =
@@ -64,13 +64,16 @@ function commitChanges(
   changes: Automerge.Change[]
 ): Promise<string> {
   const serializedChanges = JSON.stringify(changes, null, 2)
+  const message = `${messageTitle}\n\n${serializedChanges}`
+  console.log(message)
+
   return git.commit({
     dir: gitRepoDir,
     author: {
       name: 'Keykapp Syncbot',
       email: 'syncbot@keykapp.com',
     },
-    message: `${messageTitle}\n\n${serializedChanges}`,
+    message,
   })
 }
 
@@ -198,6 +201,17 @@ export function currentSexp(syncRoot: AppSyncRoot): Sexp {
   const cursorIdx = syncRoot.sexpZoomCursorIdx
   const sexp = cursorIdx > 0 ? list[cursorIdx - 1] : list
   return sexp
+}
+
+export function currentSexpTextAtom(
+  syncRoot: AppSyncRoot
+): Automerge.Text | null {
+  const sexp = currentSexp(syncRoot)
+  if (sexp instanceof Automerge.Text) {
+    return sexp
+  } else {
+    return null
+  }
 }
 
 function currentSexpAndInfo(

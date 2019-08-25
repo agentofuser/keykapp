@@ -69,7 +69,8 @@ export type AppAction = KeyswitchUp | LoadSyncRootFromBrowserGit
 // type TextTree = Automerge.List<TextTreeItem>
 // type TextTreeItem = Automerge.Text | TextTree
 export type SexpList = any[]
-export type SexpAtom = Automerge.Text
+export type SexpTextAtom = Automerge.Text
+export type SexpAtom = SexpTextAtom
 export type Sexp = SexpList | SexpAtom
 
 export type UUID = string

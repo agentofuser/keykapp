@@ -5,10 +5,10 @@ import { AppAction, AppSyncRoot, Sexp, UserlandKapp } from '../types'
 
 function textNew(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   const list: Automerge.List<Sexp> = currentSexpList(draftSyncRoot)
-  let cursorIdx = draftSyncRoot.sexpZoomCursorIdx
+  let zoomCursorIdx = draftSyncRoot.sexpZoomCursorIdx
 
-  if (list.insertAt) list.insertAt(cursorIdx, new Automerge.Text(''))
-  draftSyncRoot.sexpZoomCursorIdx = cursorIdx + 1
+  if (list.insertAt) list.insertAt(zoomCursorIdx, new Automerge.Text(''))
+  draftSyncRoot.sexpZoomCursorIdx = zoomCursorIdx + 1
   setFocusCursorIdx(draftSyncRoot, list, draftSyncRoot.sexpZoomCursorIdx)
 }
 
@@ -20,6 +20,7 @@ function zoomNext(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
     draftSyncRoot.sexpZoomCursorIdx = zoomCursorIdx + 1
     setFocusCursorIdx(draftSyncRoot, list, draftSyncRoot.sexpZoomCursorIdx)
   }
+  console.log(JSON.stringify(draftSyncRoot, null, 2))
 }
 
 function zoomPrev(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
@@ -30,6 +31,7 @@ function zoomPrev(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
     draftSyncRoot.sexpZoomCursorIdx = zoomCursorIdx - 1
     setFocusCursorIdx(draftSyncRoot, list, draftSyncRoot.sexpZoomCursorIdx)
   }
+  console.log(JSON.stringify(draftSyncRoot, null, 2))
 }
 
 export const sexpKapps: UserlandKapp[] = [

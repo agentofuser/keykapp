@@ -1,7 +1,6 @@
 import { map } from 'fp-ts/es6/Array'
-import * as Automerge from 'automerge'
 import { asciiIdv0Path } from '../constants'
-import { currentSexp } from '../state'
+import { currentSexpTextAtom } from '../state'
 import {
   AppAction,
   AppSyncRoot,
@@ -13,8 +12,8 @@ const pushLiteral = (literal: string): DraftSyncRootMutator => (
   draftState: AppSyncRoot,
   _action: AppAction
 ): void => {
-  const text = currentSexp(draftState)
-  if (!(text instanceof Automerge.Text)) return
+  const text = currentSexpTextAtom(draftState)
+  if (!text) return
 
   if (text && text.insertAt) {
     text.insertAt(text.length, literal)
