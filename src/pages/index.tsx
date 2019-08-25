@@ -8,7 +8,7 @@ import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
 import {
   appReducer,
-  currentSexpAtom,
+  currentSexp,
   currentWaypoint,
   loadSyncRootFromBrowserGit,
   makeInitialAppState,
@@ -117,7 +117,7 @@ export default function App(): React.ReactNode {
 
   const classes = useStyles()
 
-  const currentAtom = state.syncRoot ? currentSexpAtom(state.syncRoot) : null
+  const currentAtom = state.syncRoot ? currentSexp(state.syncRoot) : null
 
   const atomContent = currentAtom ? currentAtom.join('') : ''
   const unselectedText = atomContent ? atomContent.slice(0, -1) : ''

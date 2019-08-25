@@ -17,7 +17,7 @@ import {
   AppTempRoot,
   Kapp,
   NGrammer,
-  SexpAtom,
+  Sexp,
   SexpList,
   Waypoint,
 } from '../types'
@@ -93,7 +93,7 @@ export function makeInitialSyncRoot(): AppSyncRoot {
     currentBuffer: 'deprecated',
     sexp: [new Automerge.Text(placeholderText)],
     currentSexpListPath: [],
-    currentSexpAtomIndx: 0,
+    currentSexpCursorIdx: 1,
   })
 }
 
@@ -108,8 +108,8 @@ function migrateSyncRootSchema(syncRoot: AppSyncRoot): AppSyncRoot | null {
       if (doc.currentSexpListPath === undefined) {
         doc.currentSexpListPath = []
       }
-      if (doc.currentSexpAtomIndx === undefined) {
-        doc.currentSexpAtomIndx = 0
+      if (doc.currentSexpCursorIdx === undefined) {
+        doc.currentSexpCursorIdx = 0
       }
     }
   )
@@ -188,11 +188,11 @@ export function currentSexpList(syncRoot: AppSyncRoot): SexpList {
   return selectedList
 }
 
-export function currentSexpAtom(syncRoot: AppSyncRoot): SexpAtom | null {
+export function currentSexp(syncRoot: AppSyncRoot): Sexp {
   const list = currentSexpList(syncRoot)
-  const index = syncRoot.currentSexpAtomIndx
-  const atom = index !== null ? list[index] : null
-  return atom
+  const cursorIdx = syncRoot.currentSexpCursorIdx
+  const sexp = cursorIdx > 0 ? list[cursorIdx - 1] : list
+  return sexp
 }
 
 export function logKappExecution(

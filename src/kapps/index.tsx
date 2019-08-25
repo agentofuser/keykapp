@@ -9,7 +9,7 @@ import {
 } from '../constants'
 import murmurhash from '../kitchensink/murmurhash'
 import { zoomOutToParent, zoomOutToRoot } from '../navigation'
-import { currentSexpAtom, currentSexpList } from '../state'
+import { currentSexp, currentSexpList } from '../state'
 import {
   AppAction,
   AppState,
@@ -20,7 +20,7 @@ import {
   UserlandKapp,
 } from '../types'
 import { newlineChar, printableAsciiChars } from './literals'
-import { sexpListKapps } from './SexpList'
+import { sexpKapps } from './Sexp'
 
 const mapLastChar = (
   charMapper: (char: string) => string
@@ -28,7 +28,9 @@ const mapLastChar = (
   draftState: AppSyncRoot,
   _action: AppAction
 ): void => {
-  const text = currentSexpAtom(draftState)
+  const text = currentSexp(draftState)
+  if (!(text instanceof Automerge.Text)) return
+
   if (text && text.length > 0) {
     const lastIdx = text.length - 1
     const lastChar = text.get(lastIdx)
@@ -47,8 +49,8 @@ const mapBuffer = (
   _action: AppAction
 ): void => {
   const list = currentSexpList(draftState)
-  const atom = currentSexpAtom(draftState)
-  const idx = draftState.currentSexpAtomIndx
+  const atom = currentSexp(draftState)
+  const idx = draftState.currentSexpCursorIdx
   if (atom && idx !== null) {
     list[idx] = new Automerge.Text(bufferMapper(atom.join('')))
   }
@@ -60,7 +62,7 @@ const copyCurrentSexpAtomToClipboard: DraftSyncRootMutator = (
   _action
 ): void => {
   let copied = false
-  const atom = currentSexpAtom(draftState)
+  const atom = currentSexp(draftState)
   if (atom) copied = copy(atom.join(''))
   if (!copied) {
     console.error('Could not copy to clipboard.')
@@ -69,7 +71,7 @@ const copyCurrentSexpAtomToClipboard: DraftSyncRootMutator = (
 
 export const userlandKapps: UserlandKapp[] = [
   ...printableAsciiChars,
-  ...sexpListKapps,
+  ...sexpKapps,
   newlineChar,
   {
     type: 'UserlandKapp',

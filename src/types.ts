@@ -70,14 +70,17 @@ export type AppAction = KeyswitchUp | LoadSyncRootFromBrowserGit
 // type TextTreeItem = Automerge.Text | TextTree
 export type SexpList = any[]
 export type SexpAtom = Automerge.Text
-export type SexpItem = SexpList | SexpAtom
+export type Sexp = SexpList | SexpAtom
 
 export interface AppSyncRoot {
   kappIdv0Log: string[]
   currentBuffer: string
-  sexp: SexpList
+  sexp: SexpList // the root userland sexp
   currentSexpListPath: number[] // stack of int list indices: empty means root
-  currentSexpAtomIndx: number | null // null for none selected in current list
+  // zoom cursor boundary index. 0 for empty list, list.length for last item.
+  // insertion happens at the cursor position. kapps operate on list index
+  // cursor - 1.
+  currentSexpCursorIdx: number
 }
 
 export interface AppTempRoot {
