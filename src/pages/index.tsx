@@ -6,7 +6,6 @@ import { fold, none, Option, toNullable } from 'fp-ts/es6/Option'
 import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
-import { stringClamper } from '../kitchensink/purefns'
 import {
   appReducer,
   currentSexpAtom,

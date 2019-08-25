@@ -70,6 +70,7 @@ export type AppAction = KeyswitchUp | LoadSyncRootFromBrowserGit
 // type TextTreeItem = Automerge.Text | TextTree
 export type SexpList = any[]
 export type SexpAtom = Automerge.Text
+export type SexpItem = SexpList | SexpAtom
 
 export interface AppSyncRoot {
   kappIdv0Log: string[]

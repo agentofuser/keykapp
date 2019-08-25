@@ -20,6 +20,7 @@ import {
   UserlandKapp,
 } from '../types'
 import { newlineChar, printableAsciiChars } from './literals'
+import { sexpListKapps } from './SexpList'
 
 const mapLastChar = (
   charMapper: (char: string) => string
@@ -68,6 +69,7 @@ const copyCurrentSexpAtomToClipboard: DraftSyncRootMutator = (
 
 export const userlandKapps: UserlandKapp[] = [
   ...printableAsciiChars,
+  ...sexpListKapps,
   newlineChar,
   {
     type: 'UserlandKapp',
