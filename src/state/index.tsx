@@ -95,7 +95,6 @@ export function makeInitialAppState(): AppState {
 export function makeInitialSyncRoot(): AppSyncRoot {
   return Automerge.from({
     kappIdv0Log: [],
-    currentBuffer: 'deprecated',
     sexp: [new Automerge.Text(placeholderText)],
     sexpMetadata: {},
     sexpListZoomPath: [],

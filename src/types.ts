@@ -81,7 +81,6 @@ export interface SexpInfo {
 
 export interface AppSyncRoot {
   kappIdv0Log: string[]
-  currentBuffer: string
   sexp: SexpList // the root userland sexp
   sexpMetadata: { [key: string]: SexpInfo } // keyed by Automerge.UUID (string)
   sexpListZoomPath: number[] // stack of int list indices: empty means root
