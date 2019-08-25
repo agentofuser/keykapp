@@ -24,3 +24,9 @@ export function getStyle(el: any, styleProp: string): string {
     return el.style[camelize(styleProp)]
   }
 }
+
+export function logDev(serializable: any): void {
+  if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+    console.info(JSON.stringify(serializable, null, 2))
+  }
+}

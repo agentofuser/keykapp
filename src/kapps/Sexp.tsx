@@ -20,7 +20,6 @@ function zoomNext(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
     draftSyncRoot.sexpZoomCursorIdx = zoomCursorIdx + 1
     setFocusCursorIdx(draftSyncRoot, list, draftSyncRoot.sexpZoomCursorIdx)
   }
-  console.log(JSON.stringify(draftSyncRoot, null, 2))
 }
 
 function zoomPrev(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
@@ -31,7 +30,6 @@ function zoomPrev(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
     draftSyncRoot.sexpZoomCursorIdx = zoomCursorIdx - 1
     setFocusCursorIdx(draftSyncRoot, list, draftSyncRoot.sexpZoomCursorIdx)
   }
-  console.log(JSON.stringify(draftSyncRoot, null, 2))
 }
 
 export const sexpKapps: UserlandKapp[] = [

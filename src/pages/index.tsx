@@ -7,6 +7,7 @@ import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
 import SexpComponent from '../components/Sexp'
+import { logDev } from '../kitchensink/effectfns'
 import {
   appReducer,
   currentSexp,
@@ -87,6 +88,7 @@ export default function App(): React.ReactNode {
   let display
   if (state.syncRoot) {
     const sexp = currentSexp(state.syncRoot)
+    logDev(state.syncRoot)
     display = <SexpComponent sexp={sexp} />
   } else {
     display = <SexpComponent sexp={new Automerge.Text('Loading...')} />

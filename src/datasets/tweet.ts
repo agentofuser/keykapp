@@ -26,8 +26,6 @@
 //     {} as any
 //   )
 
-// console.log(JSON.stringify({ charCounts }, null, 2))
-
 export const charCounts: { [name: string]: number } = {
   '0': 224,
   '1': 271,
@@ -288,5 +286,3 @@ export const charCounts: { [name: string]: number } = {
 // }
 
 // export const charCounts = entriesToObject(sortedCountPairs)
-
-// console.log(JSON.stringify(sortedCountPairs, null, 2))

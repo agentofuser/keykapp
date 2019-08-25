@@ -8,6 +8,7 @@ import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
 import { gitRepoDir, incrementManualWeight, nGramRange } from '../constants'
 import { findKappById } from '../kapps'
+import { logDev } from '../kitchensink/effectfns'
 import { zoomInto, zoomOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
 import {
@@ -65,7 +66,7 @@ function commitChanges(
 ): Promise<string> {
   const serializedChanges = JSON.stringify(changes, null, 2)
   const message = `${messageTitle}\n\n${serializedChanges}`
-  console.log(message)
+  logDev(message)
 
   return git.commit({
     dir: gitRepoDir,
