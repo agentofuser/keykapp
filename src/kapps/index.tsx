@@ -50,7 +50,7 @@ const mapBuffer = (
 ): void => {
   const list = currentSexpList(draftState)
   const atom = currentSexp(draftState)
-  const idx = draftState.currentSexpCursorIdx
+  const idx = draftState.sexpZoomCursorIdx
   if (atom && idx !== null) {
     list[idx] = new Automerge.Text(bufferMapper(atom.join('')))
   }

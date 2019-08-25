@@ -20,6 +20,7 @@ import {
   Sexp,
   SexpList,
   Waypoint,
+  SexpInfo,
 } from '../types'
 
 const placeholderText =
@@ -92,8 +93,9 @@ export function makeInitialSyncRoot(): AppSyncRoot {
     kappIdv0Log: [],
     currentBuffer: 'deprecated',
     sexp: [new Automerge.Text(placeholderText)],
-    currentSexpListPath: [],
-    currentSexpCursorIdx: 1,
+    sexpMetadata: {},
+    sexpListZoomPath: [],
+    sexpZoomCursorIdx: 1,
   })
 }
 
@@ -105,11 +107,14 @@ function migrateSyncRootSchema(syncRoot: AppSyncRoot): AppSyncRoot | null {
       if (doc.sexp === undefined || doc.sexp.length === 0) {
         doc.sexp = [new Automerge.Text('')]
       }
-      if (doc.currentSexpListPath === undefined) {
-        doc.currentSexpListPath = []
+      if (doc.sexpListZoomPath === undefined) {
+        doc.sexpListZoomPath = []
       }
-      if (doc.currentSexpCursorIdx === undefined) {
-        doc.currentSexpCursorIdx = 0
+      if (doc.sexpZoomCursorIdx === undefined) {
+        doc.sexpZoomCursorIdx = 1
+      }
+      if (doc.sexpMetadata === undefined) {
+        doc.sexpMetadata = {}
       }
     }
   )
@@ -182,7 +187,7 @@ export function currentWaypoint(state: AppState): Option<Waypoint> {
 
 export function currentSexpList(syncRoot: AppSyncRoot): SexpList {
   let selectedList = syncRoot.sexp
-  for (let index of syncRoot.currentSexpListPath) {
+  for (let index of syncRoot.sexpListZoomPath) {
     selectedList = selectedList[index]
   }
   return selectedList
@@ -190,9 +195,36 @@ export function currentSexpList(syncRoot: AppSyncRoot): SexpList {
 
 export function currentSexp(syncRoot: AppSyncRoot): Sexp {
   const list = currentSexpList(syncRoot)
-  const cursorIdx = syncRoot.currentSexpCursorIdx
+  const cursorIdx = syncRoot.sexpZoomCursorIdx
   const sexp = cursorIdx > 0 ? list[cursorIdx - 1] : list
   return sexp
+}
+
+function currentSexpAndInfo(
+  syncRoot: AppSyncRoot
+): { sexp: Sexp; info: SexpInfo } {
+  const sexp = currentSexp(syncRoot)
+  const info = syncRoot.sexpMetadata[Automerge.getObjectId(sexp)]
+  return { sexp, info }
+}
+
+export function getCurrentFocusCursorIdx(syncRoot: AppSyncRoot): number {
+  const { info, sexp } = currentSexpAndInfo(syncRoot)
+  const cursorIdx = info ? info.focusCursorIdx : sexp.length
+  return cursorIdx
+}
+
+export function setFocusCursorIdx(
+  syncRoot: AppSyncRoot,
+  sexp: Sexp,
+  focusCursorIdx: number
+): void {
+  const info = syncRoot.sexpMetadata[Automerge.getObjectId(sexp)]
+  if (info) {
+    info.focusCursorIdx = focusCursorIdx
+  } else {
+    syncRoot.sexpMetadata[Automerge.getObjectId(sexp)] = { focusCursorIdx }
+  }
 }
 
 export function logKappExecution(

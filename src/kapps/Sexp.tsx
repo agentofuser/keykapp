@@ -1,30 +1,34 @@
 import * as Automerge from 'automerge'
 import { idv0UserlandPrefix } from '../constants'
-import { currentSexpList } from '../state'
+import { currentSexpList, setFocusCursorIdx } from '../state'
 import { AppAction, AppSyncRoot, Sexp, UserlandKapp } from '../types'
 
 function textNew(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   const list: Automerge.List<Sexp> = currentSexpList(draftSyncRoot)
-  let cursorIdx = draftSyncRoot.currentSexpCursorIdx
+  let cursorIdx = draftSyncRoot.sexpZoomCursorIdx
 
   if (list.insertAt) list.insertAt(cursorIdx, new Automerge.Text(''))
-  draftSyncRoot.currentSexpCursorIdx = cursorIdx + 1
+  draftSyncRoot.sexpZoomCursorIdx = cursorIdx + 1
+  setFocusCursorIdx(draftSyncRoot, list, draftSyncRoot.sexpZoomCursorIdx)
 }
 
 function zoomNext(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   const list = currentSexpList(draftSyncRoot)
-  let cursorIdx = draftSyncRoot.currentSexpCursorIdx
+  let zoomCursorIdx = draftSyncRoot.sexpZoomCursorIdx
 
-  if (cursorIdx < list.length) {
-    draftSyncRoot.currentSexpCursorIdx = cursorIdx + 1
+  if (zoomCursorIdx < list.length) {
+    draftSyncRoot.sexpZoomCursorIdx = zoomCursorIdx + 1
+    setFocusCursorIdx(draftSyncRoot, list, draftSyncRoot.sexpZoomCursorIdx)
   }
 }
 
 function zoomPrev(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
-  let cursorIdx = draftSyncRoot.currentSexpCursorIdx
+  const list = currentSexpList(draftSyncRoot)
+  let zoomCursorIdx = draftSyncRoot.sexpZoomCursorIdx
 
-  if (cursorIdx > 1) {
-    draftSyncRoot.currentSexpCursorIdx = cursorIdx - 1
+  if (zoomCursorIdx > 1) {
+    draftSyncRoot.sexpZoomCursorIdx = zoomCursorIdx - 1
+    setFocusCursorIdx(draftSyncRoot, list, draftSyncRoot.sexpZoomCursorIdx)
   }
 }
 
