@@ -88,9 +88,12 @@ export default function App(): React.ReactNode {
   if (state.syncRoot) {
     const sexp = currentSexp(state.syncRoot)
     logDev(state.syncRoot)
-    display = <SexpComponent sexp={sexp} />
+    logDev(sexp)
+    display = <SexpComponent state={state} sexp={sexp} />
   } else {
-    display = <SexpComponent sexp={new Automerge.Text('Loading...')} />
+    display = (
+      <SexpComponent state={state} sexp={new Automerge.Text('Loading...')} />
+    )
   }
 
   return (

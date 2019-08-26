@@ -196,6 +196,21 @@ export function currentSexpList(syncRoot: AppSyncRoot): SexpList {
   return selectedList
 }
 
+export function sexpZoomLevel(syncRoot: AppSyncRoot): 'atom' | 'list' {
+  let zoomCursorIdx = syncRoot.sexpZoomCursorIdx
+  return zoomCursorIdx > 0 ? 'atom' : 'list'
+}
+
+export function parentSexpList(syncRoot: AppSyncRoot): SexpList | null {
+  let secondToLastList = null
+  let lastList = syncRoot.sexp
+  for (let index of syncRoot.sexpListZoomPath) {
+    if (index > 0) secondToLastList = lastList
+    lastList = lastList[index]
+  }
+  return sexpZoomLevel(syncRoot) === 'atom' ? lastList : secondToLastList
+}
+
 export function currentSexp(syncRoot: AppSyncRoot): Sexp {
   const list = currentSexpList(syncRoot)
   const cursorIdx = syncRoot.sexpZoomCursorIdx
@@ -226,6 +241,12 @@ export function getCurrentFocusCursorIdx(syncRoot: AppSyncRoot): number {
   const { info, sexp } = currentSexpAndInfo(syncRoot)
   const cursorIdx = info ? info.focusCursorIdx : sexp.length
   return cursorIdx
+}
+
+export function isSexpItemFocused(syncRoot: AppSyncRoot, sexp: Sexp): boolean {
+  const list: Automerge.List<any> = currentSexp(syncRoot)
+  const focusCursorIdx = getCurrentFocusCursorIdx(syncRoot)
+  return list.indexOf(sexp) === focusCursorIdx - 1
 }
 
 export function setFocusCursorIdx(

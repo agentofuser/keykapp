@@ -2,6 +2,7 @@ import { Paper, Theme } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import * as Automerge from 'automerge'
 import * as React from 'react'
+import { AppState } from 'src/types'
 
 const useStyles = makeStyles((theme: Theme) => ({
   outputBuffer: {
@@ -41,6 +42,7 @@ function DirectedCharCursor({ char }: { char: string }): React.ReactElement {
 }
 
 export interface SexpTextAtomComponentProps {
+  state: AppState
   text: Automerge.Text
 }
 

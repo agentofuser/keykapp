@@ -68,7 +68,7 @@ export type AppAction = KeyswitchUp | LoadSyncRootFromBrowserGit
 // TODO figure out how to define a recursive type like
 // type TextTree = Automerge.List<TextTreeItem>
 // type TextTreeItem = Automerge.Text | TextTree
-export type SexpList = any[]
+export type SexpList = Automerge.List<any>
 export type SexpTextAtom = Automerge.Text
 export type SexpAtom = SexpTextAtom
 export type Sexp = SexpList | SexpAtom
