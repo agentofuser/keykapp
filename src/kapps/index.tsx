@@ -9,7 +9,11 @@ import {
 } from '../constants'
 import murmurhash from '../kitchensink/murmurhash'
 import { zoomOutToParent, zoomOutToRoot } from '../navigation'
-import { lastListInZoomPath, zoomedText } from '../state'
+import {
+  lastListInZoomPath,
+  zoomedText,
+  getCurrentFocusCursorIdx,
+} from '../state'
 import {
   AppAction,
   AppState,
@@ -22,7 +26,7 @@ import {
 import { newlineChar, printableAsciiChars } from './literals'
 import { sexpKapps } from './Sexp'
 
-const mapLastChar = (
+const mapFocusedChar = (
   charMapper: (char: string) => string
 ): DraftSyncRootMutator => (
   draftState: AppSyncRoot,
@@ -30,15 +34,18 @@ const mapLastChar = (
 ): void => {
   const text = zoomedText(draftState)
   if (!text) return
+  const focusedCursorIdx = getCurrentFocusCursorIdx(draftState)
+  const charIdx = focusedCursorIdx - 1
 
-  if (text && text.length > 0) {
-    const lastIdx = text.length - 1
-    const lastChar = text.get(lastIdx)
+  if (text && focusedCursorIdx > 0 && charIdx < text.length) {
+    const focusedChar = text.get(charIdx)
 
-    if (text.deleteAt) text.deleteAt(lastIdx)
-    const replacementChar = charMapper(lastChar)
-    if (text.insertAt && replacementChar)
-      text.insertAt(lastIdx, replacementChar)
+    if (text.deleteAt) {
+      text.deleteAt(charIdx)
+      const replacementChar = charMapper(focusedChar)
+      if (text.insertAt && replacementChar)
+        text.insertAt(charIdx, replacementChar)
+    }
   }
 }
 
@@ -78,21 +85,21 @@ export const userlandKapps: UserlandKapp[] = [
     idv0: `${idv0UserlandPrefix}char/upcase`,
     shortAsciiName: ':upcase',
     legend: ':upcase',
-    instruction: mapLastChar((char: string): string => char.toUpperCase()),
+    instruction: mapFocusedChar((char: string): string => char.toUpperCase()),
   },
   {
     type: 'UserlandKapp',
     idv0: `${idv0UserlandPrefix}char/downcase`,
     shortAsciiName: ':downcase',
     legend: ':downcase',
-    instruction: mapLastChar((char: string): string => char.toLowerCase()),
+    instruction: mapFocusedChar((char: string): string => char.toLowerCase()),
   },
   {
     type: 'UserlandKapp',
     idv0: `${idv0UserlandPrefix}char/delete`,
     shortAsciiName: ':backspace',
     legend: ':backspace',
-    instruction: mapLastChar((_char: string): string => ''),
+    instruction: mapFocusedChar((_char: string): string => ''),
   },
   {
     type: 'UserlandKapp',

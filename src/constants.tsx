@@ -36,10 +36,14 @@ const focus = (name: string): void => {
 }
 focus('next')
 focus('prev')
+focus('first')
+focus('last')
 const sexp = (name: string): void => {
   manualWeights[`${idv0UserlandPrefix}sexp/${name}`] = 200
 }
 sexp('delete')
+sexp('move-back')
+sexp('move-forth')
 
 export function incrementManualWeight(kappIdv0: string): void {
   switch (kappIdv0) {

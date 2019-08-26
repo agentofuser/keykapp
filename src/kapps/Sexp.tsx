@@ -7,6 +7,7 @@ import {
   setFocusCursorIdx,
   zoomedList,
   zoomLevel,
+  zoomedSexp,
 } from '../state'
 import { AppAction, AppSyncRoot, Sexp, UserlandKapp } from '../types'
 
@@ -30,32 +31,81 @@ function textNew(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   }
 }
 
-function sexpDelete(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
+function focusedDelete(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
+  const sexp = zoomedSexp(draftSyncRoot)
+  if (sexp) {
+    const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
+    const idx = focusCursorIdx - 1
+    if (sexp.deleteAt && focusCursorIdx > 0 && focusCursorIdx <= sexp.length) {
+      sexp.deleteAt(idx)
+      setFocusCursorIdx(draftSyncRoot, sexp, idx)
+    }
+  }
+}
+
+function moveBack(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   const list = zoomedList(draftSyncRoot)
   if (list) {
     const idx = getCurrentFocusCursorIdx(draftSyncRoot) - 1
-    if (list.deleteAt) {
-      list.deleteAt(idx)
-      setFocusCursorIdx(draftSyncRoot, list, idx)
+    if (idx > 0) {
+      const newIdx = idx - 1
+      const newFocusCursorIdx = newIdx + 1
+      const sexp = list[idx]
+      if (list.deleteAt && list.insertAt) {
+        list.deleteAt(idx)
+        list.insertAt(newIdx, sexp)
+        setFocusCursorIdx(draftSyncRoot, list, newFocusCursorIdx)
+      }
+    }
+  }
+}
+
+function moveForth(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
+  const list = zoomedList(draftSyncRoot)
+  if (list) {
+    const idx = getCurrentFocusCursorIdx(draftSyncRoot) - 1
+    if (idx < list.length - 1) {
+      const newIdx = idx + 1
+      const newFocusCursorIdx = newIdx + 1
+      const sexp = list[idx]
+      if (list.deleteAt && list.insertAt) {
+        list.deleteAt(idx)
+        list.insertAt(newIdx, sexp)
+        setFocusCursorIdx(draftSyncRoot, list, newFocusCursorIdx)
+      }
     }
   }
 }
 
 function focusNext(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
-  if (zoomLevel(draftSyncRoot) === 'atom') return
-  const list = lastListInZoomPath(draftSyncRoot)
+  const sexp = zoomedSexp(draftSyncRoot)
   const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
-  if (focusCursorIdx < list.length) {
-    setFocusCursorIdx(draftSyncRoot, list, focusCursorIdx + 1)
+  if (focusCursorIdx < sexp.length) {
+    setFocusCursorIdx(draftSyncRoot, sexp, focusCursorIdx + 1)
   }
 }
 
 function focusPrev(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
-  if (zoomLevel(draftSyncRoot) === 'atom') return
-  const list = lastListInZoomPath(draftSyncRoot)
+  const sexp = zoomedSexp(draftSyncRoot)
   const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
   if (focusCursorIdx > 0) {
-    setFocusCursorIdx(draftSyncRoot, list, focusCursorIdx - 1)
+    setFocusCursorIdx(draftSyncRoot, sexp, focusCursorIdx - 1)
+  }
+}
+
+function focusFirst(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
+  const sexp = zoomedSexp(draftSyncRoot)
+  const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
+  if (focusCursorIdx > 0) {
+    setFocusCursorIdx(draftSyncRoot, sexp, 1)
+  }
+}
+
+function focusLast(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
+  const sexp = zoomedSexp(draftSyncRoot)
+  const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
+  if (focusCursorIdx < sexp.length) {
+    setFocusCursorIdx(draftSyncRoot, sexp, sexp.length)
   }
 }
 
@@ -119,7 +169,21 @@ export const sexpKapps: UserlandKapp[] = [
     idv0: `${idv0UserlandPrefix}sexp/delete`,
     shortAsciiName: ':delete',
     legend: '🗑:delete',
-    instruction: sexpDelete,
+    instruction: focusedDelete,
+  },
+  {
+    type: 'UserlandKapp',
+    idv0: `${idv0UserlandPrefix}sexp/move-back`,
+    shortAsciiName: ':move-back',
+    legend: '🌤:move-back',
+    instruction: moveBack,
+  },
+  {
+    type: 'UserlandKapp',
+    idv0: `${idv0UserlandPrefix}sexp/move-forth`,
+    shortAsciiName: ':move-forth',
+    legend: '☀️:move-forth',
+    instruction: moveForth,
   },
   {
     type: 'UserlandKapp',
@@ -162,5 +226,19 @@ export const sexpKapps: UserlandKapp[] = [
     shortAsciiName: ':focus-prev',
     legend: '⬆️:focus-prev',
     instruction: focusPrev,
+  },
+  {
+    type: 'UserlandKapp',
+    idv0: `${idv0UserlandPrefix}focus/first`,
+    shortAsciiName: ':focus-first',
+    legend: '⬆️:focus-first',
+    instruction: focusFirst,
+  },
+  {
+    type: 'UserlandKapp',
+    idv0: `${idv0UserlandPrefix}focus/last`,
+    shortAsciiName: ':focus-last',
+    legend: '⬇️:focus-last',
+    instruction: focusLast,
   },
 ]

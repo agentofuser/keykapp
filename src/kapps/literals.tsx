@@ -1,6 +1,10 @@
 import { map } from 'fp-ts/es6/Array'
 import { asciiIdv0Path } from '../constants'
-import { zoomedText } from '../state'
+import {
+  zoomedText,
+  getCurrentFocusCursorIdx,
+  setFocusCursorIdx,
+} from '../state'
 import {
   AppAction,
   AppSyncRoot,
@@ -9,15 +13,15 @@ import {
 } from '../types'
 
 const pushLiteral = (literal: string): DraftSyncRootMutator => (
-  draftState: AppSyncRoot,
+  draftSyncRoot: AppSyncRoot,
   _action: AppAction
 ): void => {
-  const text = zoomedText(draftState)
-  if (!text) return
+  const text = zoomedText(draftSyncRoot)
+  if (!(text && text.insertAt)) return
 
-  if (text && text.insertAt) {
-    text.insertAt(text.length, literal)
-  }
+  const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
+  text.insertAt(focusCursorIdx, literal)
+  setFocusCursorIdx(draftSyncRoot, text, focusCursorIdx + 1)
 }
 
 // This list doesn't include tab and newline. These are the character codes

@@ -2,7 +2,9 @@ import { Paper, Theme } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import * as Automerge from 'automerge'
 import * as React from 'react'
-import { AppState } from 'src/types'
+import { AppState } from '../types'
+import { getCurrentFocusCursorIdx } from '../state'
+import { splitAt } from 'fp-ts/es6/Array'
 
 const useStyles = makeStyles((theme: Theme) => ({
   outputBuffer: {
@@ -45,20 +47,24 @@ export interface SexpTextAtomComponentProps {
 }
 
 export default function SexpTextAtomComponent({
+  state,
   text,
 }: SexpTextAtomComponentProps): React.ReactElement {
   const classes = useStyles()
 
-  const textString = text.join('')
-  const unselectedText = textString.slice(0, -1)
-  const lastChar = textString.slice(-1)
+  if (!state.syncRoot) return <p>Loading...</p>
+
+  const focusCursorIdx = getCurrentFocusCursorIdx(state.syncRoot)
+  const [beforeCursor, afterCursor] = splitAt(focusCursorIdx)(text)
+
+  const lastChar = text.join('').slice(-1)
 
   const textWithCursor = ((): React.ReactNode => {
     switch (lastChar) {
       case '\n':
         return (
           <React.Fragment>
-            {textString}
+            {text.join('')}
             <VerticalCharCursor />
           </React.Fragment>
         )
@@ -67,8 +73,9 @@ export default function SexpTextAtomComponent({
       default:
         return (
           <React.Fragment>
-            {unselectedText}
-            <DirectedCharCursor char={lastChar} />
+            {beforeCursor.slice(0, -1).join('')}
+            <DirectedCharCursor char={beforeCursor.join('').slice(-1)} />
+            {afterCursor.join('')}
           </React.Fragment>
         )
     }
