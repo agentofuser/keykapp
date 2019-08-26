@@ -23,7 +23,6 @@ const useStyles = makeStyles({
     top: 0,
   },
   multilegendP: {
-    fontFamily: 'monospace',
     wordWrap: 'break-word',
     margin: 0,
     display: '-webkit-box',
@@ -86,7 +85,7 @@ export default function HuffmanButton({
             <p
               ref={multilegendPRef}
               className={classes.multilegendP}
-              style={{ textAlign, fontSize: 18, lineHeight: 1.5 }}
+              style={{ textAlign, fontSize: '1rem', lineHeight: 1.5 }}
             >
               <span
                 ref={offscreenSpan}

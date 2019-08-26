@@ -21,7 +21,6 @@ import { Keybinding } from '../types'
 const useStyles = makeStyles(() => ({
   container: {
     height: '100%',
-    fontFamily: 'monospace',
   },
   display: {
     height: '50%',

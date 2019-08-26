@@ -3,6 +3,9 @@ import { createMuiTheme } from '@material-ui/core/styles'
 
 // A custom theme for this app
 const theme = createMuiTheme({
+  typography: {
+    htmlFontSize: 18,
+  },
   palette: {
     primary: {
       main: '#556cd6',

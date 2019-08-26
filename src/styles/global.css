@@ -7,9 +7,14 @@ html,
 html {
   -ms-touch-action: manipulation;
   touch-action: manipulation;
+  font-size: 18px;
 }
 
 body {
   padding: 16px 0;
   height: 100%;
+}
+
+html * {
+  font-family: monospace, monospace !important;
 }
