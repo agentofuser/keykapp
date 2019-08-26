@@ -9,7 +9,7 @@ import {
 } from '../constants'
 import murmurhash from '../kitchensink/murmurhash'
 import { zoomOutToParent, zoomOutToRoot } from '../navigation'
-import { currentSexpList, currentSexpTextAtom } from '../state'
+import { lastListInZoomPath, zoomedText } from '../state'
 import {
   AppAction,
   AppState,
@@ -28,7 +28,7 @@ const mapLastChar = (
   draftState: AppSyncRoot,
   _action: AppAction
 ): void => {
-  const text = currentSexpTextAtom(draftState)
+  const text = zoomedText(draftState)
   if (!text) return
 
   if (text && text.length > 0) {
@@ -48,8 +48,8 @@ const mapBuffer = (
   draftState: AppSyncRoot,
   _action: AppAction
 ): void => {
-  const list = currentSexpList(draftState)
-  const text = currentSexpTextAtom(draftState)
+  const list = lastListInZoomPath(draftState)
+  const text = zoomedText(draftState)
   const zoomCursorIdx = draftState.sexpZoomCursorIdx
   if (text && zoomCursorIdx > 0) {
     list[zoomCursorIdx - 1] = new Automerge.Text(bufferMapper(text.join('')))
@@ -62,7 +62,7 @@ const copyCurrentSexpTextAtomToClipboard: DraftSyncRootMutator = (
   _action
 ): void => {
   let copied = false
-  const text = currentSexpTextAtom(draftState)
+  const text = zoomedText(draftState)
   if (text) copied = copy(text.join(''))
   if (!copied) {
     console.error('Could not copy to clipboard.')
@@ -104,8 +104,8 @@ export const userlandKapps: UserlandKapp[] = [
   {
     type: 'UserlandKapp',
     idv0: `${idv0UserlandPrefix}text/copy`,
-    shortAsciiName: ':copy',
-    legend: '📋:copy',
+    shortAsciiName: ':copy!',
+    legend: '📋:copy!',
     instruction: copyCurrentSexpTextAtomToClipboard,
   },
 ]

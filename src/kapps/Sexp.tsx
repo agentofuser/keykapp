@@ -1,16 +1,17 @@
 import * as Automerge from 'automerge'
 import { idv0UserlandPrefix } from '../constants'
 import {
-  currentSexpList,
   getCurrentFocusCursorIdx,
-  parentSexpList,
+  lastListInZoomPath,
+  parentList,
   setFocusCursorIdx,
-  sexpZoomLevel,
+  zoomedList,
+  zoomLevel,
 } from '../state'
 import { AppAction, AppSyncRoot, Sexp, UserlandKapp } from '../types'
 
 function textNew(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
-  const list: Automerge.List<Sexp> = currentSexpList(draftSyncRoot)
+  const list: Automerge.List<Sexp> = lastListInZoomPath(draftSyncRoot)
   let zoomCursorIdx = draftSyncRoot.sexpZoomCursorIdx
   let zoomLevel = zoomCursorIdx > 0 ? 'atom' : 'list'
 
@@ -29,9 +30,20 @@ function textNew(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   }
 }
 
+function sexpDelete(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
+  const list = zoomedList(draftSyncRoot)
+  if (list) {
+    const idx = getCurrentFocusCursorIdx(draftSyncRoot) - 1
+    if (list.deleteAt) {
+      list.deleteAt(idx)
+      setFocusCursorIdx(draftSyncRoot, list, idx)
+    }
+  }
+}
+
 function focusNext(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
-  if (sexpZoomLevel(draftSyncRoot) === 'atom') return
-  const list = currentSexpList(draftSyncRoot)
+  if (zoomLevel(draftSyncRoot) === 'atom') return
+  const list = lastListInZoomPath(draftSyncRoot)
   const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
   if (focusCursorIdx < list.length) {
     setFocusCursorIdx(draftSyncRoot, list, focusCursorIdx + 1)
@@ -39,55 +51,47 @@ function focusNext(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
 }
 
 function focusPrev(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
-  if (sexpZoomLevel(draftSyncRoot) === 'atom') return
-  const list = currentSexpList(draftSyncRoot)
+  if (zoomLevel(draftSyncRoot) === 'atom') return
+  const list = lastListInZoomPath(draftSyncRoot)
   const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
-  if (focusCursorIdx > 1) {
+  if (focusCursorIdx > 0) {
     setFocusCursorIdx(draftSyncRoot, list, focusCursorIdx - 1)
   }
 }
 
 function zoomNext(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
-  const parentList = parentSexpList(draftSyncRoot)
-  if (!parentList) return
+  const parent = parentList(draftSyncRoot)
+  if (!parent) return
 
   let zoomCursorIdx = draftSyncRoot.sexpZoomCursorIdx
 
-  if (zoomCursorIdx < parentList.length) {
+  if (zoomCursorIdx < parent.length) {
     draftSyncRoot.sexpZoomCursorIdx = zoomCursorIdx + 1
-    setFocusCursorIdx(
-      draftSyncRoot,
-      parentList,
-      draftSyncRoot.sexpZoomCursorIdx
-    )
+    setFocusCursorIdx(draftSyncRoot, parent, draftSyncRoot.sexpZoomCursorIdx)
   }
 }
 
 function zoomPrev(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
-  const parentList = parentSexpList(draftSyncRoot)
-  if (!parentList) return
+  const parent = parentList(draftSyncRoot)
+  if (!parent) return
 
   let zoomCursorIdx = draftSyncRoot.sexpZoomCursorIdx
 
   if (zoomCursorIdx > 1) {
     draftSyncRoot.sexpZoomCursorIdx = zoomCursorIdx - 1
-    setFocusCursorIdx(
-      draftSyncRoot,
-      parentList,
-      draftSyncRoot.sexpZoomCursorIdx
-    )
+    setFocusCursorIdx(draftSyncRoot, parent, draftSyncRoot.sexpZoomCursorIdx)
   }
 }
 
 function zoomIn(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
-  if (sexpZoomLevel(draftSyncRoot) === 'atom') return
+  if (zoomLevel(draftSyncRoot) === 'atom') return
 
-  const parentList = parentSexpList(draftSyncRoot)
+  const parent = parentList(draftSyncRoot)
   const currentListIdx = draftSyncRoot.sexpZoomCursorIdx - 1
   const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
 
   if (focusCursorIdx > 0) {
-    if (parentList) draftSyncRoot.sexpListZoomPath.push(currentListIdx)
+    if (parent) draftSyncRoot.sexpListZoomPath.push(currentListIdx)
     draftSyncRoot.sexpZoomCursorIdx = focusCursorIdx
   }
 }
@@ -109,6 +113,13 @@ export const sexpKapps: UserlandKapp[] = [
     shortAsciiName: ':text-new',
     legend: '📝:text-new',
     instruction: textNew,
+  },
+  {
+    type: 'UserlandKapp',
+    idv0: `${idv0UserlandPrefix}sexp/delete`,
+    shortAsciiName: ':delete',
+    legend: '🗑:delete',
+    instruction: sexpDelete,
   },
   {
     type: 'UserlandKapp',

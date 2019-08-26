@@ -34,13 +34,7 @@ export function KappLegend({ kapp }: KappLegendProps): React.ReactElement {
         className={title.length === 1 ? classes.char : classes.string}
         style={{ backgroundColor: kappColor(kapp) }}
       >
-        <Typography
-          ref={titleRef}
-          align="center"
-          style={{
-            fontSize: '1rem',
-          }}
-        >
+        <Typography ref={titleRef} align="center">
           {title}
         </Typography>
       </Paper>

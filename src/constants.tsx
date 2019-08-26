@@ -22,17 +22,33 @@ export const redoIdv0 = `${idv0SystemPrefix}syncRoot/redo`
 
 export const manualWeights: { [name: string]: number } = {}
 manualWeights[`${idv0UserlandPrefix}text/copy`] = 40
-manualWeights[undoIdv0] = 100
-manualWeights[redoIdv0] = 100
+manualWeights[undoIdv0] = 150
+manualWeights[redoIdv0] = 150
+
+const zoom = (name: string): void => {
+  manualWeights[`${idv0UserlandPrefix}zoom/${name}`] = 200
+}
+zoom('in')
+zoom('out')
+
+const focus = (name: string): void => {
+  manualWeights[`${idv0UserlandPrefix}focus/${name}`] = 200
+}
+focus('next')
+focus('prev')
+const sexp = (name: string): void => {
+  manualWeights[`${idv0UserlandPrefix}sexp/${name}`] = 200
+}
+sexp('delete')
 
 export function incrementManualWeight(kappIdv0: string): void {
   switch (kappIdv0) {
     case undoIdv0:
-      manualWeights[undoIdv0] = manualWeights[undoIdv0] + 10
+      manualWeights[undoIdv0] = manualWeights[undoIdv0] + 100
 
       break
     case redoIdv0:
-      manualWeights[redoIdv0] = manualWeights[redoIdv0] + 10
+      manualWeights[redoIdv0] = manualWeights[redoIdv0] + 100
       break
     default:
       break

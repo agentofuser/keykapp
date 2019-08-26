@@ -188,7 +188,7 @@ export function currentWaypoint(state: AppState): Option<Waypoint> {
   return waypointOption
 }
 
-export function currentSexpList(syncRoot: AppSyncRoot): SexpList {
+export function lastListInZoomPath(syncRoot: AppSyncRoot): SexpList {
   let selectedList = syncRoot.sexp
   for (let index of syncRoot.sexpListZoomPath) {
     selectedList = selectedList[index]
@@ -196,32 +196,62 @@ export function currentSexpList(syncRoot: AppSyncRoot): SexpList {
   return selectedList
 }
 
-export function sexpZoomLevel(syncRoot: AppSyncRoot): 'atom' | 'list' {
+export function zoomLevel(syncRoot: AppSyncRoot): 'atom' | 'list' {
   let zoomCursorIdx = syncRoot.sexpZoomCursorIdx
   return zoomCursorIdx > 0 ? 'atom' : 'list'
 }
 
-export function parentSexpList(syncRoot: AppSyncRoot): SexpList | null {
+export function parentList(syncRoot: AppSyncRoot): SexpList | null {
   let secondToLastList = null
   let lastList = syncRoot.sexp
   for (let index of syncRoot.sexpListZoomPath) {
     if (index > 0) secondToLastList = lastList
     lastList = lastList[index]
   }
-  return sexpZoomLevel(syncRoot) === 'atom' ? lastList : secondToLastList
+  return zoomLevel(syncRoot) === 'atom' ? lastList : secondToLastList
 }
 
-export function currentSexp(syncRoot: AppSyncRoot): Sexp {
-  const list = currentSexpList(syncRoot)
+export function zoomedSexp(syncRoot: AppSyncRoot): Sexp {
+  const list = lastListInZoomPath(syncRoot)
   const cursorIdx = syncRoot.sexpZoomCursorIdx
   const sexp = cursorIdx > 0 ? list[cursorIdx - 1] : list
   return sexp
 }
 
-export function currentSexpTextAtom(
+function zoomedSexpAndInfo(
   syncRoot: AppSyncRoot
-): Automerge.Text | null {
-  const sexp = currentSexp(syncRoot)
+): { sexp: Sexp; info: SexpInfo } {
+  const sexp = zoomedSexp(syncRoot)
+  const info = syncRoot.sexpMetadata[Automerge.getObjectId(sexp)]
+  return { sexp, info }
+}
+
+export function zoomedList(syncRoot: AppSyncRoot): SexpList | null {
+  if (zoomLevel(syncRoot) === 'list') {
+    return zoomedSexp(syncRoot)
+  } else {
+    return null
+  }
+}
+
+export function getCurrentFocusCursorIdx(syncRoot: AppSyncRoot): number {
+  const { info, sexp } = zoomedSexpAndInfo(syncRoot)
+  const cursorIdx = info ? info.focusCursorIdx : sexp.length
+  return cursorIdx
+}
+
+export function focusedSexp(syncRoot: AppSyncRoot): Sexp | null {
+  const list = zoomedList(syncRoot)
+  if (list) {
+    const idx = getCurrentFocusCursorIdx(syncRoot) - 1
+    return list[idx]
+  } else {
+    return null
+  }
+}
+
+export function zoomedText(syncRoot: AppSyncRoot): Automerge.Text | null {
+  const sexp = zoomedSexp(syncRoot)
   if (sexp instanceof Automerge.Text) {
     return sexp
   } else {
@@ -229,22 +259,8 @@ export function currentSexpTextAtom(
   }
 }
 
-function currentSexpAndInfo(
-  syncRoot: AppSyncRoot
-): { sexp: Sexp; info: SexpInfo } {
-  const sexp = currentSexp(syncRoot)
-  const info = syncRoot.sexpMetadata[Automerge.getObjectId(sexp)]
-  return { sexp, info }
-}
-
-export function getCurrentFocusCursorIdx(syncRoot: AppSyncRoot): number {
-  const { info, sexp } = currentSexpAndInfo(syncRoot)
-  const cursorIdx = info ? info.focusCursorIdx : sexp.length
-  return cursorIdx
-}
-
 export function isSexpItemFocused(syncRoot: AppSyncRoot, sexp: Sexp): boolean {
-  const list: Automerge.List<any> = currentSexp(syncRoot)
+  const list: Automerge.List<any> = zoomedSexp(syncRoot)
   const focusCursorIdx = getCurrentFocusCursorIdx(syncRoot)
   return list.indexOf(sexp) === focusCursorIdx - 1
 }

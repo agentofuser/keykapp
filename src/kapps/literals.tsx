@@ -1,6 +1,6 @@
 import { map } from 'fp-ts/es6/Array'
 import { asciiIdv0Path } from '../constants'
-import { currentSexpTextAtom } from '../state'
+import { zoomedText } from '../state'
 import {
   AppAction,
   AppSyncRoot,
@@ -12,7 +12,7 @@ const pushLiteral = (literal: string): DraftSyncRootMutator => (
   draftState: AppSyncRoot,
   _action: AppAction
 ): void => {
-  const text = currentSexpTextAtom(draftState)
+  const text = zoomedText(draftState)
   if (!text) return
 
   if (text && text.insertAt) {

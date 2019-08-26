@@ -10,7 +10,7 @@ import SexpComponent from '../components/Sexp'
 import { logDev } from '../kitchensink/effectfns'
 import {
   appReducer,
-  currentSexp,
+  zoomedSexp,
   currentWaypoint,
   loadSyncRootFromBrowserGit,
   makeInitialAppState,
@@ -86,7 +86,7 @@ export default function App(): React.ReactNode {
 
   let display
   if (state.syncRoot) {
-    const sexp = currentSexp(state.syncRoot)
+    const sexp = zoomedSexp(state.syncRoot)
     logDev(state.syncRoot)
     logDev(sexp)
     display = <SexpComponent state={state} sexp={sexp} />

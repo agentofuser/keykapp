@@ -13,8 +13,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   outputBufferPre: {
     wordWrap: 'break-word',
     whiteSpace: 'pre-wrap',
-    fontSize: '1rem',
-    lineHeight: 1.75,
   },
 }))
 
