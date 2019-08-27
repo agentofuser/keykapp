@@ -9,7 +9,7 @@ import {
 import { getObjectId, Text } from 'automerge'
 import * as React from 'react'
 import { stringClamper } from '../kitchensink/purefns'
-import { isSexpItemFocused } from '../state'
+import { isSexpItemFocused, getCurrentFocusCursorIdx } from '../state'
 import { AppState, Sexp, SexpList } from '../types'
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -21,6 +21,12 @@ const useStyles = makeStyles((theme: Theme) => ({
   focused: {
     border: '1px solid fuchsia',
     borderTop: 'none',
+  },
+  zerothFocus: {
+    border: '1px solid fuchsia',
+    borderLeft: 'none',
+    borderBottom: 'none',
+    borderRight: 'none',
   },
 }))
 
@@ -87,9 +93,15 @@ export default function SexpListComponent({
       <SexpItem state={state} sexp={sexp} key={getObjectId(sexp)} />
     )
   )
+
+  const className =
+    state.syncRoot && getCurrentFocusCursorIdx(state.syncRoot) === 0
+      ? classes.zerothFocus
+      : ''
+
   return (
     <Paper className={classes.surface}>
-      <List>{listItems}</List>
+      <List className={className}>{listItems}</List>
     </Paper>
   )
 }
