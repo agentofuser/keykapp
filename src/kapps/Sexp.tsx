@@ -1,14 +1,12 @@
 import * as Automerge from 'automerge'
 import { idv0UserlandPrefix } from '../constants'
 import {
+  focusedSexp,
   getCurrentFocusCursorIdx,
   lastListInZoomPath,
-  parentList,
   setFocusCursorIdx,
   zoomedList,
-  zoomLevel,
   zoomedSexp,
-  focusedSexp,
 } from '../state'
 import { AppAction, AppSyncRoot, Sexp, UserlandKapp } from '../types'
 
@@ -121,30 +119,6 @@ function focusLast(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   }
 }
 
-function zoomNext(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
-  const parent = parentList(draftSyncRoot)
-  if (!parent) return
-
-  let zoomCursorIdx = draftSyncRoot.sexpZoomCursorIdx
-
-  if (zoomCursorIdx < parent.length) {
-    draftSyncRoot.sexpZoomCursorIdx = zoomCursorIdx + 1
-    setFocusCursorIdx(draftSyncRoot, parent, draftSyncRoot.sexpZoomCursorIdx)
-  }
-}
-
-function zoomPrev(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
-  const parent = parentList(draftSyncRoot)
-  if (!parent) return
-
-  let zoomCursorIdx = draftSyncRoot.sexpZoomCursorIdx
-
-  if (zoomCursorIdx > 1) {
-    draftSyncRoot.sexpZoomCursorIdx = zoomCursorIdx - 1
-    setFocusCursorIdx(draftSyncRoot, parent, draftSyncRoot.sexpZoomCursorIdx)
-  }
-}
-
 function zoomIn(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   const sexp = focusedSexp(draftSyncRoot)
   if (sexp) {
@@ -168,7 +142,7 @@ function zoomOut(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   }
 }
 
-export const sexpKapps: UserlandKapp[] = [
+export const zoomedListOnlyKapps: UserlandKapp[] = [
   {
     type: 'UserlandKapp',
     idv0: `${idv0UserlandPrefix}text/new`,
@@ -182,13 +156,6 @@ export const sexpKapps: UserlandKapp[] = [
     shortAsciiName: ':list-new',
     legend: '📃:list-new',
     instruction: listNew,
-  },
-  {
-    type: 'UserlandKapp',
-    idv0: `${idv0UserlandPrefix}sexp/delete`,
-    shortAsciiName: ':delete',
-    legend: '🗑:delete',
-    instruction: focusedDelete,
   },
   {
     type: 'UserlandKapp',
@@ -206,24 +173,20 @@ export const sexpKapps: UserlandKapp[] = [
   },
   {
     type: 'UserlandKapp',
-    idv0: `${idv0UserlandPrefix}zoom/next`,
-    shortAsciiName: ':zoom-next',
-    legend: '⬇️:zoom-next',
-    instruction: zoomNext,
-  },
-  {
-    type: 'UserlandKapp',
-    idv0: `${idv0UserlandPrefix}zoom/prev`,
-    shortAsciiName: ':zoom-prev',
-    legend: '⬆️:zoom-prev',
-    instruction: zoomPrev,
-  },
-  {
-    type: 'UserlandKapp',
     idv0: `${idv0UserlandPrefix}zoom/in`,
     shortAsciiName: ':zoom-in',
     legend: '🔬:zoom-in',
     instruction: zoomIn,
+  },
+]
+
+export const zoomedListOrTextKapps: UserlandKapp[] = [
+  {
+    type: 'UserlandKapp',
+    idv0: `${idv0UserlandPrefix}sexp/delete`,
+    shortAsciiName: ':delete',
+    legend: '🗑:delete',
+    instruction: focusedDelete,
   },
   {
     type: 'UserlandKapp',
@@ -260,4 +223,9 @@ export const sexpKapps: UserlandKapp[] = [
     legend: '⬇️:focus-last',
     instruction: focusLast,
   },
+]
+
+export const sexpKapps: UserlandKapp[] = [
+  ...zoomedListOnlyKapps,
+  ...zoomedListOrTextKapps,
 ]

@@ -7,7 +7,12 @@ import * as git from 'isomorphic-git'
 import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
 import { gitRepoDir, incrementManualWeight, nGramRange } from '../constants'
-import { findKappById } from '../kapps'
+import {
+  findKappById,
+  listModeKapps,
+  textModeKapps,
+  zoomedTextOnlyKapps,
+} from '../kapps'
 import { logDev } from '../kitchensink/effectfns'
 import { menuIn, menuOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
@@ -79,7 +84,7 @@ function commitChanges(
 }
 
 export function makeInitialAppState(): AppState {
-  const initialHuffmanRoot = newHuffmanRoot({})
+  const initialHuffmanRoot = newHuffmanRoot({ kapps: zoomedTextOnlyKapps })
 
   const syncRoot = null
 
@@ -200,6 +205,10 @@ export function lastListInZoomPath(syncRoot: AppSyncRoot): SexpList {
 export function zoomLevel(syncRoot: AppSyncRoot): 'atom' | 'list' {
   let zoomCursorIdx = syncRoot.sexpZoomCursorIdx
   return zoomCursorIdx > 0 ? 'atom' : 'list'
+}
+
+export function currentMode(syncRoot: AppSyncRoot): 'text-mode' | 'list-mode' {
+  return zoomLevel(syncRoot) === 'list' ? 'list-mode' : 'text-mode'
 }
 
 export function parentList(syncRoot: AppSyncRoot): SexpList | null {
@@ -339,7 +348,16 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
         nextState.syncRoot = action.data.syncRoot
         console.info('Calculating n-grams for kapp prediction...')
         updateSequenceFrequencies(nextState)
-        console.info('Done calculating n-grams. Keykapp is ready to use.')
+        console.info('Done calculating n-grams.')
+        console.info('Updating huffman menu tree...')
+        const mode = currentMode(nextState.syncRoot)
+        nextState.tempRoot.waypointBreadcrumbs = [
+          newHuffmanRoot({
+            state: nextState,
+            kapps: mode === 'list-mode' ? listModeKapps : textModeKapps,
+          }),
+        ]
+        console.info('Keykapp is ready to use.')
       }
       break
     case 'KeyswitchUp':
@@ -369,11 +387,14 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
           )
 
           updateTailSequenceFrequencies(nextState)
+          const mode = currentMode(nextState.syncRoot)
+
           // Update huffman tree based on kapp's updated weight calculated
           // from the kappLog
           nextState.tempRoot.waypointBreadcrumbs = [
             newHuffmanRoot({
               state: nextState,
+              kapps: mode === 'list-mode' ? listModeKapps : textModeKapps,
             }),
           ]
 

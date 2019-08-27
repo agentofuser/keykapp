@@ -90,6 +90,7 @@ export interface AppSyncRoot {
   sexpZoomCursorIdx: number
 }
 
+// a menu is a non-leaf waypoint
 export type Menu = Waypoint
 
 export interface AppTempRoot {

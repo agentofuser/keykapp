@@ -9,11 +9,7 @@ import {
 } from '../constants'
 import murmurhash from '../kitchensink/murmurhash'
 import { menuOut, menuOutToRoot } from '../navigation'
-import {
-  lastListInZoomPath,
-  zoomedText,
-  getCurrentFocusCursorIdx,
-} from '../state'
+import { getCurrentFocusCursorIdx, zoomedText } from '../state'
 import {
   AppAction,
   AppState,
@@ -24,7 +20,7 @@ import {
   UserlandKapp,
 } from '../types'
 import { newlineChar, printableAsciiChars } from './literals'
-import { sexpKapps } from './Sexp'
+import { zoomedListOnlyKapps, zoomedListOrTextKapps } from './Sexp'
 
 const mapFocusedChar = (
   charMapper: (char: string) => string
@@ -49,20 +45,6 @@ const mapFocusedChar = (
   }
 }
 
-const mapBuffer = (
-  bufferMapper: (buffer: string) => string
-): DraftSyncRootMutator => (
-  draftState: AppSyncRoot,
-  _action: AppAction
-): void => {
-  const list = lastListInZoomPath(draftState)
-  const text = zoomedText(draftState)
-  const zoomCursorIdx = draftState.sexpZoomCursorIdx
-  if (text && zoomCursorIdx > 0) {
-    list[zoomCursorIdx - 1] = new Automerge.Text(bufferMapper(text.join('')))
-  }
-}
-
 // TODO this should be an async task or something to handle effects
 const copyCurrentSexpTextAtomToClipboard: DraftSyncRootMutator = (
   draftState,
@@ -76,9 +58,8 @@ const copyCurrentSexpTextAtomToClipboard: DraftSyncRootMutator = (
   }
 }
 
-export const userlandKapps: UserlandKapp[] = [
+export const zoomedTextOnlyKapps: UserlandKapp[] = [
   ...printableAsciiChars,
-  ...sexpKapps,
   newlineChar,
   {
     type: 'UserlandKapp',
@@ -96,25 +77,17 @@ export const userlandKapps: UserlandKapp[] = [
   },
   {
     type: 'UserlandKapp',
-    idv0: `${idv0UserlandPrefix}char/delete`,
-    shortAsciiName: ':backspace',
-    legend: ':backspace',
-    instruction: mapFocusedChar((_char: string): string => ''),
-  },
-  {
-    type: 'UserlandKapp',
-    idv0: `${idv0UserlandPrefix}text/clear`,
-    shortAsciiName: ':clear',
-    legend: '∅:clear',
-    instruction: mapBuffer((_buffer: string): string => ''),
-  },
-  {
-    type: 'UserlandKapp',
     idv0: `${idv0UserlandPrefix}text/copy`,
     shortAsciiName: ':copy!',
     legend: '📋:copy!',
     instruction: copyCurrentSexpTextAtomToClipboard,
   },
+]
+
+export const userlandKapps: UserlandKapp[] = [
+  ...zoomedTextOnlyKapps,
+  ...zoomedListOnlyKapps,
+  ...zoomedListOrTextKapps,
 ]
 
 export const menuUpKapp: SystemKapp = {
@@ -165,7 +138,19 @@ export const systemKapps: SystemKapp[] = [menuUpKapp, undoKapp, redoKapp]
 
 export const allKapps: Kapp[] = [...userlandKapps, ...systemKapps]
 
-export const huffmanKapps: Kapp[] = [...userlandKapps, undoKapp, redoKapp]
+export const listModeKapps: Kapp[] = [
+  ...zoomedListOnlyKapps,
+  ...zoomedListOrTextKapps,
+  undoKapp,
+  redoKapp,
+]
+
+export const textModeKapps: Kapp[] = [
+  ...zoomedTextOnlyKapps,
+  ...zoomedListOrTextKapps,
+  undoKapp,
+  redoKapp,
+]
 
 export const KappStore: Map<string, Kapp> = new Map(
   map((kapp: Kapp): [string, Kapp] => [kapp.idv0, kapp])(allKapps)
