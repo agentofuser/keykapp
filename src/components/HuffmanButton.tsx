@@ -8,12 +8,15 @@ import { getKappById, kappColor } from '../kapps'
 import { getStyle } from '../kitchensink/effectfns'
 import { parsePx } from '../kitchensink/purefns'
 import { reachableKapps } from '../navigation/huffman'
-import { AppAction, Kapp, Keybinding, LeftHand } from '../types'
+import { AppAction, Kapp, Keybinding, LeftHand, AppState } from '../types'
 import { KappLegend } from './Legend'
 
 const useStyles = makeStyles({
   button: {
     padding: '1em',
+  },
+  visited: {
+    backgroundColor: '#eee !important',
   },
   buttonActionArea: {
     height: '100%',
@@ -34,16 +37,19 @@ const useStyles = makeStyles({
 })
 
 interface ButtonProps {
+  state: AppState
   dispatch: React.Dispatch<AppAction>
   keybinding: Keybinding
 }
 
 export default function HuffmanButton({
+  state,
   dispatch,
   keybinding,
 }: ButtonProps): React.ReactElement {
   const classes = useStyles()
   const textAlign = keybinding[0].hand === LeftHand ? 'right' : 'left'
+  const visited = state.tempRoot.menuIns.includes(keybinding[1])
 
   const [multilegendDivRef, multilegendDivSize] = useDimensions()
   const multilegendPRef = React.useRef(null)
@@ -68,7 +74,10 @@ export default function HuffmanButton({
 
   const kappIdv0 = keybinding[1].value.kappIdv0
   return (
-    <Card className={classes.button}>
+    <Card
+      className={classes.button}
+      classes={{ root: visited ? classes.visited : '' }}
+    >
       <CardActionArea
         onMouseUp={(): void =>
           dispatch({

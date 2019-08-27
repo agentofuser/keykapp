@@ -8,7 +8,7 @@ import {
   undoIdv0,
 } from '../constants'
 import murmurhash from '../kitchensink/murmurhash'
-import { zoomOutToParent, zoomOutToRoot } from '../navigation'
+import { menuOut, menuOutToRoot } from '../navigation'
 import {
   lastListInZoomPath,
   zoomedText,
@@ -122,7 +122,7 @@ export const menuUpKapp: SystemKapp = {
   idv0: `${idv0SystemPrefix}menu/up`,
   shortAsciiName: ':menu-up',
   legend: '🔼:menu-up',
-  instruction: zoomOutToParent,
+  instruction: menuOut,
 }
 
 function undoInstruction(draftState: AppState, _action: AppAction): void {
@@ -132,7 +132,7 @@ function undoInstruction(draftState: AppState, _action: AppAction): void {
   if (Automerge.canUndo(syncRoot)) {
     draftState.syncRoot = Automerge.undo(syncRoot, undoIdv0)
   }
-  zoomOutToRoot(draftState, _action)
+  menuOutToRoot(draftState, _action)
 }
 
 function redoInstruction(draftState: AppState, _action: AppAction): void {
@@ -142,7 +142,7 @@ function redoInstruction(draftState: AppState, _action: AppAction): void {
   if (Automerge.canRedo(syncRoot)) {
     draftState.syncRoot = Automerge.redo(syncRoot, redoIdv0)
   }
-  zoomOutToRoot(draftState, _action)
+  menuOutToRoot(draftState, _action)
 }
 
 export const undoKapp: SystemKapp = {

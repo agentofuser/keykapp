@@ -9,7 +9,7 @@ import { Dispatch } from 'react'
 import { gitRepoDir, incrementManualWeight, nGramRange } from '../constants'
 import { findKappById } from '../kapps'
 import { logDev } from '../kitchensink/effectfns'
-import { zoomInto, zoomOutToRoot } from '../navigation'
+import { menuIn, menuOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
 import {
   AppAction,
@@ -85,6 +85,7 @@ export function makeInitialAppState(): AppState {
 
   const tempRoot: AppTempRoot = {
     waypointBreadcrumbs: [initialHuffmanRoot],
+    menuIns: [],
     sequenceFrequencies: {},
   }
 
@@ -350,7 +351,7 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
 
       // a menu is a non-leaf waypoint
       if (isMenuWaypoint) {
-        zoomInto(waypoint)(nextState, action)
+        menuIn(waypoint)(nextState, action)
       } else if (
         kappIdv0 &&
         kapp &&
@@ -376,7 +377,7 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
             }),
           ]
 
-          zoomOutToRoot(nextState, action)
+          menuOutToRoot(nextState, action)
         } else if (kapp.type === 'SystemKapp') {
           kapp.instruction(nextState, action)
         }

@@ -90,8 +90,12 @@ export interface AppSyncRoot {
   sexpZoomCursorIdx: number
 }
 
+export type Menu = Waypoint
+
 export interface AppTempRoot {
+  // TODO rename "waypoint" to "menu" at some point
   waypointBreadcrumbs: NonEmptyArray<Waypoint>
+  menuIns: Waypoint[]
   sequenceFrequencies: { [key: string]: number }
 }
 

@@ -91,6 +91,7 @@ export default function Keypad({
   const hand = map(
     (keybinding: Keybinding): React.ReactElement => (
       <HuffmanButton
+        state={state}
         dispatch={dispatch}
         keybinding={keybinding}
         key={`react-collection-key-${keybinding[0].key}`}
