@@ -1,16 +1,16 @@
-import * as React from 'react'
-import { SexpList, Sexp, AppState } from '../types'
 import {
   List,
   ListItem,
   ListItemText,
-  Paper,
   makeStyles,
+  Paper,
   Theme,
 } from '@material-ui/core'
 import { getObjectId, Text } from 'automerge'
+import * as React from 'react'
 import { stringClamper } from '../kitchensink/purefns'
 import { isSexpItemFocused } from '../state'
+import { AppState, Sexp, SexpList } from '../types'
 
 const useStyles = makeStyles((theme: Theme) => ({
   surface: {
@@ -24,8 +24,30 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }))
 
+function sexpDecoration(sexp: Sexp): string {
+  if (sexp instanceof Text) {
+    return '📝 '
+  } else {
+    return `📃 ${sexp.length}⋮ `
+  }
+}
+
 function textSummary(text: Text): string {
-  return stringClamper(44)(text.join('').split('\n')[0])
+  const str =
+    text.length > 0 ? stringClamper(44)(text.join('').split('\n')[0]) : ''
+  return str
+}
+
+function sexpSummary(sexp: Sexp): string {
+  if (sexp instanceof Text) {
+    return textSummary(sexp)
+  } else {
+    if (sexp.length === 0) {
+      return ''
+    } else {
+      return sexpSummary(sexp[0])
+    }
+  }
 }
 
 function SexpItem({
@@ -36,14 +58,8 @@ function SexpItem({
   sexp: Sexp
 }): React.ReactElement {
   const classes = useStyles()
-  let primaryText
-  if (sexp instanceof Text) {
-    primaryText = textSummary(sexp)
-  } else if (sexp instanceof Array) {
-    primaryText = `List with ${sexp.length} items`
-  } else {
-    primaryText = 'ERROR: Unknown sexp type'
-  }
+
+  const primaryText = sexpDecoration(sexp) + sexpSummary(sexp)
 
   const className =
     state.syncRoot && isSexpItemFocused(state.syncRoot, sexp)

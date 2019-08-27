@@ -44,6 +44,10 @@ const sexp = (name: string): void => {
 sexp('delete')
 sexp('move-back')
 sexp('move-forth')
+const list = (name: string): void => {
+  manualWeights[`${idv0UserlandPrefix}list/${name}`] = 200
+}
+list('new')
 
 export function incrementManualWeight(kappIdv0: string): void {
   switch (kappIdv0) {

@@ -8,6 +8,7 @@ import {
   zoomedList,
   zoomLevel,
   zoomedSexp,
+  focusedSexp,
 } from '../state'
 import { AppAction, AppSyncRoot, Sexp, UserlandKapp } from '../types'
 
@@ -27,6 +28,17 @@ function textNew(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
       list.insertAt(zoomCursorIdx, new Automerge.Text(''))
       draftSyncRoot.sexpZoomCursorIdx = zoomCursorIdx + 1
       setFocusCursorIdx(draftSyncRoot, list, draftSyncRoot.sexpZoomCursorIdx)
+    }
+  }
+}
+
+function listNew(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
+  const list = zoomedList(draftSyncRoot)
+  if (list) {
+    const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
+    if (list.insertAt) {
+      list.insertAt(focusCursorIdx, [])
+      setFocusCursorIdx(draftSyncRoot, list, focusCursorIdx + 1)
     }
   }
 }
@@ -134,15 +146,15 @@ function zoomPrev(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
 }
 
 function zoomIn(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
-  if (zoomLevel(draftSyncRoot) === 'atom') return
-
-  const parent = parentList(draftSyncRoot)
-  const currentListIdx = draftSyncRoot.sexpZoomCursorIdx - 1
-  const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
-
-  if (focusCursorIdx > 0) {
-    if (parent) draftSyncRoot.sexpListZoomPath.push(currentListIdx)
-    draftSyncRoot.sexpZoomCursorIdx = focusCursorIdx
+  const sexp = focusedSexp(draftSyncRoot)
+  if (sexp) {
+    const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
+    if (sexp instanceof Automerge.Text) {
+      draftSyncRoot.sexpZoomCursorIdx = focusCursorIdx
+    } else {
+      draftSyncRoot.sexpListZoomPath.push(focusCursorIdx - 1)
+      draftSyncRoot.sexpZoomCursorIdx = 0
+    }
   }
 }
 
@@ -163,6 +175,13 @@ export const sexpKapps: UserlandKapp[] = [
     shortAsciiName: ':text-new',
     legend: '📝:text-new',
     instruction: textNew,
+  },
+  {
+    type: 'UserlandKapp',
+    idv0: `${idv0UserlandPrefix}list/new`,
+    shortAsciiName: ':list-new',
+    legend: '📃:list-new',
+    instruction: listNew,
   },
   {
     type: 'UserlandKapp',
