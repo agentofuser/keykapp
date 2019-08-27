@@ -52,34 +52,35 @@ export default function SexpTextAtomComponent({
 }: SexpTextAtomComponentProps): React.ReactElement {
   const classes = useStyles()
 
-  if (!state.syncRoot) return <p>Loading...</p>
+  let textWithCursor: React.ReactNode = 'Loading...'
+  if (state.syncRoot) {
+    const focusCursorIdx = getCurrentFocusCursorIdx(state.syncRoot)
+    const [beforeCursor, afterCursor] = splitAt(focusCursorIdx)(text)
 
-  const focusCursorIdx = getCurrentFocusCursorIdx(state.syncRoot)
-  const [beforeCursor, afterCursor] = splitAt(focusCursorIdx)(text)
+    const lastChar = text.join('').slice(-1)
 
-  const lastChar = text.join('').slice(-1)
-
-  const textWithCursor = ((): React.ReactNode => {
-    switch (lastChar) {
-      case '\n':
-        return (
-          <React.Fragment>
-            {text.join('')}
-            <VerticalCharCursor />
-          </React.Fragment>
-        )
-      case '':
-        return <VerticalCharCursor />
-      default:
-        return (
-          <React.Fragment>
-            {beforeCursor.slice(0, -1).join('')}
-            <DirectedCharCursor char={beforeCursor.join('').slice(-1)} />
-            {afterCursor.join('')}
-          </React.Fragment>
-        )
-    }
-  })()
+    textWithCursor = ((): React.ReactNode => {
+      switch (lastChar) {
+        case '\n':
+          return (
+            <React.Fragment>
+              {text.join('')}
+              <VerticalCharCursor />
+            </React.Fragment>
+          )
+        case '':
+          return <VerticalCharCursor />
+        default:
+          return (
+            <React.Fragment>
+              {beforeCursor.slice(0, -1).join('')}
+              <DirectedCharCursor char={beforeCursor.join('').slice(-1)} />
+              {afterCursor.join('')}
+            </React.Fragment>
+          )
+      }
+    })()
+  }
 
   return (
     <Paper className={classes.outputBuffer}>
