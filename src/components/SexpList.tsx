@@ -8,8 +8,7 @@ import {
 } from '@material-ui/core'
 import { getObjectId, Text } from 'automerge'
 import * as React from 'react'
-import { stringClamper } from '../kitchensink/purefns'
-import { isSexpItemFocused, getCurrentFocusCursorIdx } from '../state'
+import { getCurrentFocusCursorIdx, isSexpItemFocused } from '../state'
 import { AppState, Sexp, SexpList } from '../types'
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -28,6 +27,14 @@ const useStyles = makeStyles((theme: Theme) => ({
     borderBottom: 'none',
     borderRight: 'none',
   },
+  listItemText: {
+    wordWrap: 'break-word',
+    display: '-webkit-box',
+    WebkitBoxOrient: 'vertical',
+    WebkitLineClamp: 1,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
 }))
 
 function sexpDecoration(sexp: Sexp): string {
@@ -39,8 +46,7 @@ function sexpDecoration(sexp: Sexp): string {
 }
 
 function textSummary(text: Text): string {
-  const str =
-    text.length > 0 ? stringClamper(44)(text.join('').split('\n')[0]) : ''
+  const str = text.length > 0 ? text.join('').split('\n')[0] : ''
   return str
 }
 
@@ -74,7 +80,7 @@ function SexpItem({
 
   return (
     <ListItem divider className={className}>
-      <ListItemText primary={primaryText} />
+      <ListItemText className={classes.listItemText} primary={primaryText} />
     </ListItem>
   )
 }

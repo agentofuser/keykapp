@@ -7,7 +7,7 @@ html,
 html {
   -ms-touch-action: manipulation;
   touch-action: manipulation;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 body {

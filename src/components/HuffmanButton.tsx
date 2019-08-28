@@ -94,7 +94,7 @@ export default function HuffmanButton({
             <p
               ref={multilegendPRef}
               className={classes.multilegendP}
-              style={{ textAlign, fontSize: '0.875rem', lineHeight: 1.5 }}
+              style={{ textAlign, fontSize: '1rem', lineHeight: 1.5 }}
             >
               <span
                 ref={offscreenSpan}
