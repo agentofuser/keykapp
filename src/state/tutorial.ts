@@ -9,7 +9,7 @@ const textLessonBody = `
 So yeah, this is (for now) all there is to Keykapp:
 
 - Write, make lists, outline,
-- Then \`:copy\` out what you typed and paste it somewhere else.
+- Then \`:copy!\` out what you typed and paste it somewhere else.
 
 All this with only 4 buttons!
 
