@@ -64,15 +64,22 @@ export default function SexpTextAtomComponent({
         case '\n':
           return (
             <React.Fragment>
+              {`bytes: ${new Blob([text.join('')]).size}\n---\n`}
               {text.join('')}
               <VerticalCharCursor />
             </React.Fragment>
           )
         case '':
-          return <VerticalCharCursor />
+          return (
+            <React.Fragment>
+              {`bytes: ${new Blob([text.join('')]).size}\n---\n`}
+              <VerticalCharCursor />
+            </React.Fragment>
+          )
         default:
           return (
             <React.Fragment>
+              {`bytes: ${new Blob([text.join('')]).size}\n---\n`}
               {beforeCursor.slice(0, -1).join('')}
               <DirectedCharCursor char={beforeCursor.join('').slice(-1)} />
               {afterCursor.join('')}
