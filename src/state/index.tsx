@@ -28,6 +28,7 @@ import {
   SexpList,
   Waypoint,
 } from '../types'
+import tutorial from './tutorial'
 
 const placeholderText =
   'Hi there! Welcome to Keykapp :) Make yourself at home, and please give me feedback at twitter.com/keykapp. Thank you for stopping by! — @agentofuser'
@@ -101,10 +102,10 @@ export function makeInitialAppState(): AppState {
 export function makeInitialSyncRoot(): AppSyncRoot {
   return Automerge.from({
     kappIdv0Log: [],
-    sexp: [new Automerge.Text(placeholderText)],
+    sexp: tutorial,
     sexpMetadata: {},
     sexpListZoomPath: [],
-    sexpZoomCursorIdx: 1,
+    sexpZoomCursorIdx: 0,
   })
 }
 

@@ -1,5 +1,5 @@
-import { Keyswitch, LeftHand, RightHand } from './types'
 import { range } from 'fp-ts/es6/Array'
+import { Keyswitch, LeftHand, RightHand } from './types'
 
 export const allKeyswitches: Keyswitch[] = [
   // { index: 0, key: 'a', actuationCost: 4, hand: LeftHand },
