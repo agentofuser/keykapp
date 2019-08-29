@@ -7,14 +7,14 @@ import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
 import SexpComponent from '../components/Sexp'
-import { logDev } from '../kitchensink/effectfns'
+import { devStringyAndLog } from '../kitchensink/effectfns'
 import {
   appReducer,
-  zoomedSexp,
   currentWaypoint,
   loadSyncRootFromBrowserGit,
   makeInitialAppState,
   setupGit,
+  zoomedSexp,
 } from '../state'
 import { Keybinding } from '../types'
 
@@ -87,8 +87,8 @@ export default function App(): React.ReactNode {
   let display
   if (state.syncRoot) {
     const sexp = zoomedSexp(state.syncRoot)
-    logDev(state.syncRoot)
-    logDev(sexp)
+    devStringyAndLog(state.syncRoot)
+    devStringyAndLog(sexp)
     display = <SexpComponent state={state} sexp={sexp} />
   } else {
     display = (

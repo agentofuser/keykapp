@@ -13,7 +13,7 @@ import {
   textModeKapps,
   zoomedTextOnlyKapps,
 } from '../kapps'
-import { logDev } from '../kitchensink/effectfns'
+import { devLog } from '../kitchensink/effectfns'
 import { menuIn, menuOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
 import {
@@ -69,7 +69,7 @@ function commitChanges(
 ): Promise<string> {
   const serializedChanges = JSON.stringify(changes, null, 2)
   const message = `${messageTitle}\n\n${serializedChanges}`
-  logDev(message)
+  devLog(message)
 
   return git.commit({
     dir: gitRepoDir,
@@ -111,7 +111,7 @@ function migrateSyncRootSchema(syncRoot: AppSyncRoot): AppSyncRoot | null {
     syncRoot,
     'migrateSyncRootSchema',
     (doc: AppSyncRoot): void => {
-      if (doc.sexp === undefined || doc.sexp.length === 0) {
+      if (doc.sexp === undefined) {
         doc.sexp = [new Automerge.Text('')]
       }
       if (doc.sexpListZoomPath === undefined) {
