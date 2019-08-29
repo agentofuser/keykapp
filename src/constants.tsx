@@ -49,20 +49,6 @@ const list = (name: string): void => {
 }
 list('new')
 
-export function incrementManualWeight(kappIdv0: string): void {
-  switch (kappIdv0) {
-    case undoIdv0:
-      manualWeights[undoIdv0] = manualWeights[undoIdv0] + 100
-
-      break
-    case redoIdv0:
-      manualWeights[redoIdv0] = manualWeights[redoIdv0] + 100
-      break
-    default:
-      break
-  }
-}
-
 export const nGramRange = range(1, 8)
 
 export const gitRepoDir = '/keykapp/syncRootLog/'

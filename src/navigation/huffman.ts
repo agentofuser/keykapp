@@ -44,11 +44,8 @@ function kappTwitterCount(kapp: Kapp): number {
 }
 
 function tailKGram(k: number, state: AppState, kapp: Kapp): string {
-  if (!state.syncRoot) {
-    return ''
-  }
-  const { length } = state.syncRoot.kappIdv0Log
-  const logTail = state.syncRoot.kappIdv0Log.slice(length - k + 1, length)
+  const { length } = state.tempRoot.kappIdv0Log
+  const logTail = state.tempRoot.kappIdv0Log.slice(length - k + 1, length)
   logTail.push(kapp.idv0)
   const kGram = logTail.join('\n')
   return kGram

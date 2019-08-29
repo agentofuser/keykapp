@@ -47,7 +47,11 @@ function focusedDelete(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
     const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
     const idx = focusCursorIdx - 1
     if (sexp.deleteAt && focusCursorIdx > 0 && focusCursorIdx <= sexp.length) {
+      const deleted = sexp[idx]
       sexp.deleteAt(idx)
+      if (!(sexp instanceof Automerge.Text)) {
+        setFocusCursorIdx(draftSyncRoot, deleted, undefined)
+      }
       setFocusCursorIdx(draftSyncRoot, sexp, idx)
     }
   }

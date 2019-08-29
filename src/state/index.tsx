@@ -6,14 +6,14 @@ import { Option } from 'fp-ts/es6/Option'
 import * as git from 'isomorphic-git'
 import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
-import { gitRepoDir, incrementManualWeight, nGramRange } from '../constants'
+import { gitRepoDir, nGramRange } from '../constants'
 import {
   findKappById,
   listModeKapps,
   textModeKapps,
   zoomedTextOnlyKapps,
 } from '../kapps'
-import { devLog } from '../kitchensink/effectfns'
+import { devLog, devStringyAndLog } from '../kitchensink/effectfns'
 import { menuIn, menuOutToRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
 import {
@@ -87,6 +87,7 @@ export function makeInitialAppState(): AppState {
   const syncRoot = null
 
   const tempRoot: AppTempRoot = {
+    kappIdv0Log: [],
     waypointBreadcrumbs: [initialHuffmanRoot],
     menuIns: [],
     sequenceFrequencies: {},
@@ -98,7 +99,6 @@ export function makeInitialAppState(): AppState {
 
 export function makeInitialSyncRoot(): AppSyncRoot {
   return Automerge.from({
-    kappIdv0Log: [],
     sexp: tutorial,
     sexpMetadata: {},
     sexpListZoomPath: [],
@@ -122,6 +122,9 @@ function migrateSyncRootSchema(syncRoot: AppSyncRoot): AppSyncRoot | null {
       }
       if (doc.sexpMetadata === undefined) {
         doc.sexpMetadata = {}
+      }
+      if (doc.kappIdv0Log !== undefined) {
+        delete doc.kappIdv0Log
       }
     }
   )
@@ -148,14 +151,14 @@ export async function loadSyncRootFromBrowserGit(
         ): Automerge.Change[] => {
           const lines = commit.message.split('\n')
           const kappIdv0 = lines[0]
-          incrementManualWeight(kappIdv0)
+          state.tempRoot.kappIdv0Log.push(kappIdv0)
 
           const payload = lines.slice(2).join('\n')
 
           let changes = JSON.parse(payload)
           return allChanges.concat(changes)
         }
-      )(commits)
+      )(commits.reverse())
 
       console.info('Done parsing Automerge changes.')
 
@@ -274,23 +277,26 @@ export function isSexpItemFocused(syncRoot: AppSyncRoot, sexp: Sexp): boolean {
 }
 
 export function setFocusCursorIdx(
-  syncRoot: AppSyncRoot,
+  draftSyncRoot: AppSyncRoot,
   sexp: Sexp,
-  focusCursorIdx: number
+  focusCursorIdx: number | undefined
 ): void {
-  const info = syncRoot.sexpMetadata[Automerge.getObjectId(sexp)]
-  if (info) {
-    info.focusCursorIdx = focusCursorIdx
+  if (focusCursorIdx === undefined) {
+    delete draftSyncRoot.sexpMetadata[Automerge.getObjectId(sexp)]
   } else {
-    syncRoot.sexpMetadata[Automerge.getObjectId(sexp)] = { focusCursorIdx }
+    const info = draftSyncRoot.sexpMetadata[Automerge.getObjectId(sexp)]
+    if (info) {
+      info.focusCursorIdx = focusCursorIdx
+    } else {
+      draftSyncRoot.sexpMetadata[Automerge.getObjectId(sexp)] = {
+        focusCursorIdx,
+      }
+    }
   }
 }
 
-export function logKappExecution(
-  draftSyncRoot: AppSyncRoot,
-  kapp: Kapp
-): void {
-  draftSyncRoot.kappIdv0Log.push(kapp.idv0)
+export function logKappExecution(tempRoot: AppTempRoot, kapp: Kapp): void {
+  tempRoot.kappIdv0Log.push(kapp.idv0)
 }
 
 export function rootWaypoint(state: AppState): Waypoint {
@@ -299,7 +305,7 @@ export function rootWaypoint(state: AppState): Waypoint {
 
 function updateSequenceFrequencies(draftState: AppState): void {
   if (!draftState.syncRoot) return
-  const kappLog = draftState.syncRoot.kappIdv0Log
+  const kappLog = draftState.tempRoot.kappIdv0Log
   const kGrammers = map((k): NGrammer => nGram(k))(nGramRange)
   draftState.tempRoot.sequenceFrequencies = reduce(
     draftState.tempRoot.sequenceFrequencies,
@@ -321,7 +327,7 @@ function updateSequenceFrequencies(draftState: AppState): void {
 function updateTailSequenceFrequencies(draftState: AppState): void {
   if (draftState.syncRoot === null) return
   const seqFreqs = draftState.tempRoot.sequenceFrequencies
-  const kappIdv0Log = draftState.syncRoot.kappIdv0Log
+  const kappIdv0Log = draftState.tempRoot.kappIdv0Log
   nGramRange
     .filter((k: number): boolean => k <= kappIdv0Log.length)
     .map((k: number): string[] => {
@@ -380,7 +386,7 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
             kappIdv0,
             (draftSyncRoot: AppSyncRoot): void => {
               kapp.instruction(draftSyncRoot, action)
-              logKappExecution(draftSyncRoot, kapp)
+              logKappExecution(nextState.tempRoot, kapp)
             }
           )
 
@@ -407,7 +413,6 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
         )
         if (changes.length > 0) {
           commitChanges(kappIdv0, changes)
-          incrementManualWeight(kappIdv0)
         }
       }
 
@@ -417,5 +422,6 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
       break
   }
 
+  devStringyAndLog(nextState.tempRoot.kappIdv0Log.slice(-5))
   return nextState
 }

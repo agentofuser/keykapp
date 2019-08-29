@@ -80,7 +80,6 @@ export interface SexpInfo {
 }
 
 export interface AppSyncRoot {
-  kappIdv0Log: string[]
   sexp: SexpList // the root userland sexp
   sexpMetadata: { [key: string]: SexpInfo } // keyed by Automerge.UUID (string)
   sexpListZoomPath: number[] // stack of int list indices: empty means root
@@ -94,6 +93,7 @@ export interface AppSyncRoot {
 export type Menu = Waypoint
 
 export interface AppTempRoot {
+  kappIdv0Log: string[]
   // TODO rename "waypoint" to "menu" at some point
   waypointBreadcrumbs: NonEmptyArray<Waypoint>
   menuIns: Waypoint[]

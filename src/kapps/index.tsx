@@ -104,6 +104,7 @@ function undoInstruction(draftState: AppState, _action: AppAction): void {
 
   if (Automerge.canUndo(syncRoot)) {
     draftState.syncRoot = Automerge.undo(syncRoot, undoIdv0)
+    draftState.tempRoot.kappIdv0Log.push(undoIdv0)
   }
   menuOutToRoot(draftState, _action)
 }
@@ -114,6 +115,7 @@ function redoInstruction(draftState: AppState, _action: AppAction): void {
 
   if (Automerge.canRedo(syncRoot)) {
     draftState.syncRoot = Automerge.redo(syncRoot, redoIdv0)
+    draftState.tempRoot.kappIdv0Log.push(redoIdv0)
   }
   menuOutToRoot(draftState, _action)
 }
