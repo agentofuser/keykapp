@@ -140,7 +140,7 @@ export async function loadSyncRootFromBrowserGit(
   if (!state.syncRoot) {
     let syncRoot: AppSyncRoot | null = null
     try {
-      let commits = await git.log({
+      const commits = await git.log({
         dir: gitRepoDir,
       })
       console.info(`Loaded ${commits.length} commits from git log.`)
@@ -158,7 +158,7 @@ export async function loadSyncRootFromBrowserGit(
 
           const payload = lines.slice(2).join('\n')
 
-          let changes = JSON.parse(payload)
+          const changes = JSON.parse(payload)
           return allChanges.concat(changes)
         }
       )(commits.reverse())
@@ -173,7 +173,7 @@ export async function loadSyncRootFromBrowserGit(
       console.info('Finished applying changes.')
     } catch (_e) {
       const initialSyncRoot = makeInitialSyncRoot()
-      let initialChanges = Automerge.getChanges(
+      const initialChanges = Automerge.getChanges(
         Automerge.init(),
         initialSyncRoot
       )
@@ -200,14 +200,14 @@ export function currentWaypoint(state: AppState): Option<Waypoint> {
 
 export function lastListInZoomPath(syncRoot: AppSyncRoot): SexpList {
   let selectedList = syncRoot.sexp
-  for (let index of syncRoot.sexpListZoomPath) {
+  for (const index of syncRoot.sexpListZoomPath) {
     selectedList = selectedList[index]
   }
   return selectedList
 }
 
 export function zoomLevel(syncRoot: AppSyncRoot): 'atom' | 'list' {
-  let zoomCursorIdx = syncRoot.sexpZoomCursorIdx
+  const zoomCursorIdx = syncRoot.sexpZoomCursorIdx
   return zoomCursorIdx > 0 ? 'atom' : 'list'
 }
 
@@ -218,7 +218,7 @@ export function currentMode(syncRoot: AppSyncRoot): 'text-mode' | 'list-mode' {
 export function parentList(syncRoot: AppSyncRoot): SexpList | null {
   let secondToLastList = null
   let lastList = syncRoot.sexp
-  for (let index of syncRoot.sexpListZoomPath) {
+  for (const index of syncRoot.sexpListZoomPath) {
     if (index > 0) secondToLastList = lastList
     lastList = lastList[index]
   }
@@ -348,7 +348,7 @@ function updateTailSequenceFrequencies(draftState: AppState): void {
 }
 
 export function appReducer(prevState: AppState, action: AppAction): AppState {
-  let nextState = { ...prevState }
+  const nextState = { ...prevState }
   switch (action.type) {
     case 'LoadSyncRootFromBrowserGit':
       if (!nextState.syncRoot) {
@@ -410,7 +410,7 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
           kapp.instruction(nextState, action)
         }
 
-        let changes = Automerge.getChanges(
+        const changes = Automerge.getChanges(
           prevState.syncRoot,
           nextState.syncRoot
         )
