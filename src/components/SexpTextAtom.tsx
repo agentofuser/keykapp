@@ -5,6 +5,7 @@ import * as React from 'react'
 import { AppState } from '../types'
 import { getCurrentFocusCursorIdx } from '../state'
 import { splitAt } from 'fp-ts/es6/Array'
+import { wordCount } from '../kitchensink/purefns'
 
 const useStyles = makeStyles((theme: Theme) => ({
   outputBuffer: {
@@ -31,6 +32,13 @@ function VerticalCharCursor(): React.ReactElement {
       {' '}
     </span>
   )
+}
+
+function stats(text: Automerge.Text): React.ReactNode {
+  const string = text.join('')
+  return `bytes: ${new Blob([string]).size}, words: ${wordCount(
+    string
+  )}\n---\n\n`
 }
 
 function DirectedCharCursor({ char }: { char: string }): React.ReactElement {
@@ -64,7 +72,7 @@ export default function SexpTextAtomComponent({
         case '\n':
           return (
             <React.Fragment>
-              {`bytes: ${new Blob([text.join('')]).size}\n---\n`}
+              {stats(text)}
               {text.join('')}
               <VerticalCharCursor />
             </React.Fragment>
@@ -72,14 +80,14 @@ export default function SexpTextAtomComponent({
         case '':
           return (
             <React.Fragment>
-              {`bytes: ${new Blob([text.join('')]).size}\n---\n`}
+              {stats(text)}
               <VerticalCharCursor />
             </React.Fragment>
           )
         default:
           return (
             <React.Fragment>
-              {`bytes: ${new Blob([text.join('')]).size}\n---\n`}
+              {stats(text)}
               {beforeCursor.slice(0, -1).join('')}
               <DirectedCharCursor char={beforeCursor.join('').slice(-1)} />
               {afterCursor.join('')}
