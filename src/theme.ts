@@ -23,7 +23,7 @@ const theme = createMuiTheme({
   // disable all animations, transitions, and the ripple effect
   transitions: {
     // So we have `transition: none;` everywhere
-    create: () => 'none',
+    create: (): string => 'none',
   },
   overrides: {
     // Name of the component ⚛️

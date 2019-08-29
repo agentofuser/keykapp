@@ -30,9 +30,6 @@ import {
 } from '../types'
 import tutorial from './tutorial'
 
-const placeholderText =
-  'Hi there! Welcome to Keykapp :) Make yourself at home, and please give me feedback at twitter.com/keykapp. Thank you for stopping by! — @agentofuser'
-
 export function setupGit(): Promise<boolean> {
   return new Promise((resolve, reject): void => {
     BrowserFS.configure(
