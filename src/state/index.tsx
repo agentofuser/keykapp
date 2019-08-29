@@ -32,6 +32,7 @@ import tutorial from './tutorial'
 
 export function setupGit(): Promise<boolean> {
   return new Promise((resolve, reject): void => {
+    console.info('Configuring BrowserFS...')
     BrowserFS.configure(
       {
         fs: 'AsyncMirror',
@@ -53,7 +54,9 @@ export function setupGit(): Promise<boolean> {
           return
         }
         window.fs = BrowserFS.BFSRequire('fs')
+        console.info('Done configuring BrowserFS.')
         git.plugins.set('fs', window.fs)
+        console.info('Running git.init()...')
         await git.init({ dir: gitRepoDir })
 
         isGitReady = true
