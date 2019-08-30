@@ -38,7 +38,7 @@ function stats(text: Automerge.Text): React.ReactNode {
   const string = text.join('')
   return `bytes: ${new Blob([string]).size}, words: ${wordCount(
     string
-  )}\n---\n\n`
+  )}\n---\n`
 }
 
 function DirectedCharCursor({ char }: { char: string }): React.ReactElement {
