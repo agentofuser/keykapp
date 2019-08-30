@@ -8,8 +8,12 @@ import {
   undoIdv0,
 } from '../constants'
 import murmurhash from '../kitchensink/murmurhash'
-import { menuOut, menuOutToRoot } from '../navigation'
-import { getCurrentFocusCursorIdx, zoomedText } from '../state'
+import { menuOut, menuOutToRoot, recomputeMenuRoot } from '../navigation'
+import {
+  getCurrentFocusCursorIdx,
+  updateTailSequenceFrequencies,
+  zoomedText,
+} from '../state'
 import {
   AppAction,
   AppState,
@@ -106,6 +110,8 @@ function undoInstruction(draftState: AppState, _action: AppAction): void {
     draftState.syncRoot = Automerge.undo(syncRoot, undoIdv0)
     draftState.tempRoot.kappIdv0Log.push(undoIdv0)
   }
+  updateTailSequenceFrequencies(draftState)
+  recomputeMenuRoot(draftState)
   menuOutToRoot(draftState, _action)
 }
 
@@ -117,6 +123,8 @@ function redoInstruction(draftState: AppState, _action: AppAction): void {
     draftState.syncRoot = Automerge.redo(syncRoot, redoIdv0)
     draftState.tempRoot.kappIdv0Log.push(redoIdv0)
   }
+  updateTailSequenceFrequencies(draftState)
+  recomputeMenuRoot(draftState)
   menuOutToRoot(draftState, _action)
 }
 
@@ -184,7 +192,7 @@ export function showKappsFromIds(ids: string[]): string {
 
 // from https://stackoverflow.com/a/21682946/11343832
 function intToHSL(int: number, saturation = 100, lighting = 80): string {
-  var shortened = int % 360
+  const shortened = int % 360
   return 'hsl(' + shortened + `,${saturation}%,${lighting}%)`
 }
 

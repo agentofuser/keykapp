@@ -7,14 +7,9 @@ import * as git from 'isomorphic-git'
 import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
 import { gitRepoDir, nGramRange } from '../constants'
-import {
-  findKappById,
-  listModeKapps,
-  textModeKapps,
-  zoomedTextOnlyKapps,
-} from '../kapps'
+import { findKappById, zoomedTextOnlyKapps } from '../kapps'
 import { devLog, devStringyAndLog } from '../kitchensink/effectfns'
-import { menuIn, menuOutToRoot } from '../navigation'
+import { menuIn, menuOutToRoot, recomputeMenuRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
 import {
   AppAction,
@@ -130,8 +125,8 @@ function migrateSyncRootSchema(syncRoot: AppSyncRoot): AppSyncRoot | null {
       if (doc.sexpMetadata === undefined) {
         doc.sexpMetadata = {}
       }
-      if (doc.kappIdv0Log !== undefined) {
-        delete doc.kappIdv0Log
+      if ((doc as any).kappIdv0Log !== undefined) {
+        delete (doc as any).kappIdv0Log
       }
     }
   )
@@ -331,7 +326,7 @@ function updateSequenceFrequencies(draftState: AppState): void {
   )(kGrammers)
 }
 
-function updateTailSequenceFrequencies(draftState: AppState): void {
+export function updateTailSequenceFrequencies(draftState: AppState): void {
   if (draftState.syncRoot === null) return
   const seqFreqs = draftState.tempRoot.sequenceFrequencies
   const kappIdv0Log = draftState.tempRoot.kappIdv0Log
@@ -361,13 +356,7 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
         updateSequenceFrequencies(nextState)
         console.info('Done calculating n-grams.')
         console.info('Updating huffman menu tree...')
-        const mode = currentMode(nextState.syncRoot)
-        nextState.tempRoot.waypointBreadcrumbs = [
-          newHuffmanRoot({
-            state: nextState,
-            kapps: mode === 'list-mode' ? listModeKapps : textModeKapps,
-          }),
-        ]
+        recomputeMenuRoot(nextState)
         console.info('Keykapp is ready to use.')
       }
       break
@@ -398,16 +387,7 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
           )
 
           updateTailSequenceFrequencies(nextState)
-          const mode = currentMode(nextState.syncRoot)
-
-          // Update huffman tree based on kapp's updated weight calculated
-          // from the kappLog
-          nextState.tempRoot.waypointBreadcrumbs = [
-            newHuffmanRoot({
-              state: nextState,
-              kapps: mode === 'list-mode' ? listModeKapps : textModeKapps,
-            }),
-          ]
+          recomputeMenuRoot(nextState)
 
           menuOutToRoot(nextState, action)
         } else if (kapp.type === 'SystemKapp') {

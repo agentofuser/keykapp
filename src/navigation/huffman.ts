@@ -64,8 +64,8 @@ function tailSequenceFrequencies(state: AppState, kapp: Kapp): number[] {
 function huffmanWeightFromKapp(state: AppState | null, kapp: Kapp): number {
   const idv0 = kapp.idv0
   let manualWeight = 0
-  let twitterCount = kappTwitterCount(kapp)
-  let sequenceCounts = state ? tailSequenceFrequencies(state, kapp) : []
+  const twitterCount = kappTwitterCount(kapp)
+  const sequenceCounts = state ? tailSequenceFrequencies(state, kapp) : []
 
   if (!idv0.match(asciiIdv0Path)) {
     manualWeight = manualWeights[idv0] || 1
