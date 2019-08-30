@@ -69,19 +69,23 @@ export function setupGit(): Promise<boolean> {
 function commitChanges(
   messageTitle: string,
   changes: Automerge.Change[]
-): Promise<string> {
+): any {
   const serializedChanges = JSON.stringify(changes, null, 2)
   const message = `${messageTitle}\n\n${serializedChanges}`
   devLog(message)
 
-  return git.commit({
-    dir: gitRepoDir,
-    author: {
-      name: 'Keykapp Syncbot',
-      email: 'syncbot@keykapp.com',
-    },
-    message,
-  })
+  return git
+    .commit({
+      dir: gitRepoDir,
+      author: {
+        name: 'Keykapp Syncbot',
+        email: 'syncbot@keykapp.com',
+      },
+      message,
+    })
+    .then((sha: string) => {
+      console.info(sha)
+    })
 }
 
 export function makeInitialAppState(): AppState {
