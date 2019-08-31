@@ -115,6 +115,6 @@ export type DraftSyncRootMutator = (
 export type DraftAppStateMutator = (
   draftState: AppState,
   action: AppAction
-) => void
+) => AppState
 
 export type NGrammer = (log: string[]) => string[][]

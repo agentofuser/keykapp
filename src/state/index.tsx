@@ -305,7 +305,7 @@ export function rootWaypoint(state: AppState): Waypoint {
   return head(state.tempRoot.waypointBreadcrumbs)
 }
 
-function updateSequenceFrequencies(draftState: AppState): void {
+export function updateSequenceFrequencies(draftState: AppState): void {
   if (!draftState.syncRoot) return
   const kappLog = draftState.tempRoot.kappIdv0Log
   const kGrammers = map((k): NGrammer => nGram(k))(nGramRange)
@@ -346,18 +346,44 @@ export function updateTailSequenceFrequencies(draftState: AppState): void {
     })
 }
 
+function afterSyncRootSwap(nextState: {
+  syncRoot: Automerge.FreezeObject<AppSyncRoot> | null
+  tempRoot: AppTempRoot
+}): void {
+  console.info('Calculating n-grams for kapp prediction...')
+  updateSequenceFrequencies(nextState)
+  console.info('Done calculating n-grams.')
+  console.info('Updating huffman menu tree...')
+  recomputeMenuRoot(nextState)
+  console.info('Keykapp is ready to use.')
+}
+
+export function commitIfChanged(
+  prevState: AppState,
+  nextState: {
+    syncRoot: Automerge.FreezeObject<AppSyncRoot> | null
+    tempRoot: AppTempRoot
+  },
+  message: string
+): void {
+  if (prevState.syncRoot && nextState.syncRoot) {
+    const changes = Automerge.getChanges(
+      prevState.syncRoot,
+      nextState.syncRoot
+    )
+    if (changes.length > 0) {
+      commitChanges(message, changes)
+    }
+  }
+}
+
 export function appReducer(prevState: AppState, action: AppAction): AppState {
-  const nextState = { ...prevState }
+  let nextState = { ...prevState }
   switch (action.type) {
     case 'LoadSyncRootFromBrowserGit':
       if (!nextState.syncRoot) {
         nextState.syncRoot = action.data.syncRoot
-        console.info('Calculating n-grams for kapp prediction...')
-        updateSequenceFrequencies(nextState)
-        console.info('Done calculating n-grams.')
-        console.info('Updating huffman menu tree...')
-        recomputeMenuRoot(nextState)
-        console.info('Keykapp is ready to use.')
+        afterSyncRootSwap(nextState)
       }
       break
     case 'KeyswitchUp':
@@ -390,16 +416,10 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
           recomputeMenuRoot(nextState)
 
           menuOutToRoot(nextState, action)
-        } else if (kapp.type === 'SystemKapp') {
-          kapp.instruction(nextState, action)
-        }
 
-        const changes = Automerge.getChanges(
-          prevState.syncRoot,
-          nextState.syncRoot
-        )
-        if (changes.length > 0) {
-          commitChanges(kappIdv0, changes)
+          commitIfChanged(prevState, nextState, kappIdv0)
+        } else if (kapp.type === 'SystemKapp') {
+          nextState = kapp.instruction(nextState, action)
         }
       }
 

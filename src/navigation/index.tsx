@@ -9,13 +9,14 @@ export function menuIn(menu: Menu): DraftAppStateMutator {
   return function navigateReducer(
     draftState: AppState,
     _action: AppAction
-  ): void {
+  ): AppState {
     if (isNonEmpty(menu.forest)) {
       draftState.tempRoot.waypointBreadcrumbs.push(menu)
       draftState.tempRoot.menuIns.push(menu)
     } else {
       throw new Error('Cannot navigate to leaf waypoint')
     }
+    return draftState
   }
 }
 
@@ -26,10 +27,11 @@ export function menuOutToRoot(draftState: AppState, _action: AppAction): void {
   draftState.tempRoot.menuIns = []
 }
 
-export function menuOut(draftState: AppState, _action: AppAction): void {
+export function menuOut(draftState: AppState, _action: AppAction): AppState {
   if (draftState.tempRoot.waypointBreadcrumbs.length > 1) {
     draftState.tempRoot.waypointBreadcrumbs.pop()
   }
+  return draftState
 }
 
 export function recomputeMenuRoot(draftState: AppState): void {

@@ -11,7 +11,9 @@ import { stringSaveAs } from '../kitchensink/effectfns'
 import murmurhash from '../kitchensink/murmurhash'
 import { menuOut, menuOutToRoot, recomputeMenuRoot } from '../navigation'
 import {
+  commitIfChanged,
   getCurrentFocusCursorIdx,
+  updateSequenceFrequencies,
   updateTailSequenceFrequencies,
   zoomedText,
 } from '../state'
@@ -103,9 +105,12 @@ export const menuUpKapp: SystemKapp = {
   instruction: menuOut,
 }
 
-function undoInstruction(draftState: AppState, _action: AppAction): void {
+function undoInstruction(draftState: AppState, _action: AppAction): AppState {
   const syncRoot = draftState.syncRoot
-  if (!syncRoot) return
+  if (!syncRoot) return draftState
+
+  const prevState = draftState
+  draftState = { ...prevState }
 
   if (Automerge.canUndo(syncRoot)) {
     draftState.syncRoot = Automerge.undo(syncRoot, undoIdv0)
@@ -114,11 +119,17 @@ function undoInstruction(draftState: AppState, _action: AppAction): void {
   updateTailSequenceFrequencies(draftState)
   recomputeMenuRoot(draftState)
   menuOutToRoot(draftState, _action)
+  const nextState = draftState
+  commitIfChanged(prevState, nextState, undoIdv0)
+  return nextState
 }
 
-function redoInstruction(draftState: AppState, _action: AppAction): void {
+function redoInstruction(draftState: AppState, _action: AppAction): AppState {
   const syncRoot = draftState.syncRoot
-  if (!syncRoot) return
+  if (!syncRoot) return draftState
+
+  const prevState = draftState
+  draftState = { ...prevState }
 
   if (Automerge.canRedo(syncRoot)) {
     draftState.syncRoot = Automerge.redo(syncRoot, redoIdv0)
@@ -127,6 +138,9 @@ function redoInstruction(draftState: AppState, _action: AppAction): void {
   updateTailSequenceFrequencies(draftState)
   recomputeMenuRoot(draftState)
   menuOutToRoot(draftState, _action)
+  const nextState = draftState
+  commitIfChanged(prevState, nextState, redoIdv0)
+  return nextState
 }
 
 export const undoKapp: SystemKapp = {
@@ -148,7 +162,13 @@ export const redoKapp: SystemKapp = {
 const exportIdv0 = `${idv0SystemPrefix}syncRoot/export`
 
 // TODO this should be an async task or something to handle effects
-function exportInstruction(draftState: AppState, _action: AppAction): void {
+function exportInstruction(
+  draftState: AppState,
+  _action: AppAction
+): AppState {
+  const prevState = draftState
+  draftState = { ...prevState }
+
   const { syncRoot } = draftState
   let serializedSyncRoot
   if (syncRoot) {
@@ -160,6 +180,9 @@ function exportInstruction(draftState: AppState, _action: AppAction): void {
   updateTailSequenceFrequencies(draftState)
   recomputeMenuRoot(draftState)
   menuOutToRoot(draftState, _action)
+  const nextState = draftState
+  commitIfChanged(prevState, nextState, exportIdv0)
+  return nextState
 }
 
 const exportKapp: SystemKapp = {
@@ -170,11 +193,48 @@ const exportKapp: SystemKapp = {
   instruction: exportInstruction,
 }
 
+const importIdv0 = `${idv0SystemPrefix}syncRoot/import`
+
+// TODO this should be an async task or something to handle effects
+function importInstruction(
+  draftState: AppState,
+  _action: AppAction
+): AppState {
+  const serializedSyncRoot = process.env.KEYKAPP_SYNC_ROOT
+  if (serializedSyncRoot) {
+    const importedSyncRoot: AppSyncRoot = Automerge.load(serializedSyncRoot)
+    draftState.syncRoot = importedSyncRoot
+    updateSequenceFrequencies(draftState)
+    console.info('Swapped syncRoot from environment variable.')
+  } else {
+    console.error('Could not find process.env.KEYKAPP_SYNC_ROOT.')
+  }
+
+  const prevState = draftState
+  draftState = { ...prevState }
+
+  draftState.tempRoot.kappIdv0Log.push(importIdv0)
+  updateTailSequenceFrequencies(draftState)
+  recomputeMenuRoot(draftState)
+  menuOutToRoot(draftState, _action)
+  const nextState = draftState
+  commitIfChanged(prevState, nextState, importIdv0)
+  return nextState
+}
+const importKapp: SystemKapp = {
+  type: 'SystemKapp',
+  idv0: importIdv0,
+  shortAsciiName: ':import!!',
+  legend: ':import!!',
+  instruction: importInstruction,
+}
+
 export const systemKapps: SystemKapp[] = [
   menuUpKapp,
   undoKapp,
   redoKapp,
   exportKapp,
+  importKapp,
 ]
 
 export const allKapps: Kapp[] = [...userlandKapps, ...systemKapps]
@@ -185,6 +245,7 @@ export const listModeKapps: Kapp[] = [
   undoKapp,
   redoKapp,
   exportKapp,
+  importKapp,
 ]
 
 export const textModeKapps: Kapp[] = [
@@ -193,6 +254,7 @@ export const textModeKapps: Kapp[] = [
   undoKapp,
   redoKapp,
   exportKapp,
+  importKapp,
 ]
 
 export const KappStore: Map<string, Kapp> = new Map(
