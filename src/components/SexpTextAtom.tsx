@@ -1,11 +1,11 @@
 import { Paper, Theme } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import * as Automerge from 'automerge'
-import * as React from 'react'
-import { AppState } from '../types'
-import { getCurrentFocusCursorIdx } from '../state'
 import { splitAt } from 'fp-ts/es6/Array'
+import * as React from 'react'
 import { wordCount } from '../kitchensink/purefns'
+import { getCurrentFocusCursorIdx } from '../state'
+import { AppState } from '../types'
 
 const useStyles = makeStyles((theme: Theme) => ({
   outputBuffer: {

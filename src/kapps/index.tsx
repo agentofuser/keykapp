@@ -7,6 +7,7 @@ import {
   redoIdv0,
   undoIdv0,
 } from '../constants'
+import { stringSaveAs } from '../kitchensink/effectfns'
 import murmurhash from '../kitchensink/murmurhash'
 import { menuOut, menuOutToRoot, recomputeMenuRoot } from '../navigation'
 import {
@@ -144,7 +145,37 @@ export const redoKapp: SystemKapp = {
   instruction: redoInstruction,
 }
 
-export const systemKapps: SystemKapp[] = [menuUpKapp, undoKapp, redoKapp]
+const exportIdv0 = `${idv0SystemPrefix}syncRoot/export`
+
+// TODO this should be an async task or something to handle effects
+function exportInstruction(draftState: AppState, _action: AppAction): void {
+  const { syncRoot } = draftState
+  let serializedSyncRoot
+  if (syncRoot) {
+    serializedSyncRoot = Automerge.save(syncRoot)
+    stringSaveAs(serializedSyncRoot, 'keykapp-sync-root.json')
+  }
+
+  draftState.tempRoot.kappIdv0Log.push(exportIdv0)
+  updateTailSequenceFrequencies(draftState)
+  recomputeMenuRoot(draftState)
+  menuOutToRoot(draftState, _action)
+}
+
+const exportKapp: SystemKapp = {
+  type: 'SystemKapp',
+  idv0: exportIdv0,
+  shortAsciiName: ':export!',
+  legend: ':export!',
+  instruction: exportInstruction,
+}
+
+export const systemKapps: SystemKapp[] = [
+  menuUpKapp,
+  undoKapp,
+  redoKapp,
+  exportKapp,
+]
 
 export const allKapps: Kapp[] = [...userlandKapps, ...systemKapps]
 
@@ -153,6 +184,7 @@ export const listModeKapps: Kapp[] = [
   ...zoomedListOrTextKapps,
   undoKapp,
   redoKapp,
+  exportKapp,
 ]
 
 export const textModeKapps: Kapp[] = [
@@ -160,6 +192,7 @@ export const textModeKapps: Kapp[] = [
   ...zoomedListOrTextKapps,
   undoKapp,
   redoKapp,
+  exportKapp,
 ]
 
 export const KappStore: Map<string, Kapp> = new Map(

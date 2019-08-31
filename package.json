@@ -24,6 +24,7 @@
     "automerge": "^0.12.1",
     "browserfs": "^1.4.3",
     "copy-text-to-clipboard": "^2.1.0",
+    "file-saver": "^2.0.2",
     "fp-ts": "^2.0.5",
     "gatsby": "^2.13.79",
     "gatsby-plugin-manifest": "^2.2.9",
@@ -40,6 +41,7 @@
     "typeface-roboto": "^0.0.75"
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.1",
     "@types/node": "^12.7.2",
     "@types/react": "^16.9.2",
     "@types/react-dom": "^16.9.0",
