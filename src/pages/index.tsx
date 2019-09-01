@@ -15,6 +15,7 @@ import {
   makeInitialAppState,
   setupGit,
   zoomedSexp,
+  dispatchMiddleware,
 } from '../state'
 import { Keybinding } from '../types'
 
@@ -48,7 +49,7 @@ export default function App(): React.ReactNode {
     fold(
       (): void => {},
       (keybinding: Keybinding): void =>
-        dispatch({
+        dispatchMiddleware(dispatch)({
           type: 'KeyswitchUp',
           data: {
             timestamp: Date.now(),

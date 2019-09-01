@@ -10,6 +10,7 @@ import { parsePx } from '../kitchensink/purefns'
 import { reachableKapps } from '../navigation/huffman'
 import { AppAction, Kapp, Keybinding, LeftHand, AppState } from '../types'
 import { KappLegend } from './Legend'
+import { dispatchMiddleware } from '../state'
 
 const useStyles = makeStyles({
   button: {
@@ -80,7 +81,7 @@ export default function HuffmanButton({
     >
       <CardActionArea
         onMouseUp={(): void =>
-          dispatch({
+          dispatchMiddleware(dispatch)({
             type: 'KeyswitchUp',
             data: { timestamp: Date.now(), keybinding },
           })

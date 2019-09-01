@@ -53,6 +53,7 @@ export interface KeyswitchUp {
     timestamp: number
     keybinding: Keybinding
   }
+  middlewarePayload?: string
 }
 
 export interface LoadSyncRootFromBrowserGit {

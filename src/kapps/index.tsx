@@ -4,15 +4,18 @@ import { filter, map } from 'fp-ts/es6/Array'
 import {
   idv0SystemPrefix,
   idv0UserlandPrefix,
+  maxPasteLength,
   redoIdv0,
   undoIdv0,
 } from '../constants'
-import { stringSaveAs } from '../kitchensink/effectfns'
+import { devStringyAndLog, stringSaveAs } from '../kitchensink/effectfns'
 import murmurhash from '../kitchensink/murmurhash'
+import { sizeInBytes, stringClamper } from '../kitchensink/purefns'
 import { menuOut, menuOutToRoot, recomputeMenuRoot } from '../navigation'
 import {
   commitIfChanged,
   getCurrentFocusCursorIdx,
+  setFocusCursorIdx,
   updateSequenceFrequencies,
   updateTailSequenceFrequencies,
   zoomedText,
@@ -65,6 +68,28 @@ const copyCurrentSexpTextAtomToClipboard: DraftSyncRootMutator = (
   }
 }
 
+// TODO this should be an async task or something to handle effects
+function pasteInstruction(draftState: AppSyncRoot, action: AppAction): void {
+  const pastedString =
+    (action.type === 'KeyswitchUp' && action.middlewarePayload) || null
+  devStringyAndLog({ fn: 'pasteInstruction', pastedString })
+
+  const text = zoomedText(draftState)
+  if (text && text.insertAt && pastedString) {
+    const focusedCursorIdx = getCurrentFocusCursorIdx(draftState)
+    const clampedString = stringClamper(maxPasteLength - text.length)(
+      pastedString
+    )
+    text.insertAt(focusedCursorIdx, ...clampedString)
+    setFocusCursorIdx(
+      draftState,
+      text,
+      focusedCursorIdx + clampedString.length
+    )
+  }
+}
+
+export const pasteIdv0 = `${idv0UserlandPrefix}text/paste`
 export const zoomedTextOnlyKapps: UserlandKapp[] = [
   ...printableAsciiChars,
   newlineChar,
@@ -88,6 +113,13 @@ export const zoomedTextOnlyKapps: UserlandKapp[] = [
     shortAsciiName: ':copy!',
     legend: '📋:copy!',
     instruction: copyCurrentSexpTextAtomToClipboard,
+  },
+  {
+    type: 'UserlandKapp',
+    idv0: pasteIdv0,
+    shortAsciiName: ':paste!',
+    legend: '📋:paste!',
+    instruction: pasteInstruction,
   },
 ]
 

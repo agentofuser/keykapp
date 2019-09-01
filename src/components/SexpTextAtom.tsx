@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/styles'
 import * as Automerge from 'automerge'
 import { splitAt } from 'fp-ts/es6/Array'
 import * as React from 'react'
-import { wordCount } from '../kitchensink/purefns'
+import { wordCount, sizeInBytes } from '../kitchensink/purefns'
 import { getCurrentFocusCursorIdx } from '../state'
 import { AppState } from '../types'
 
@@ -36,9 +36,7 @@ function VerticalCharCursor(): React.ReactElement {
 
 function stats(text: Automerge.Text): React.ReactNode {
   const string = text.join('')
-  return `bytes: ${new Blob([string]).size}, words: ${wordCount(
-    string
-  )}\n---\n`
+  return `bytes: ${sizeInBytes(string)}, words: ${wordCount(string)}\n---\n`
 }
 
 function DirectedCharCursor({ char }: { char: string }): React.ReactElement {

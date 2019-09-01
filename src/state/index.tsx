@@ -7,7 +7,7 @@ import * as git from 'isomorphic-git'
 import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
 import { gitRepoDir, nGramRange } from '../constants'
-import { findKappById, zoomedTextOnlyKapps } from '../kapps'
+import { findKappById, zoomedTextOnlyKapps, pasteIdv0 } from '../kapps'
 import { devLog, devStringyAndLog } from '../kitchensink/effectfns'
 import { menuIn, menuOutToRoot, recomputeMenuRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
@@ -132,6 +132,29 @@ function migrateSyncRootSchema(syncRoot: AppSyncRoot): AppSyncRoot | null {
   )
 }
 
+export function dispatchMiddleware(
+  dispatch: Dispatch<AppAction>
+): (action: AppAction) => void {
+  return async (action): Promise<void> => {
+    switch (action.type) {
+      case 'KeyswitchUp':
+        const [_keyswitch, waypoint] = action.data.keybinding
+        const kappIdv0 = waypoint.value.kappIdv0
+        if (kappIdv0 === pasteIdv0) {
+          const pastedString = await navigator.clipboard.readText()
+          devStringyAndLog({ fn: 'dispatchMiddleware', pastedString })
+          dispatch({ ...action, middlewarePayload: pastedString })
+        } else {
+          dispatch(action)
+        }
+        break
+      default:
+        dispatch(action)
+        break
+    }
+  }
+}
+
 export async function loadSyncRootFromBrowserGit(
   state: AppState,
   dispatch: Dispatch<AppAction>
@@ -183,7 +206,7 @@ export async function loadSyncRootFromBrowserGit(
       syncRoot = initialSyncRoot
     } finally {
       if (syncRoot) {
-        dispatch({
+        dispatchMiddleware(dispatch)({
           type: 'LoadSyncRootFromBrowserGit',
           data: { timestamp: Date.now(), syncRoot },
         })

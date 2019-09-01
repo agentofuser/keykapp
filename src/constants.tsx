@@ -52,3 +52,5 @@ list('new')
 export const nGramRange = range(1, 8)
 
 export const gitRepoDir = '/keykapp/syncRootLog/'
+
+export const maxPasteLength = 280
