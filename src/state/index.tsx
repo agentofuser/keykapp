@@ -7,7 +7,7 @@ import * as git from 'isomorphic-git'
 import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
 import { gitRepoDir, nGramRange } from '../constants'
-import { findKappById, zoomedTextOnlyKapps, pasteIdv0 } from '../kapps'
+import { findKappById, pasteIdv0, zoomedTextOnlyKapps } from '../kapps'
 import { devLog, devStringyAndLog } from '../kitchensink/effectfns'
 import { menuIn, menuOutToRoot, recomputeMenuRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
@@ -93,6 +93,7 @@ export function makeInitialAppState(): AppState {
     waypointBreadcrumbs: [initialHuffmanRoot],
     menuIns: [],
     sequenceFrequencies: {},
+    keyUpCount: 0,
   }
 
   const initialAppState: AppState = { syncRoot, tempRoot }
@@ -410,6 +411,7 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
       }
       break
     case 'KeyswitchUp':
+      nextState.tempRoot.keyUpCount++
       const [_keyswitch, waypoint] = action.data.keybinding
       const kappIdv0 = waypoint.value.kappIdv0
       const kapp = kappIdv0 && findKappById(kappIdv0)

@@ -11,11 +11,11 @@ import { devStringyAndLog } from '../kitchensink/effectfns'
 import {
   appReducer,
   currentWaypoint,
+  dispatchMiddleware,
   loadSyncRootFromBrowserGit,
   makeInitialAppState,
   setupGit,
   zoomedSexp,
-  dispatchMiddleware,
 } from '../state'
 import { Keybinding } from '../types'
 
@@ -43,7 +43,7 @@ export default function App(): React.ReactNode {
       ? findFirst(
           ([keyswitch, _waypoint]: Keybinding): boolean =>
             keyswitch.key === event.key
-        )(layout(waypointOption))
+        )(layout(state, waypointOption))
       : none
 
     fold(

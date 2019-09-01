@@ -1,10 +1,18 @@
 import { makeStyles } from '@material-ui/styles'
-import { map, partition, reverse, sortBy, zip } from 'fp-ts/es6/Array'
+import {
+  flatten,
+  map,
+  partition,
+  partitionWithIndex,
+  reverse,
+  sortBy,
+  zip,
+} from 'fp-ts/es6/Array'
 import { fold, Option } from 'fp-ts/es6/Option'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
 import * as React from 'react'
-import { menuUpKapp } from '../kapps'
 import { allKeyswitches } from '../constants'
+import { menuUpKapp } from '../kapps'
 import { makeOrphanLeafWaypoint } from '../navigation/huffman'
 import { currentWaypoint } from '../state'
 import {
@@ -13,6 +21,7 @@ import {
   Keybinding,
   Keyswitch,
   Layout,
+  Menu,
   RightHand,
   Waypoint,
 } from '../types'
@@ -36,6 +45,7 @@ const useStyles = makeStyles({
 })
 
 function loadBalancer(
+  state: AppState,
   keyswitches: Keyswitch[],
   waypoints: Waypoint[]
 ): Layout {
@@ -43,6 +53,14 @@ function loadBalancer(
   // reverse so that if there are less waypoints than keyswitches, we put those
   // waypoints at the center, not all at the left
   const sortedDescWeightWaypoints = reverse(waypoints).concat(zoomOutWaypoint)
+
+  // alternate between right and left hands
+  const { left, right } = partitionWithIndex(
+    (i: number, _waypoint: Menu): boolean => i % 2 === 0
+  )(sortedDescWeightWaypoints)
+  const sideBalancedWaypoints = flatten(
+    state.tempRoot.keyUpCount % 2 === 0 ? zip(left, right) : zip(right, left)
+  )
 
   let keybindings: Keybinding[] = []
 
@@ -53,7 +71,7 @@ function loadBalancer(
   const sortedAscCostKeyswitches = sortBy([lowestActuationCost])(keyswitches)
 
   keybindings = keybindings.concat(
-    zip(sortedAscCostKeyswitches, sortedDescWeightWaypoints)
+    zip(sortedAscCostKeyswitches, sideBalancedWaypoints)
   )
 
   const ascendingIndex = ord.contramap(
@@ -65,11 +83,14 @@ function loadBalancer(
   return keybindings
 }
 
-export function layout(waypointOption: Option<Waypoint>): Layout {
+export function layout(
+  state: AppState,
+  waypointOption: Option<Waypoint>
+): Layout {
   return fold(
     (): Layout => [],
     (waypoint: Waypoint): Layout =>
-      loadBalancer(allKeyswitches, waypoint.forest)
+      loadBalancer(state, allKeyswitches, waypoint.forest)
   )(waypointOption)
 }
 
@@ -86,7 +107,7 @@ export default function Keypad({
 
   const { left, right } = partition(
     (keybinding: Keybinding): boolean => keybinding[0].hand === RightHand
-  )(layout(currentWaypoint(state)))
+  )(layout(state, currentWaypoint(state)))
 
   const hand = map(
     (keybinding: Keybinding): React.ReactElement => (

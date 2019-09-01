@@ -99,6 +99,7 @@ export interface AppTempRoot {
   waypointBreadcrumbs: NonEmptyArray<Waypoint>
   menuIns: Waypoint[]
   sequenceFrequencies: { [key: string]: number }
+  keyUpCount: number
 }
 
 export interface AppState {
