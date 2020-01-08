@@ -18,6 +18,9 @@
     "up": "ncu -u && yarn",
     "watch": "nodemon"
   },
+  "engines": {
+    "node": ">=12"
+  },
   "dependencies": {
     "@material-ui/core": "^4.8.3",
     "@material-ui/icons": "^4.5.1",
