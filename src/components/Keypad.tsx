@@ -59,7 +59,9 @@ function loadBalancer(
     (i: number, _waypoint: Menu): boolean => i % 2 === 0
   )(sortedDescWeightWaypoints)
   const sideBalancedWaypoints = flatten(
-    state.tempRoot.keyUpCount % 2 === 0 ? zip(left, right) : zip(right, left)
+    // FIXME replace with finer-grained load-balancing, not whole hands.
+    // state.tempRoot.keyUpCount % 2 === 0 ? zip(left, right) : zip(right, left)
+    zip(left, right)
   )
 
   let keybindings: Keybinding[] = []
