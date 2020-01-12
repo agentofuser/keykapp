@@ -102,7 +102,7 @@ export function makeInitialAppState(): AppState {
 
 export function makeInitialSyncRoot(): AppSyncRoot {
   return Automerge.from({
-    sexp: tutorial,
+    sexp: [],
     sexpMetadata: {},
     sexpListZoomPath: [],
     sexpZoomCursorIdx: 0,
