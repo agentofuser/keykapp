@@ -49,7 +49,7 @@ const list = (name: string): void => {
 }
 list('new')
 
-export const nGramRange = range(1, 8)
+export const nGramRange = range(1, 1)
 
 export const gitRepoDir = '/keykapp/syncRootLog/'
 
