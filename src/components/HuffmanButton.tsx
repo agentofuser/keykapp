@@ -8,9 +8,16 @@ import { getKappById, kappColor } from '../kapps'
 import { getStyle } from '../kitchensink/effectfns'
 import { parsePx } from '../kitchensink/purefns'
 import { reachableKapps } from '../navigation/huffman'
-import { AppAction, Kapp, Keybinding, LeftHand, AppState } from '../types'
-import { KappLegend } from './Legend'
 import { dispatchMiddleware } from '../state'
+import {
+  AppAction,
+  AppState,
+  Kapp,
+  Keybinding,
+  LeftHand,
+  RightHand,
+} from '../types'
+import { KappLegend } from './Legend'
 
 const useStyles = makeStyles({
   button: {
@@ -49,8 +56,9 @@ export default function HuffmanButton({
   keybinding,
 }: ButtonProps): React.ReactElement {
   const classes = useStyles()
-  const textAlign = keybinding[0].hand === LeftHand ? 'right' : 'left'
-  const visited = state.tempRoot.menuIns.includes(keybinding[1])
+  const [keyswitch, menu] = keybinding
+  const textAlign = keyswitch.hand === LeftHand ? 'right' : 'left'
+  const visited = state.tempRoot.menuIns.includes(menu)
 
   const [multilegendDivRef, multilegendDivSize] = useDimensions()
   const multilegendPRef = React.useRef(null)
@@ -73,11 +81,15 @@ export default function HuffmanButton({
     }
   })
 
-  const kappIdv0 = keybinding[1].value.kappIdv0
+  const kappIdv0 = menu.value.kappIdv0
   return (
     <Card
       className={classes.button}
       classes={{ root: visited ? classes.visited : '' }}
+      style={{
+        gridColumn:
+          keyswitch.index + 1 - (keyswitch.hand === RightHand ? 4 : 0),
+      }}
     >
       <CardActionArea
         onMouseUp={(): void =>
@@ -118,7 +130,7 @@ export default function HuffmanButton({
                     </span>{' '}
                   </React.Fragment>
                 )
-              )(reachableKapps(keybinding[1]))}
+              )(reachableKapps(menu))}
             </p>
           </div>
         )}

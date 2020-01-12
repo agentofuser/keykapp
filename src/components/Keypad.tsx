@@ -1,19 +1,9 @@
 import { makeStyles } from '@material-ui/styles'
-import {
-  flatten,
-  map,
-  partition,
-  partitionWithIndex,
-  reverse,
-  sortBy,
-  zip,
-} from 'fp-ts/es6/Array'
+import { map, partition, reverse, sortBy, zip } from 'fp-ts/es6/Array'
 import { fold, Option } from 'fp-ts/es6/Option'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
 import * as React from 'react'
 import { allKeyswitches } from '../constants'
-import { menuUpKapp } from '../kapps'
-import { makeOrphanLeafWaypoint } from '../navigation/huffman'
 import { currentWaypoint } from '../state'
 import {
   AppAction,
@@ -21,7 +11,6 @@ import {
   Keybinding,
   Keyswitch,
   Layout,
-  Menu,
   RightHand,
   Waypoint,
 } from '../types'
@@ -31,15 +20,15 @@ const useStyles = makeStyles({
   keypad: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
-    gridColumnGap: '1em',
+    gridColumnGap: '8em',
     justifyContent: 'center',
     height: '50%',
   },
   hand: {
     height: '100%',
     display: 'grid',
-    gridTemplateColumns: 'repeat(1, 1fr)',
-    gridTemplateRows: 'repeat(2, 1fr)',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gridTemplateRows: 'repeat(1, 1fr)',
     gridRowGap: '1em',
   },
 })
@@ -49,20 +38,10 @@ function loadBalancer(
   keyswitches: Keyswitch[],
   waypoints: Waypoint[]
 ): Layout {
-  const zoomOutWaypoint = makeOrphanLeafWaypoint(null, menuUpKapp)
   // reverse so that if there are less waypoints than keyswitches, we put those
   // waypoints at the center, not all at the left
-  const sortedDescWeightWaypoints = reverse(waypoints).concat(zoomOutWaypoint)
-
-  // alternate between right and left hands
-  const { left, right } = partitionWithIndex(
-    (i: number, _waypoint: Menu): boolean => i % 2 === 0
-  )(sortedDescWeightWaypoints)
-  const sideBalancedWaypoints = flatten(
-    // FIXME replace with finer-grained load-balancing, not whole hands.
-    // state.tempRoot.keyUpCount % 2 === 0 ? zip(left, right) : zip(right, left)
-    zip(left, right)
-  )
+  const sortedDescWeightWaypoints = reverse(waypoints)
+  // const sortedDescWeightWaypoints = waypoints
 
   let keybindings: Keybinding[] = []
 
@@ -73,7 +52,7 @@ function loadBalancer(
   const sortedAscCostKeyswitches = sortBy([lowestActuationCost])(keyswitches)
 
   keybindings = keybindings.concat(
-    zip(sortedAscCostKeyswitches, sideBalancedWaypoints)
+    zip(sortedAscCostKeyswitches, sortedDescWeightWaypoints)
   )
 
   const ascendingIndex = ord.contramap(
@@ -112,20 +91,23 @@ export default function Keypad({
   )(layout(state, currentWaypoint(state)))
 
   const hand = map(
-    (keybinding: Keybinding): React.ReactElement => (
-      <HuffmanButton
-        state={state}
-        dispatch={dispatch}
-        keybinding={keybinding}
-        key={`react-collection-key-${keybinding[0].key}`}
-      ></HuffmanButton>
-    )
+    (keybinding: Keybinding): React.ReactElement => {
+      const keyswitch = keybinding[0]
+      return (
+        <HuffmanButton
+          state={state}
+          dispatch={dispatch}
+          keybinding={keybinding}
+          key={`react-collection-key-${keyswitch.key}`}
+        ></HuffmanButton>
+      )
+    }
   )
 
   return (
     <div className={classes.keypad}>
       <div className={classes.hand}>{hand(left)}</div>
-      <div className={classes.hand}>{hand(right).reverse()}</div>
+      <div className={classes.hand}>{hand(right)}</div>
     </div>
   )
 }

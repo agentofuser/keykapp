@@ -71,9 +71,10 @@ function huffmanWeightFromKapp(state: AppState | null, kapp: Kapp): number {
     manualWeight = manualWeights[idv0] || 1
   }
 
-  const sequenceWeight = reduce(0, sumReducer)(
-    mapWithIndex((i, n: number): number => n * 10 ** (i + 2))(sequenceCounts)
-  )
+  const sequenceWeight = reduce(
+    0,
+    sumReducer
+  )(mapWithIndex((i, n: number): number => n * 10 ** (i + 2))(sequenceCounts))
 
   const finalWeight = twitterCount + manualWeight + sequenceWeight
 
@@ -196,8 +197,8 @@ interface NewHuffmanRootParams {
 
 export function newHuffmanRoot({
   state = null,
-  // subtract one to leave a keyswitch for system kapps
-  width = allKeyswitches.length - 1,
+  // subtract two to leave keyswitches for system kapps
+  width = allKeyswitches.length - 2,
   kapps,
 }: NewHuffmanRootParams): Waypoint {
   const huffmanOrphanLeaves = map(
