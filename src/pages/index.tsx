@@ -39,6 +39,9 @@ export default function App(): React.ReactNode {
     event.preventDefault()
     const waypointOption = currentWaypoint(state)
     const waypoint = toNullable(waypointOption)
+    // FIXME: move the call to layout() out of the loop
+    // Why is layout() being called at all? Shouldn't this have been calculated
+    // and stored upon rendering the frame?
     const keybinding: Option<Keybinding> = waypoint
       ? findFirst(
           ([keyswitch, _waypoint]: Keybinding): boolean =>
