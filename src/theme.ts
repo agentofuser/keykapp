@@ -17,7 +17,7 @@ const theme = createMuiTheme({
       main: red.A400,
     },
     background: {
-      default: '#fff',
+      default: '#eee',
     },
   },
   // disable all animations, transitions, and the ripple effect
