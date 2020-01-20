@@ -12,8 +12,8 @@ import { AppAction, AppSyncRoot, Sexp, UserlandKapp } from '../types'
 
 function textNew(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   const list: Automerge.List<Sexp> = lastListInZoomPath(draftSyncRoot)
-  let zoomCursorIdx = draftSyncRoot.sexpZoomCursorIdx
-  let zoomLevel = zoomCursorIdx > 0 ? 'atom' : 'list'
+  const zoomCursorIdx = draftSyncRoot.sexpZoomCursorIdx
+  const zoomLevel = zoomCursorIdx > 0 ? 'atom' : 'list'
 
   if (zoomLevel === 'list') {
     const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
@@ -137,7 +137,7 @@ function zoomIn(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
 }
 
 function zoomOut(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
-  let zoomCursorIdx = draftSyncRoot.sexpZoomCursorIdx
+  const zoomCursorIdx = draftSyncRoot.sexpZoomCursorIdx
 
   if (zoomCursorIdx > 0) {
     draftSyncRoot.sexpZoomCursorIdx = 0
