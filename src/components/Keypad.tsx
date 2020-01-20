@@ -1,9 +1,10 @@
+import { Button } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import { map, partition, reverse, sortBy, zip } from 'fp-ts/es6/Array'
 import { fold, Option } from 'fp-ts/es6/Option'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
 import * as React from 'react'
-import { allKeyswitches } from '../constants'
+import { homerowKeyswitches } from '../constants'
 import { currentWaypoint } from '../state'
 import {
   AppAction,
@@ -19,17 +20,32 @@ import HuffmanButton from './HuffmanButton'
 const useStyles = makeStyles({
   keypad: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
+    gridTemplateRows: '1fr 1fr',
+    gridTemplateColumns: '1fr 1fr',
+    gridTemplateAreas: `
+      'leftHand rightHand'
+      'spacebar spacebar'
+    `,
     gridColumnGap: '8em',
+    gridRowGap: '2em',
     justifyContent: 'center',
-    height: '50%',
+    height: '30%',
   },
   hand: {
     height: '100%',
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)',
     gridTemplateRows: 'repeat(1, 1fr)',
-    gridRowGap: '1em',
+    gridColumnGap: '1em',
+  },
+  leftHand: {
+    gridArea: 'leftHand',
+  },
+  rightHand: {
+    gridArea: 'rightHand',
+  },
+  spacebar: {
+    gridArea: 'spacebar',
   },
 })
 
@@ -71,7 +87,7 @@ export function layout(
   return fold(
     (): Layout => [],
     (waypoint: Waypoint): Layout =>
-      loadBalancer(state, allKeyswitches, waypoint.forest)
+      loadBalancer(state, homerowKeyswitches, waypoint.forest)
   )(waypointOption)
 }
 
@@ -106,8 +122,13 @@ export default function Keypad({
 
   return (
     <div className={classes.keypad}>
-      <div className={classes.hand}>{hand(left)}</div>
-      <div className={classes.hand}>{hand(right)}</div>
+      <div className={[classes.hand, classes.leftHand].join(' ')}>
+        {hand(left)}
+      </div>
+      <div className={[classes.hand, classes.rightHand].join(' ')}>
+        {hand(right)}
+      </div>
+      <Button className={classes.spacebar}>:keypad-up</Button>
     </div>
   )
 }

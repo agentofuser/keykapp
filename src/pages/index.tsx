@@ -37,29 +37,38 @@ export default function App(): React.ReactNode {
   function onKeyUp(event: KeyboardEvent): void {
     event.stopPropagation()
     event.preventDefault()
-    const waypointOption = currentWaypoint(state)
-    const waypoint = toNullable(waypointOption)
-    // FIXME: move the call to layout() out of the loop
-    // Why is layout() being called at all? Shouldn't this have been calculated
-    // and stored upon rendering the frame?
-    const keybinding: Option<Keybinding> = waypoint
-      ? findFirst(
-          ([keyswitch, _waypoint]: Keybinding): boolean =>
-            keyswitch.key === event.key
-        )(layout(state, waypointOption))
-      : none
+    if (event.key == ' ') {
+      dispatchMiddleware(dispatch)({
+        type: 'KeypadUp',
+        data: {
+          timestamp: Date.now(),
+        },
+      })
+    } else {
+      const waypointOption = currentWaypoint(state)
+      const waypoint = toNullable(waypointOption)
+      // FIXME: move the call to layout() out of the loop
+      // Why is layout() being called at all? Shouldn't this have been calculated
+      // and stored upon rendering the frame?
+      const keybinding: Option<Keybinding> = waypoint
+        ? findFirst(
+            ([keyswitch, _waypoint]: Keybinding): boolean =>
+              keyswitch.key === event.key
+          )(layout(state, waypointOption))
+        : none
 
-    fold(
-      (): void => {},
-      (keybinding: Keybinding): void =>
-        dispatchMiddleware(dispatch)({
-          type: 'KeyswitchUp',
-          data: {
-            timestamp: Date.now(),
-            keybinding,
-          },
-        })
-    )(keybinding)
+      fold(
+        (): void => {},
+        (keybinding: Keybinding): void =>
+          dispatchMiddleware(dispatch)({
+            type: 'KeyswitchUp',
+            data: {
+              timestamp: Date.now(),
+              keybinding,
+            },
+          })
+      )(keybinding)
+    }
   }
 
   React.useEffect((): void => {

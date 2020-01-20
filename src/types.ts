@@ -11,7 +11,7 @@ export const RightHand: RightHand = 'RightHand'
 export type Hand = LeftHand | RightHand
 export interface Keyswitch {
   index: number
-  hand: Hand
+  hand?: Hand
   key: React.Key
   actuationCost: number
 }
@@ -64,7 +64,14 @@ export interface LoadSyncRootFromBrowserGit {
   }
 }
 
-export type AppAction = KeyswitchUp | LoadSyncRootFromBrowserGit
+export interface KeypadUp {
+  type: 'KeypadUp'
+  data: {
+    timestamp: number
+  }
+}
+
+export type AppAction = KeyswitchUp | LoadSyncRootFromBrowserGit | KeypadUp
 
 // TODO figure out how to define a recursive type like
 // type TextTree = Automerge.List<TextTreeItem>

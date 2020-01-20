@@ -450,6 +450,10 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
 
       break
 
+    case 'KeypadUp':
+      nextState = menuUpKapp.instruction(nextState, action)
+      break
+
     default:
       break
   }

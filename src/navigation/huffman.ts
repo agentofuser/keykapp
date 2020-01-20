@@ -14,7 +14,7 @@ import { fold, fromNullable } from 'fp-ts/es6/Option'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
 import { foldMap as foldMapTree, make } from 'fp-ts/es6/Tree'
 import {
-  allKeyswitches,
+  homerowKeyswitches,
   asciiIdv0Path,
   manualWeights,
   nGramRange,
@@ -197,8 +197,7 @@ interface NewHuffmanRootParams {
 
 export function newHuffmanRoot({
   state = null,
-  // subtract two to leave keyswitches for system kapps
-  width = allKeyswitches.length - 2,
+  width = homerowKeyswitches.length,
   kapps,
 }: NewHuffmanRootParams): Waypoint {
   const huffmanOrphanLeaves = map(

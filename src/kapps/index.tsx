@@ -133,7 +133,7 @@ export const menuUpKapp: SystemKapp = {
   type: 'SystemKapp',
   idv0: `${idv0SystemPrefix}menu/up`,
   shortAsciiName: ':menu-up',
-  legend: '🔼:menu-up',
+  legend: '🔼:keypad-prev',
   instruction: menuOut,
 }
 

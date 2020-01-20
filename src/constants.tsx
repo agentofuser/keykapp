@@ -1,7 +1,7 @@
 import { range } from 'fp-ts/es6/Array'
 import { Keyswitch, LeftHand, RightHand } from './types'
 
-export const allKeyswitches: Keyswitch[] = [
+export const homerowKeyswitches: Keyswitch[] = [
   { index: 0, key: 'a', actuationCost: 4, hand: LeftHand },
   { index: 1, key: 's', actuationCost: 3, hand: LeftHand },
   { index: 2, key: 'd', actuationCost: 2, hand: LeftHand },
@@ -11,6 +11,12 @@ export const allKeyswitches: Keyswitch[] = [
   { index: 6, key: 'l', actuationCost: 3, hand: RightHand },
   { index: 7, key: ';', actuationCost: 4, hand: RightHand },
 ]
+
+export const spacebarKeyswitch: Keyswitch = {
+  index: 8,
+  key: ' ',
+  actuationCost: 1,
+}
 
 export const idv0UserlandPrefix = '/userland/kapp/'
 export const asciiIdv0Path = `${idv0UserlandPrefix}literals/ascii/`
