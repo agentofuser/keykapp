@@ -7,7 +7,12 @@ import * as git from 'isomorphic-git'
 import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
 import { gitRepoDir, nGramRange } from '../constants'
-import { findKappById, pasteIdv0, zoomedTextOnlyKapps } from '../kapps'
+import {
+  findKappById,
+  menuUpKapp,
+  pasteIdv0,
+  zoomedTextOnlyKapps,
+} from '../kapps'
 import { devLog, devStringyAndLog } from '../kitchensink/effectfns'
 import { menuIn, menuOutToRoot, recomputeMenuRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
@@ -23,7 +28,6 @@ import {
   SexpList,
   Waypoint,
 } from '../types'
-import tutorial from './tutorial'
 
 export function setupGit(): Promise<boolean> {
   return new Promise((resolve, reject): void => {

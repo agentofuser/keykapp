@@ -184,6 +184,14 @@ export const zoomedListOnlyKapps: UserlandKapp[] = [
   },
 ]
 
+export const zoomOutKapp: UserlandKapp = {
+  type: 'UserlandKapp',
+  idv0: `${idv0UserlandPrefix}zoom/out`,
+  shortAsciiName: ':zoom-out',
+  legend: '👋:zoom-out',
+  instruction: zoomOut,
+}
+
 export const zoomedListOrTextKapps: UserlandKapp[] = [
   {
     type: 'UserlandKapp',
@@ -192,13 +200,7 @@ export const zoomedListOrTextKapps: UserlandKapp[] = [
     legend: '🗑:delete',
     instruction: focusedDelete,
   },
-  {
-    type: 'UserlandKapp',
-    idv0: `${idv0UserlandPrefix}zoom/out`,
-    shortAsciiName: ':zoom-out',
-    legend: '👋:zoom-out',
-    instruction: zoomOut,
-  },
+  zoomOutKapp,
   {
     type: 'UserlandKapp',
     idv0: `${idv0UserlandPrefix}focus/next`,

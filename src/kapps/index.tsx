@@ -1,126 +1,123 @@
 import * as Automerge from 'automerge'
-import * as copy from 'copy-text-to-clipboard'
 import { filter, map } from 'fp-ts/es6/Array'
 import {
   idv0SystemPrefix,
   idv0UserlandPrefix,
-  maxPasteLength,
   redoIdv0,
   undoIdv0,
 } from '../constants'
-import { devStringyAndLog, stringSaveAs } from '../kitchensink/effectfns'
+import { stringSaveAs } from '../kitchensink/effectfns'
 import murmurhash from '../kitchensink/murmurhash'
-import { sizeInBytes, stringClamper } from '../kitchensink/purefns'
 import { menuOut, menuOutToRoot, recomputeMenuRoot } from '../navigation'
 import {
   commitIfChanged,
-  getCurrentFocusCursorIdx,
-  setFocusCursorIdx,
   updateSequenceFrequencies,
   updateTailSequenceFrequencies,
-  zoomedText,
 } from '../state'
 import {
   AppAction,
   AppState,
   AppSyncRoot,
-  DraftSyncRootMutator,
   Kapp,
   SystemKapp,
   UserlandKapp,
 } from '../types'
 import { newlineChar, printableAsciiChars } from './literals'
-import { zoomedListOnlyKapps, zoomedListOrTextKapps } from './Sexp'
+import {
+  zoomedListOnlyKapps,
+  zoomedListOrTextKapps,
+  zoomOutKapp,
+} from './Sexp'
 
-const mapFocusedChar = (
-  charMapper: (char: string) => string
-): DraftSyncRootMutator => (
-  draftState: AppSyncRoot,
-  _action: AppAction
-): void => {
-  const text = zoomedText(draftState)
-  if (!text) return
-  const focusedCursorIdx = getCurrentFocusCursorIdx(draftState)
-  const charIdx = focusedCursorIdx - 1
+// const mapFocusedChar = (
+//   charMapper: (char: string) => string
+// ): DraftSyncRootMutator => (
+//   draftState: AppSyncRoot,
+//   _action: AppAction
+// ): void => {
+//   const text = zoomedText(draftState)
+//   if (!text) return
+//   const focusedCursorIdx = getCurrentFocusCursorIdx(draftState)
+//   const charIdx = focusedCursorIdx - 1
 
-  if (text && focusedCursorIdx > 0 && charIdx < text.length) {
-    const focusedChar = text.get(charIdx)
+//   if (text && focusedCursorIdx > 0 && charIdx < text.length) {
+//     const focusedChar = text.get(charIdx)
 
-    if (text.deleteAt) {
-      text.deleteAt(charIdx)
-      const replacementChar = charMapper(focusedChar)
-      if (text.insertAt && replacementChar)
-        text.insertAt(charIdx, replacementChar)
-    }
-  }
-}
-
-// TODO this should be an async task or something to handle effects
-const copyCurrentSexpTextAtomToClipboard: DraftSyncRootMutator = (
-  draftState,
-  _action
-): void => {
-  let copied = false
-  const text = zoomedText(draftState)
-  if (text) copied = copy(text.join(''))
-  if (!copied) {
-    console.error('Could not copy to clipboard.')
-  }
-}
+//     if (text.deleteAt) {
+//       text.deleteAt(charIdx)
+//       const replacementChar = charMapper(focusedChar)
+//       if (text.insertAt && replacementChar)
+//         text.insertAt(charIdx, replacementChar)
+//     }
+//   }
+// }
 
 // TODO this should be an async task or something to handle effects
-function pasteInstruction(draftState: AppSyncRoot, action: AppAction): void {
-  const pastedString =
-    (action.type === 'KeyswitchUp' && action.middlewarePayload) || null
-  devStringyAndLog({ fn: 'pasteInstruction', pastedString })
+// const copyCurrentSexpTextAtomToClipboard: DraftSyncRootMutator = (
+//   draftState,
+//   _action
+// ): void => {
+//   let copied = false
+//   const text = zoomedText(draftState)
+//   if (text) copied = copy(text.join(''))
+//   if (!copied) {
+//     console.error('Could not copy to clipboard.')
+//   }
+// }
 
-  const text = zoomedText(draftState)
-  if (text && text.insertAt && pastedString) {
-    const focusedCursorIdx = getCurrentFocusCursorIdx(draftState)
-    const clampedString = stringClamper(maxPasteLength - text.length)(
-      pastedString
-    )
-    text.insertAt(focusedCursorIdx, ...clampedString)
-    setFocusCursorIdx(
-      draftState,
-      text,
-      focusedCursorIdx + clampedString.length
-    )
-  }
-}
+// TODO this should be an async task or something to handle effects
+// function pasteInstruction(draftState: AppSyncRoot, action: AppAction): void {
+//   const pastedString =
+//     (action.type === 'KeyswitchUp' && action.middlewarePayload) || null
+//   devStringyAndLog({ fn: 'pasteInstruction', pastedString })
+
+//   const text = zoomedText(draftState)
+//   if (text && text.insertAt && pastedString) {
+//     const focusedCursorIdx = getCurrentFocusCursorIdx(draftState)
+//     const clampedString = stringClamper(maxPasteLength - text.length)(
+//       pastedString
+//     )
+//     text.insertAt(focusedCursorIdx, ...clampedString)
+//     setFocusCursorIdx(
+//       draftState,
+//       text,
+//       focusedCursorIdx + clampedString.length
+//     )
+//   }
+// }
 
 export const pasteIdv0 = `${idv0UserlandPrefix}text/paste`
 export const zoomedTextOnlyKapps: UserlandKapp[] = [
   ...printableAsciiChars,
   newlineChar,
-  {
-    type: 'UserlandKapp',
-    idv0: `${idv0UserlandPrefix}char/upcase`,
-    shortAsciiName: ':upcase',
-    legend: ':upcase',
-    instruction: mapFocusedChar((char: string): string => char.toUpperCase()),
-  },
-  {
-    type: 'UserlandKapp',
-    idv0: `${idv0UserlandPrefix}char/downcase`,
-    shortAsciiName: ':downcase',
-    legend: ':downcase',
-    instruction: mapFocusedChar((char: string): string => char.toLowerCase()),
-  },
-  {
-    type: 'UserlandKapp',
-    idv0: `${idv0UserlandPrefix}text/copy`,
-    shortAsciiName: ':copy!',
-    legend: '📋:copy!',
-    instruction: copyCurrentSexpTextAtomToClipboard,
-  },
-  {
-    type: 'UserlandKapp',
-    idv0: pasteIdv0,
-    shortAsciiName: ':paste!',
-    legend: '📋:paste!',
-    instruction: pasteInstruction,
-  },
+  // {
+  //   type: 'UserlandKapp',
+  //   idv0: `${idv0UserlandPrefix}char/upcase`,
+  //   shortAsciiName: ':upcase',
+  //   legend: ':upcase',
+  //   instruction: mapFocusedChar((char: string): string => char.toUpperCase()),
+  // },
+  // {
+  //   type: 'UserlandKapp',
+  //   idv0: `${idv0UserlandPrefix}char/downcase`,
+  //   shortAsciiName: ':downcase',
+  //   legend: ':downcase',
+  //   instruction: mapFocusedChar((char: string): string => char.toLowerCase()),
+  // },
+  // {
+  //   type: 'UserlandKapp',
+  //   idv0: `${idv0UserlandPrefix}text/copy`,
+  //   shortAsciiName: ':copy!',
+  //   legend: '📋:copy!',
+  //   instruction: copyCurrentSexpTextAtomToClipboard,
+  // },
+  // {
+  //   type: 'UserlandKapp',
+  //   idv0: pasteIdv0,
+  //   shortAsciiName: ':paste!',
+  //   legend: '📋:paste!',
+  //   instruction: pasteInstruction,
+  // },
 ]
 
 export const userlandKapps: UserlandKapp[] = [
@@ -282,11 +279,12 @@ export const listModeKapps: Kapp[] = [
 
 export const textModeKapps: Kapp[] = [
   ...zoomedTextOnlyKapps,
-  ...zoomedListOrTextKapps,
-  undoKapp,
-  redoKapp,
-  exportKapp,
-  importKapp,
+  // ...zoomedListOrTextKapps,
+  // undoKapp,
+  // redoKapp,
+  // exportKapp,
+  // importKapp,
+  zoomOutKapp,
 ]
 
 export const KappStore: Map<string, Kapp> = new Map(
