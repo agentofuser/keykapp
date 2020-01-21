@@ -952,6 +952,21 @@
   dependencies:
     "@hapi/hoek" "8.x.x"
 
+"@isomorphic-git/idb-keyval@^3.3.1":
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/@isomorphic-git/idb-keyval/-/idb-keyval-3.3.1.tgz#e7129c89e8657ef1eba9022c1020c518437d8a98"
+  integrity sha512-1KoEHIlzNKzX1I5c6wKTB9hjf4pGfcAKRha2ct32v4hsqYcKGy5e8escHbdjhwcKU1Xzm9vcblwP1yeWb0O+lw==
+
+"@isomorphic-git/lightning-fs@^3.4.1":
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/@isomorphic-git/lightning-fs/-/lightning-fs-3.4.1.tgz#ed2e223b41eb9e02461a56c195d1c3ba281bbd18"
+  integrity sha512-S+BafpUwav0WM0g1QZnEMaHlGJ1eS4+pB3DaMdBxSqQb0upcE4edfRnf3+6xucThekU+ie+SHhO3S4VlO7O6Yw==
+  dependencies:
+    "@isomorphic-git/idb-keyval" "^3.3.1"
+    isomorphic-textencoder "1.0.1"
+    just-debounce-it "1.1.0"
+    just-once "1.1.0"
+
 "@material-ui/core@^4.8.3":
   version "4.8.3"
   resolved "https://registry.yarnpkg.com/@material-ui/core/-/core-4.8.3.tgz#858f758b26d8417eb39310f07fb9d7a72beb8b03"
@@ -1897,7 +1912,7 @@ async@1.5.2:
   resolved "https://registry.npmjs.org/async/-/async-1.5.2.tgz#ec6a61ae56480c0c3cb241c95618e20892f9672a"
   integrity sha1-7GphrlZIDAw8skHJVhjiCJL5Zyo=
 
-async@^2.1.4, async@^2.6.2:
+async@^2.6.2:
   version "2.6.3"
   resolved "https://registry.npmjs.org/async/-/async-2.6.3.tgz#d72625e2344a3656e3a3ad4fa749fa83299d82ff"
   integrity sha512-zflvls11DCy+dQWzTW2dzuilv8Z5X/pjfmZOWba6TNIVDm+2UDaJmXSOXlasHKfNBs8oo3M0aT50fDEWfKZjXg==
@@ -2320,14 +2335,6 @@ brorand@^1.0.1:
   version "1.1.0"
   resolved "https://registry.npmjs.org/brorand/-/brorand-1.1.0.tgz#12c25efe40a45e3c323eb8675a0a0ce57b22371f"
   integrity sha1-EsJe/kCkXjwyPrhnWgoM5XsiNx8=
-
-browserfs@^1.4.3:
-  version "1.4.3"
-  resolved "https://registry.npmjs.org/browserfs/-/browserfs-1.4.3.tgz#92ffc6063967612daccdb8566d3fc03f521205fb"
-  integrity sha512-tz8HClVrzTJshcyIu8frE15cjqjcBIu15Bezxsvl/i+6f59iNCN3kznlWjz0FEb3DlnDx3gW5szxeT6D1x0s0w==
-  dependencies:
-    async "^2.1.4"
-    pako "^1.0.4"
 
 browserify-aes@^1.0.0, browserify-aes@^1.0.4:
   version "1.2.0"
@@ -4774,6 +4781,11 @@ fast-levenshtein@^2.0.6, fast-levenshtein@~2.0.6:
   resolved "https://registry.npmjs.org/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
   integrity sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
 
+fast-text-encoding@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/fast-text-encoding/-/fast-text-encoding-1.0.0.tgz#3e5ce8293409cfaa7177a71b9ca84e1b1e6f25ef"
+  integrity sha512-R9bHCvweUxxwkDwhjav5vxpFvdPGlVngtqmx4pIZfSUhM/Q4NiIUHB456BAf+Q1Nwu3HEZYONtu+Rya+af4jiQ==
+
 fastparse@^1.1.1:
   version "1.1.2"
   resolved "https://registry.npmjs.org/fastparse/-/fastparse-1.1.2.tgz#91728c5a5942eced8531283c79441ee4122c35a9"
@@ -6879,6 +6891,13 @@ isomorphic-git@^0.72.1:
     sha.js "^2.4.9"
     simple-get "^3.0.2"
 
+isomorphic-textencoder@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/isomorphic-textencoder/-/isomorphic-textencoder-1.0.1.tgz#38dcd3b4416d29cd33e274f64b99ae567cd15e83"
+  integrity sha512-676hESgHullDdHDsj469hr+7t3i/neBKU9J7q1T4RHaWwLAsaQnywC0D1dIUId0YZ+JtVrShzuBk1soo0+GVcQ==
+  dependencies:
+    fast-text-encoding "^1.0.0"
+
 isurl@^1.0.0-alpha5:
   version "1.0.0"
   resolved "https://registry.npmjs.org/isurl/-/isurl-1.0.0.tgz#b27f4f49f3cdaa3ea44a0a5b7f3462e6edc39d67"
@@ -7107,6 +7126,16 @@ jsx-ast-utils@^2.2.3:
   dependencies:
     array-includes "^3.0.3"
     object.assign "^4.1.0"
+
+just-debounce-it@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/just-debounce-it/-/just-debounce-it-1.1.0.tgz#8e92578effc155358a44f458c52ffbee66983bef"
+  integrity sha512-87Nnc0qZKgBZuhFZjYVjSraic0x7zwjhaTMrCKlj0QYKH6lh0KbFzVnfu6LHan03NO7J8ygjeBeD0epejn5Zcg==
+
+just-once@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/just-once/-/just-once-1.1.0.tgz#fe81a185ebaeeb0947a7e705bf01cb6808db0ad8"
+  integrity sha512-+rZVpl+6VyTilK7vB/svlMPil4pxqIJZkbnN7DKZTOzyXfun6ZiFeq2Pk4EtCEHZ0VU4EkdFzG8ZK5F3PErcDw==
 
 keyv@3.0.0:
   version "3.0.0"
@@ -8722,7 +8751,7 @@ pacote@^10.2.0:
     tar "^5.0.5"
     which "^2.0.2"
 
-pako@^1.0.10, pako@^1.0.4, pako@~1.0.5:
+pako@^1.0.10, pako@~1.0.5:
   version "1.0.10"
   resolved "https://registry.npmjs.org/pako/-/pako-1.0.10.tgz#4328badb5086a426aa90f541977d4955da5c9732"
   integrity sha512-0DTvPVU3ed8+HNXOu5Bs+o//Mbdj9VNQMUOe9oKCwh8l0GNwpTDMKCWbRjgtD291AWnkAgkqA/LOnQS8AmS1tw==

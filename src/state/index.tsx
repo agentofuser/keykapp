@@ -1,5 +1,5 @@
+import * as FS from '@isomorphic-git/lightning-fs'
 import * as Automerge from 'automerge'
-import * as BrowserFS from 'browserfs'
 import { last, map, reduce } from 'fp-ts/es6/Array'
 import { head } from 'fp-ts/es6/NonEmptyArray'
 import { Option } from 'fp-ts/es6/Option'
@@ -29,40 +29,15 @@ import {
   Waypoint,
 } from '../types'
 
-export function setupGit(): Promise<boolean> {
-  return new Promise((resolve, reject): void => {
-    console.info('Configuring BrowserFS...')
-    BrowserFS.configure(
-      {
-        fs: 'AsyncMirror',
-        options: {
-          sync: { fs: 'InMemory' },
-          async: {
-            fs: 'IndexedDB',
-            options: {
-              storeName: 'keykappUser',
-            },
-          },
-        },
-      },
-      async function(e): Promise<void> {
-        let isGitReady = false
-        if (e) {
-          reject(isGitReady)
-          console.error(e)
-          return
-        }
-        window.fs = BrowserFS.BFSRequire('fs')
-        console.info('Done configuring BrowserFS.')
-        git.plugins.set('fs', window.fs)
-        console.info('Running git.init()...')
-        await git.init({ dir: gitRepoDir })
-
-        isGitReady = true
-        resolve(isGitReady)
-      }
-    )
-  })
+export async function setupGit(): Promise<boolean> {
+  console.info('Configuring LightningFS...')
+  const _fs = new FS('keykappUser')
+  window.fs = _fs
+  console.info('Done configuring LightningFS.')
+  git.plugins.set('fs', window.fs)
+  console.info('Running git.init()...')
+  await git.init({ dir: gitRepoDir })
+  return true
 }
 
 function commitChanges(
