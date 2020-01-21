@@ -6,7 +6,7 @@
   "configurations": [
     {
       "runtimeExecutable": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
-      "userDataDir": true,
+      "userDataDir": "/tmp/chrome-debug/keykapp--user-data-dir",
       "type": "chrome",
       "request": "launch",
       "name": "Launch Brave against localhost",

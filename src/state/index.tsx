@@ -13,7 +13,7 @@ import {
   pasteIdv0,
   zoomedTextOnlyKapps,
 } from '../kapps'
-import { devLog, devStringyAndLog } from '../kitchensink/effectfns'
+import { devLog, devStringifyAndLog } from '../kitchensink/effectfns'
 import { menuIn, menuOutToRoot, recomputeMenuRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
 import {
@@ -147,7 +147,7 @@ export function dispatchMiddleware(
         const kappIdv0 = waypoint.value.kappIdv0
         if (kappIdv0 === pasteIdv0) {
           const pastedString = await navigator.clipboard.readText()
-          devStringyAndLog({ fn: 'dispatchMiddleware', pastedString })
+          devStringifyAndLog({ fn: 'dispatchMiddleware', pastedString })
           dispatch({ ...action, middlewarePayload: pastedString })
         } else {
           dispatch(action)
@@ -198,7 +198,8 @@ export async function loadSyncRootFromBrowserGit(
       syncRoot = migrateSyncRootSchema(syncRoot)
 
       console.info('Finished applying changes.')
-    } catch (_e) {
+    } catch (e) {
+      devStringifyAndLog(e)
       const initialSyncRoot = makeInitialSyncRoot()
       const initialChanges = Automerge.getChanges(
         Automerge.init(),
@@ -462,6 +463,6 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
       break
   }
 
-  devStringyAndLog(nextState.tempRoot.kappIdv0Log.slice(-5))
+  devStringifyAndLog(nextState.tempRoot.kappIdv0Log.slice(-5))
   return nextState
 }

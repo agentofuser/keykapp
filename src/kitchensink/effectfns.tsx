@@ -27,7 +27,7 @@ export function getStyle(el: any, styleProp: string): string {
   }
 }
 
-export function devStringyAndLog(serializable: any): void {
+export function devStringifyAndLog(serializable: any): void {
   if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
     console.info(JSON.stringify(serializable, null, 2))
   }

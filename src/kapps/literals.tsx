@@ -1,9 +1,9 @@
 import { map } from 'fp-ts/es6/Array'
 import { asciiIdv0Path } from '../constants'
 import {
-  zoomedText,
   getCurrentFocusCursorIdx,
   setFocusCursorIdx,
+  zoomedText,
 } from '../state'
 import {
   AppAction,

@@ -9,19 +9,8 @@ import {
 import { stringSaveAs } from '../kitchensink/effectfns'
 import murmurhash from '../kitchensink/murmurhash'
 import { menuOut, menuOutToRoot, recomputeMenuRoot } from '../navigation'
-import {
-  commitIfChanged,
-  updateSequenceFrequencies,
-  updateTailSequenceFrequencies,
-} from '../state'
-import {
-  AppAction,
-  AppState,
-  AppSyncRoot,
-  Kapp,
-  SystemKapp,
-  UserlandKapp,
-} from '../types'
+import { commitIfChanged, updateTailSequenceFrequencies } from '../state'
+import { AppAction, AppState, Kapp, SystemKapp, UserlandKapp } from '../types'
 import { newlineChar, printableAsciiChars } from './literals'
 import {
   zoomedListOnlyKapps,
