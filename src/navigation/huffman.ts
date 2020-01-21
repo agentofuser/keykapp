@@ -38,7 +38,7 @@ function kappTwitterCount(kapp: Kapp): number {
     const char = String.fromCharCode(charCode)
 
     twitterCount = charCounts[char] || 0
-    twitterCount = Math.floor(twitterCount / 100)
+    twitterCount = Math.floor(twitterCount)
   }
   return twitterCount
 }
