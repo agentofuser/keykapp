@@ -222,48 +222,11 @@ const exportKapp: SystemKapp = {
   instruction: exportInstruction,
 }
 
-const importIdv0 = `${idv0SystemPrefix}syncRoot/import`
-
-// TODO this should be an async task or something to handle effects
-function importInstruction(
-  draftState: AppState,
-  _action: AppAction
-): AppState {
-  const serializedSyncRoot = process.env.KEYKAPP_SYNC_ROOT
-  if (serializedSyncRoot) {
-    const importedSyncRoot: AppSyncRoot = Automerge.load(serializedSyncRoot)
-    draftState.syncRoot = importedSyncRoot
-    updateSequenceFrequencies(draftState)
-    console.info('Swapped syncRoot from environment variable.')
-  } else {
-    console.error('Could not find process.env.KEYKAPP_SYNC_ROOT.')
-  }
-
-  const prevState = draftState
-  draftState = { ...prevState }
-
-  draftState.tempRoot.kappIdv0Log.push(importIdv0)
-  updateTailSequenceFrequencies(draftState)
-  recomputeMenuRoot(draftState)
-  menuOutToRoot(draftState, _action)
-  const nextState = draftState
-  commitIfChanged(prevState, nextState, importIdv0)
-  return nextState
-}
-const importKapp: SystemKapp = {
-  type: 'SystemKapp',
-  idv0: importIdv0,
-  shortAsciiName: ':import!!',
-  legend: ':import!!',
-  instruction: importInstruction,
-}
-
 export const systemKapps: SystemKapp[] = [
   menuUpKapp,
   undoKapp,
   redoKapp,
   exportKapp,
-  importKapp,
 ]
 
 export const allKapps: Kapp[] = [...userlandKapps, ...systemKapps]
@@ -274,7 +237,6 @@ export const listModeKapps: Kapp[] = [
   undoKapp,
   redoKapp,
   exportKapp,
-  importKapp,
 ]
 
 export const textModeKapps: Kapp[] = [
@@ -283,7 +245,6 @@ export const textModeKapps: Kapp[] = [
   // undoKapp,
   // redoKapp,
   // exportKapp,
-  // importKapp,
   zoomOutKapp,
 ]
 
