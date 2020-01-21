@@ -124,6 +124,8 @@ export default function HuffmanButton({
                         color: 'black',
                         borderLeft: `6px solid ${kappColor(kapp)}`,
                         borderRight: `6px solid ${kappColor(kapp)}`,
+                        fontSize:
+                          kapp.shortAsciiName.length === 1 ? '1.3rem' : '1rem',
                       }}
                     >
                       {kapp.shortAsciiName}
