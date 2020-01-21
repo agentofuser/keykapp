@@ -10,6 +10,10 @@ const useStyles = makeStyles(theme => ({
   char: {
     padding: theme.spacing(1, 3),
   },
+  charTypography: {
+    fontSize: '1.3rem',
+  },
+  stringTypography: {},
 }))
 
 export interface KappLegendProps {
@@ -34,7 +38,15 @@ export function KappLegend({ kapp }: KappLegendProps): React.ReactElement {
         className={title.length === 1 ? classes.char : classes.string}
         style={{ backgroundColor: kappColor(kapp) }}
       >
-        <Typography ref={titleRef} align="center">
+        <Typography
+          className={
+            title.length === 1
+              ? classes.charTypography
+              : classes.stringTypography
+          }
+          ref={titleRef}
+          align="center"
+        >
           {title}
         </Typography>
       </Paper>

@@ -33,8 +33,8 @@ export const printableAsciiChars: UserlandKapp[] = map(
   (char: string): UserlandKapp => ({
     type: 'UserlandKapp',
     idv0: `${asciiIdv0Path}${char.charCodeAt(0)}`,
-    shortAsciiName: char === ' ' ? ':space' : char,
-    legend: char === ' ' ? 'space' : char,
+    shortAsciiName: char === ' ' ? ':space' : char.toUpperCase(),
+    legend: char === ' ' ? 'space' : char.toUpperCase(),
     instruction: pushLiteral(char),
   })
 )(ascii32To126MinusUppercase.split(''))
