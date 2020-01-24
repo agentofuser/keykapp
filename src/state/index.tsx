@@ -59,6 +59,15 @@ function commitChanges(
     })
     .then((sha: string) => {
       console.info(sha)
+      return git.push({
+        dir: gitRepoDir,
+        force: true,
+        noGitSuffix: true,
+        url: 'http://localhost:9999/localhost:8080',
+      })
+    })
+    .then((res: git.PushResponse): void => {
+      devStringifyAndLog(res)
     })
 }
 
