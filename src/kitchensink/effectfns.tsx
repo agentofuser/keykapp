@@ -27,15 +27,18 @@ export function getStyle(el: any, styleProp: string): string {
   }
 }
 
-export function devStringifyAndLog(serializable: any): void {
+export function ifDevelopment(task: () => any): any {
   if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-    console.info(JSON.stringify(serializable, null, 2))
+    return task()
   }
 }
+
+export function devStringifyAndLog(serializable: any): void {
+  ifDevelopment(() => console.info(JSON.stringify(serializable, null, 2)))
+}
+
 export function devLog(serializable: any): void {
-  if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-    console.info(serializable)
-  }
+  ifDevelopment(() => console.info(serializable))
 }
 
 function data2blob(data: string, isBase64 = false): Blob {
