@@ -14,8 +14,8 @@ import { fold, fromNullable } from 'fp-ts/es6/Option'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
 import { foldMap as foldMapTree, make } from 'fp-ts/es6/Tree'
 import {
-  homerowKeyswitches,
   asciiIdv0Path,
+  homerowKeyswitches,
   manualWeights,
   nGramRange,
 } from '../constants'
@@ -74,7 +74,7 @@ function huffmanWeightFromKapp(state: AppState | null, kapp: Kapp): number {
   const sequenceWeight = reduce(
     0,
     sumReducer
-  )(mapWithIndex((i, n: number): number => n * 10 ** (i + 2))(sequenceCounts))
+  )(mapWithIndex((i, n: number): number => n * 10 ** i)(sequenceCounts))
 
   const finalWeight = twitterCount + manualWeight + sequenceWeight
 
