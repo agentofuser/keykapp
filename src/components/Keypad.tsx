@@ -26,17 +26,17 @@ const useStyles = makeStyles({
       'leftHand rightHand'
       'spacebar spacebar'
     `,
-    gridColumnGap: '8em',
+    gridColumnGap: '2em',
     gridRowGap: '2em',
     justifyContent: 'center',
-    height: '30%',
+    height: '16%',
   },
   hand: {
     height: '100%',
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)',
     gridTemplateRows: 'repeat(1, 1fr)',
-    gridColumnGap: '1em',
+    gridColumnGap: '0.5rem',
   },
   leftHand: {
     gridArea: 'leftHand',
