@@ -1,6 +1,14 @@
 import { Button } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
-import { map, partition, reverse, sortBy, zip } from 'fp-ts/es6/Array'
+import {
+  flatten,
+  map,
+  partition,
+  partitionWithIndex,
+  reverse,
+  sortBy,
+  zip,
+} from 'fp-ts/es6/Array'
 import { fold, Option } from 'fp-ts/es6/Option'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
 import * as React from 'react'
@@ -12,6 +20,7 @@ import {
   Keybinding,
   Keyswitch,
   Layout,
+  Menu,
   RightHand,
   Waypoint,
 } from '../types'
@@ -57,7 +66,18 @@ function loadBalancer(
   // reverse so that if there are less waypoints than keyswitches, we put those
   // waypoints at the center, not all at the left
   const sortedDescWeightWaypoints = reverse(waypoints)
-  // const sortedDescWeightWaypoints = waypoints
+
+  // alternate between right and left hands for different depths of the huffman
+  // tree. this leads to better load-balancing while keeping things predictable
+  // for improved motor learning.
+  const { left, right } = partitionWithIndex(
+    (i: number, _waypoint: Menu): boolean => i % 2 === 0
+  )(sortedDescWeightWaypoints)
+  const sideBalancedWaypoints = flatten(
+    state.tempRoot.waypointBreadcrumbs.length % 2 === 0
+      ? zip(left, right)
+      : zip(right, left)
+  )
 
   let keybindings: Keybinding[] = []
 
@@ -68,7 +88,7 @@ function loadBalancer(
   const sortedAscCostKeyswitches = sortBy([lowestActuationCost])(keyswitches)
 
   keybindings = keybindings.concat(
-    zip(sortedAscCostKeyswitches, sortedDescWeightWaypoints)
+    zip(sortedAscCostKeyswitches, sideBalancedWaypoints)
   )
 
   const ascendingIndex = ord.contramap(
