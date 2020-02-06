@@ -9,37 +9,51 @@ import {
 import { stringSaveAs } from '../kitchensink/effectfns'
 import murmurhash from '../kitchensink/murmurhash'
 import { menuOut, menuOutToRoot, recomputeMenuRoot } from '../navigation'
-import { commitIfChanged, updateTailSequenceFrequencies } from '../state'
-import { AppAction, AppState, Kapp, SystemKapp, UserlandKapp } from '../types'
+import {
+  commitIfChanged,
+  getCurrentFocusCursorIdx,
+  updateTailSequenceFrequencies,
+  zoomedText,
+} from '../state'
+import {
+  AppAction,
+  AppState,
+  AppSyncRoot,
+  DraftSyncRootMutator,
+  Kapp,
+  SystemKapp,
+  UserlandKapp,
+} from '../types'
 import { newlineChar, printableAsciiChars } from './literals'
 import {
   zoomedListOnlyKapps,
   zoomedListOrTextKapps,
   zoomOutKapp,
+  deleteKapp,
 } from './Sexp'
 
-// const mapFocusedChar = (
-//   charMapper: (char: string) => string
-// ): DraftSyncRootMutator => (
-//   draftState: AppSyncRoot,
-//   _action: AppAction
-// ): void => {
-//   const text = zoomedText(draftState)
-//   if (!text) return
-//   const focusedCursorIdx = getCurrentFocusCursorIdx(draftState)
-//   const charIdx = focusedCursorIdx - 1
+const mapFocusedChar = (
+  charMapper: (char: string) => string
+): DraftSyncRootMutator => (
+  draftState: AppSyncRoot,
+  _action: AppAction
+): void => {
+  const text = zoomedText(draftState)
+  if (!text) return
+  const focusedCursorIdx = getCurrentFocusCursorIdx(draftState)
+  const charIdx = focusedCursorIdx - 1
 
-//   if (text && focusedCursorIdx > 0 && charIdx < text.length) {
-//     const focusedChar = text.get(charIdx)
+  if (text && focusedCursorIdx > 0 && charIdx < text.length) {
+    const focusedChar = text.get(charIdx)
 
-//     if (text.deleteAt) {
-//       text.deleteAt(charIdx)
-//       const replacementChar = charMapper(focusedChar)
-//       if (text.insertAt && replacementChar)
-//         text.insertAt(charIdx, replacementChar)
-//     }
-//   }
-// }
+    if (text.deleteAt) {
+      text.deleteAt(charIdx)
+      const replacementChar = charMapper(focusedChar)
+      if (text.insertAt && replacementChar)
+        text.insertAt(charIdx, replacementChar)
+    }
+  }
+}
 
 // TODO this should be an async task or something to handle effects
 // const copyCurrentSexpTextAtomToClipboard: DraftSyncRootMutator = (
@@ -79,13 +93,13 @@ export const pasteIdv0 = `${idv0UserlandPrefix}text/paste`
 export const zoomedTextOnlyKapps: UserlandKapp[] = [
   ...printableAsciiChars,
   newlineChar,
-  // {
-  //   type: 'UserlandKapp',
-  //   idv0: `${idv0UserlandPrefix}char/upcase`,
-  //   shortAsciiName: ':upcase',
-  //   legend: ':upcase',
-  //   instruction: mapFocusedChar((char: string): string => char.toUpperCase()),
-  // },
+  {
+    type: 'UserlandKapp',
+    idv0: `${idv0UserlandPrefix}char/upcase`,
+    shortAsciiName: ':upcase',
+    legend: ':upcase',
+    instruction: mapFocusedChar((char: string): string => char.toUpperCase()),
+  },
   // {
   //   type: 'UserlandKapp',
   //   idv0: `${idv0UserlandPrefix}char/downcase`,
@@ -235,6 +249,7 @@ export const textModeKapps: Kapp[] = [
   // redoKapp,
   // exportKapp,
   zoomOutKapp,
+  deleteKapp,
 ]
 
 export const KappStore: Map<string, Kapp> = new Map(

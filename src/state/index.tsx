@@ -13,7 +13,7 @@ import {
   pasteIdv0,
   zoomedTextOnlyKapps,
 } from '../kapps'
-import { devLog, devStringifyAndLog } from '../kitchensink/effectfns'
+import { devStringifyAndLog } from '../kitchensink/effectfns'
 import { menuIn, menuOutToRoot, recomputeMenuRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
 import {
@@ -46,7 +46,6 @@ function commitChanges(
 ): any {
   const serializedChanges = JSON.stringify(changes, null, 2)
   const message = `${messageTitle}\n\n${serializedChanges}`
-  devLog(message)
 
   return git
     .commit({
@@ -131,7 +130,6 @@ export function dispatchMiddleware(
         const kappIdv0 = waypoint.value.kappIdv0
         if (kappIdv0 === pasteIdv0) {
           const pastedString = await navigator.clipboard.readText()
-          devStringifyAndLog({ fn: 'dispatchMiddleware', pastedString })
           dispatch({ ...action, middlewarePayload: pastedString })
         } else {
           dispatch(action)
@@ -447,6 +445,5 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
       break
   }
 
-  devStringifyAndLog(nextState.tempRoot.kappIdv0Log.slice(-5))
   return nextState
 }

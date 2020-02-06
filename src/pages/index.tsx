@@ -7,7 +7,6 @@ import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
 import SexpComponent from '../components/Sexp'
-import { devStringifyAndLog } from '../kitchensink/effectfns'
 import {
   appReducer,
   currentWaypoint,
@@ -100,8 +99,6 @@ export default function App(): React.ReactNode {
   let display
   if (state.syncRoot) {
     const sexp = zoomedSexp(state.syncRoot)
-    devStringifyAndLog(state.syncRoot)
-    devStringifyAndLog(sexp)
     display = <SexpComponent state={state} sexp={sexp} />
   } else {
     display = (

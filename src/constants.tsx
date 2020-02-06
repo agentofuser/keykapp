@@ -44,16 +44,22 @@ focus('next')
 focus('prev')
 focus('first')
 focus('last')
-const sexp = (name: string): void => {
-  manualWeights[`${idv0UserlandPrefix}sexp/${name}`] = 200
+const sexp = (name: string, weight = 200): void => {
+  manualWeights[`${idv0UserlandPrefix}sexp/${name}`] = weight
 }
-sexp('delete')
+sexp('delete', 1000)
 sexp('move-back')
 sexp('move-forth')
 const list = (name: string): void => {
   manualWeights[`${idv0UserlandPrefix}list/${name}`] = 200
 }
 list('new')
+
+const nameWeight = (name: string, weight = 200): void => {
+  manualWeights[`${idv0UserlandPrefix}${name}`] = weight
+}
+
+nameWeight('char/upcase', 1000)
 
 export const nGramRange = range(1, 1)
 
