@@ -3,3 +3,4 @@ node_modules
 public/
 private
 .env*
+cors-proxy.pid

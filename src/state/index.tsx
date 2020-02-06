@@ -35,9 +35,62 @@ export async function setupGit(): Promise<boolean> {
   window.fs = _fs
   console.info('Done configuring LightningFS.')
   git.plugins.set('fs', window.fs)
-  console.info('Running git.init()...')
-  await git.init({ dir: gitRepoDir })
+  console.info('Running git.clone()...')
+  // FIXME: this is in "works on my machine" state. make it usable to
+  // other people.
+  await git.clone({
+    dir: gitRepoDir,
+    corsProxy: 'http://localhost:9999',
+    url: 'http://localhost:8080',
+    noGitSuffix: true,
+  })
+
   return true
+}
+
+// give keybase time to process pushes before sending a new one.
+let isPushResponsePending = false
+let pushesPending = 0
+
+function flushGitPushQueue(): Promise<any> {
+  if (pushesPending === 0) return Promise.resolve('Nothing to push.')
+
+  if (isPushResponsePending) {
+    return Promise.resolve(
+      'Waiting for ongoing push to conclude. Retrying soon...'
+    )
+  }
+
+  isPushResponsePending = true
+  pushesPending = 0
+  console.log(
+    "Backing up to filesystem git repo. (And from there to Keybase if that's properly set up.)"
+  )
+  return git
+    .push({
+      dir: gitRepoDir,
+      remote: 'origin',
+      noGitSuffix: true,
+    })
+    .then((_res: git.PushResponse): any => {
+      isPushResponsePending = false
+      if (pushesPending > 0) {
+        return flushGitPushQueue()
+      } else {
+        const msg = 'Git push queue empty. Filesystem backup successful.'
+        console.log(msg)
+        return msg
+      }
+    })
+    .catch((message: any): void => {
+      isPushResponsePending = false
+      devStringifyAndLog(message)
+    })
+}
+
+function enqueueGitPush(): Promise<any> {
+  pushesPending = pushesPending + 1
+  return flushGitPushQueue()
 }
 
 function commitChanges(
@@ -56,17 +109,8 @@ function commitChanges(
       },
       message,
     })
-    .then((sha: string) => {
-      console.info(sha)
-      return git.push({
-        dir: gitRepoDir,
-        force: true,
-        noGitSuffix: true,
-        url: 'http://localhost:9999/localhost:8080',
-      })
-    })
-    .then((res: git.PushResponse): void => {
-      devStringifyAndLog(res)
+    .then((_sha: string) => {
+      return enqueueGitPush()
     })
 }
 
