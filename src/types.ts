@@ -68,6 +68,7 @@ export interface KeypadUp {
   type: 'KeypadUp'
   data: {
     timestamp: number
+    keybinding: Keybinding
   }
 }
 
@@ -87,6 +88,12 @@ export interface SexpInfo {
   focusCursorIdx: number
 }
 
+export interface Keystroke {
+  timestamp: number
+  keyswitch: Keyswitch
+  huffmanTreeDepth: number // starts at 0 for root
+}
+
 export interface AppSyncRoot {
   sexp: SexpList // the root userland sexp
   sexpMetadata: { [key: string]: SexpInfo } // keyed by Automerge.UUID (string)
@@ -95,9 +102,9 @@ export interface AppSyncRoot {
   // insertion happens at the cursor position. kapps operate on list index
   // cursor - 1.
   sexpZoomCursorIdx: number
+  keystrokeHistory: Keystroke[]
 }
 
-// a menu is a non-leaf waypoint
 export type Menu = Waypoint
 
 export interface AppTempRoot {

@@ -6,7 +6,7 @@ import { Option } from 'fp-ts/es6/Option'
 import * as git from 'isomorphic-git'
 import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
-import { gitRepoDir, nGramRange } from '../constants'
+import { gitRepoDir, nGramRange, spacebarKeyswitch } from '../constants'
 import {
   findKappById,
   menuUpKapp,
@@ -22,6 +22,8 @@ import {
   AppSyncRoot,
   AppTempRoot,
   Kapp,
+  Keystroke,
+  Keyswitch,
   NGrammer,
   Sexp,
   SexpInfo,
@@ -137,10 +139,11 @@ export function makeInitialSyncRoot(): AppSyncRoot {
     sexpMetadata: {},
     sexpListZoomPath: [],
     sexpZoomCursorIdx: 0,
+    keystrokeHistory: [],
   })
 }
 
-function migrateSyncRootSchema(syncRoot: AppSyncRoot): AppSyncRoot | null {
+function migrateSyncRootSchema(syncRoot: AppSyncRoot): AppSyncRoot {
   return Automerge.change(
     syncRoot,
     'migrateSyncRootSchema',
@@ -159,6 +162,9 @@ function migrateSyncRootSchema(syncRoot: AppSyncRoot): AppSyncRoot | null {
       }
       if ((doc as any).kappIdv0Log !== undefined) {
         delete (doc as any).kappIdv0Log
+      }
+      if (doc.keystrokeHistory === undefined) {
+        doc.keystrokeHistory = []
       }
     }
   )
@@ -206,12 +212,13 @@ export async function loadSyncRootFromBrowserGit(
           commit: git.CommitDescription
         ): Automerge.Change[] => {
           const lines = commit.message.split('\n')
-          const kappIdv0 = lines[0]
-          state.tempRoot.kappIdv0Log.push(kappIdv0)
+          const kappIdv0 = lines[0].startsWith('/') && lines[0]
+          kappIdv0 && state.tempRoot.kappIdv0Log.push(kappIdv0)
 
           const payload = lines.slice(2).join('\n')
 
           const changes = JSON.parse(payload)
+
           return allChanges.concat(changes)
         }
       )(commits.reverse())
@@ -221,7 +228,12 @@ export async function loadSyncRootFromBrowserGit(
       console.info('Applying Automerge changes to base state...')
       syncRoot = Automerge.applyChanges(Automerge.init(), syncRootChanges)
 
-      syncRoot = migrateSyncRootSchema(syncRoot)
+      const migratedSyncRoot = migrateSyncRootSchema(syncRoot)
+      const migrationChanges = Automerge.getChanges(syncRoot, migratedSyncRoot)
+      if (migrationChanges.length > 0) {
+        await commitChanges('schemaMigration', migrationChanges)
+      }
+      syncRoot = migratedSyncRoot
 
       console.info('Finished applying changes.')
     } catch (e) {
@@ -432,6 +444,32 @@ export function commitIfChanged(
   }
 }
 
+function logKeystroke(
+  prevState: AppState,
+  keyswitch: Keyswitch,
+  nextState: {
+    syncRoot: Automerge.FreezeObject<AppSyncRoot> | null
+    tempRoot: AppTempRoot
+  }
+): void {
+  const huffmanTreeDepth = prevState.tempRoot.waypointBreadcrumbs.length - 1
+  const keystroke: Keystroke = {
+    timestamp: Date.now(),
+    keyswitch,
+    huffmanTreeDepth,
+  }
+  if (nextState.syncRoot) {
+    nextState.syncRoot = Automerge.change(
+      prevState.syncRoot,
+      'syncRoot.keystrokeHistory.push()',
+      (draftSyncRoot: AppSyncRoot): void => {
+        draftSyncRoot.keystrokeHistory.push(keystroke)
+      }
+    )
+    commitIfChanged(prevState, nextState, 'syncRoot.keystrokeHistory.push()')
+  }
+}
+
 export function appReducer(prevState: AppState, action: AppAction): AppState {
   let nextState = { ...prevState }
   switch (action.type) {
@@ -443,11 +481,13 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
       break
     case 'KeyswitchUp':
       nextState.tempRoot.keyUpCount++
-      const [_keyswitch, waypoint] = action.data.keybinding
+      const [keyswitch, waypoint] = action.data.keybinding
       const kappIdv0 = waypoint.value.kappIdv0
       const kapp = kappIdv0 && findKappById(kappIdv0)
       const isKappWaypoint = !!kappIdv0
       const isMenuWaypoint = !isKappWaypoint
+
+      logKeystroke(prevState, keyswitch, nextState)
 
       // a menu is a non-leaf waypoint
       if (isMenuWaypoint) {
@@ -482,6 +522,7 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
       break
 
     case 'KeypadUp':
+      logKeystroke(prevState, spacebarKeyswitch, nextState)
       nextState = menuUpKapp.instruction(nextState, action)
       break
 

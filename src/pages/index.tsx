@@ -7,6 +7,7 @@ import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
 import SexpComponent from '../components/Sexp'
+import { spacebarKeyswitch } from '../constants'
 import {
   appReducer,
   currentWaypoint,
@@ -16,7 +17,7 @@ import {
   setupGit,
   zoomedSexp,
 } from '../state'
-import { Keybinding } from '../types'
+import { Keybinding, KeypadUp } from '../types'
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -36,16 +37,19 @@ export default function App(): React.ReactNode {
   function onKeyUp(event: KeyboardEvent): void {
     event.stopPropagation()
     event.preventDefault()
-    if (event.key == ' ') {
-      dispatchMiddleware(dispatch)({
+    const waypointOption = currentWaypoint(state)
+    const waypoint = toNullable(waypointOption)
+    if (event.key == ' ' && waypoint) {
+      const keybinding: Keybinding = [spacebarKeyswitch, waypoint]
+      const keypadUp: KeypadUp = {
         type: 'KeypadUp',
         data: {
           timestamp: Date.now(),
+          keybinding,
         },
-      })
+      }
+      dispatchMiddleware(dispatch)(keypadUp)
     } else {
-      const waypointOption = currentWaypoint(state)
-      const waypoint = toNullable(waypointOption)
       // FIXME: move the call to layout() out of the loop
       // Why is layout() being called at all? Shouldn't this have been calculated
       // and stored upon rendering the frame?
