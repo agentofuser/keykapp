@@ -457,6 +457,9 @@ function logKeystroke(
     tempRoot: AppTempRoot
   }
 ): void {
+  // FIXME: prevState shouldn't be used after logKeystroke() commits
+  return
+
   const huffmanTreeDepth = prevState.tempRoot.keybindingBreadcrumbs.length - 1
   const keystroke: Keystroke = {
     timestamp: Date.now(),
