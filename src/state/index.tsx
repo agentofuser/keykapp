@@ -237,25 +237,29 @@ export async function loadSyncRootFromBrowserGit(
       syncRoot = migratedSyncRoot
 
       console.info('Finished applying changes.')
-    } catch (e) {
-      devStringifyAndLog(e)
-      const initialSyncRoot = makeInitialSyncRoot()
-      const initialChanges = Automerge.getChanges(
-        Automerge.init(),
-        initialSyncRoot
-      )
-      if (initialChanges.length > 0) {
-        await commitChanges('initialSyncRoot', initialChanges)
-      }
 
-      syncRoot = initialSyncRoot
-    } finally {
       if (syncRoot) {
         dispatchMiddleware(dispatch)({
           type: 'LoadSyncRootFromBrowserGit',
           data: { timestamp: Date.now(), syncRoot },
         })
       }
+    } catch (e) {
+      console.error(e)
+      devStringifyAndLog(e)
+      throw e
+      // const initialSyncRoot = makeInitialSyncRoot()
+      // const initialChanges = Automerge.getChanges(
+      //   Automerge.init(),
+      //   initialSyncRoot
+      // )
+      // if (initialChanges.length > 0) {
+      //   await commitChanges('initialSyncRoot', initialChanges)
+      // }
+
+      // syncRoot = initialSyncRoot
+      // } finally {
+      // }
     }
   }
 }
