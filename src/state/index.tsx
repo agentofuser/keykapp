@@ -2,7 +2,7 @@ import * as FS from '@isomorphic-git/lightning-fs'
 import * as Automerge from 'automerge'
 import { last, map, reduce } from 'fp-ts/es6/Array'
 import { head } from 'fp-ts/es6/NonEmptyArray'
-import { Option } from 'fp-ts/es6/Option'
+import { Option, map as optionMap } from 'fp-ts/es6/Option'
 import * as git from 'isomorphic-git'
 import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
@@ -22,6 +22,7 @@ import {
   AppSyncRoot,
   AppTempRoot,
   Kapp,
+  Keybinding,
   Keystroke,
   Keyswitch,
   NGrammer,
@@ -123,7 +124,7 @@ export function makeInitialAppState(): AppState {
 
   const tempRoot: AppTempRoot = {
     kappIdv0Log: [],
-    waypointBreadcrumbs: [initialHuffmanRoot],
+    keybindingBreadcrumbs: [[spacebarKeyswitch, initialHuffmanRoot]],
     menuIns: [],
     sequenceFrequencies: {},
     keyUpCount: 0,
@@ -260,8 +261,8 @@ export async function loadSyncRootFromBrowserGit(
 }
 
 export function currentWaypoint(state: AppState): Option<Waypoint> {
-  const waypointOption = last(state.tempRoot.waypointBreadcrumbs)
-  return waypointOption
+  const waypointOption = last(state.tempRoot.keybindingBreadcrumbs)
+  return optionMap(([_keyswitch, waypoint]:Keybinding): Waypoint => waypoint)(waypointOption)
 }
 
 export function lastListInZoomPath(syncRoot: AppSyncRoot): SexpList {
@@ -369,7 +370,7 @@ export function logKappExecution(tempRoot: AppTempRoot, kapp: Kapp): void {
 }
 
 export function rootWaypoint(state: AppState): Waypoint {
-  return head(state.tempRoot.waypointBreadcrumbs)
+  return head(state.tempRoot.keybindingBreadcrumbs)
 }
 
 export function updateSequenceFrequencies(draftState: AppState): void {
@@ -452,7 +453,7 @@ function logKeystroke(
     tempRoot: AppTempRoot
   }
 ): void {
-  const huffmanTreeDepth = prevState.tempRoot.waypointBreadcrumbs.length - 1
+  const huffmanTreeDepth = prevState.tempRoot.keybindingBreadcrumbs.length - 1
   const keystroke: Keystroke = {
     timestamp: Date.now(),
     keyswitch,
@@ -491,7 +492,7 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
 
       // a menu is a non-leaf waypoint
       if (isMenuWaypoint) {
-        menuIn(waypoint)(nextState, action)
+        menuIn(action.data.keybinding)(nextState, action)
       } else if (
         kappIdv0 &&
         kapp &&

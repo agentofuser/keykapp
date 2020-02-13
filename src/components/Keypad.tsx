@@ -74,7 +74,7 @@ function loadBalancer(
     (i: number, _waypoint: Menu): boolean => i % 2 === 0
   )(sortedDescWeightWaypoints)
   const sideBalancedWaypoints = flatten(
-    state.tempRoot.waypointBreadcrumbs.length % 2 === 0
+    state.tempRoot.keybindingBreadcrumbs.length % 2 === 0
       ? zip(left, right)
       : zip(right, left)
   )

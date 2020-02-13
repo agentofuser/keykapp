@@ -110,7 +110,7 @@ export type Menu = Waypoint
 export interface AppTempRoot {
   kappIdv0Log: string[]
   // TODO rename "waypoint" to "menu" at some point
-  waypointBreadcrumbs: NonEmptyArray<Waypoint>
+  keybindingBreadcrumbs: NonEmptyArray<Keybinding>
   menuIns: Waypoint[]
   sequenceFrequencies: { [key: string]: number }
   keyUpCount: number
