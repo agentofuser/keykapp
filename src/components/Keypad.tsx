@@ -9,6 +9,7 @@ import {
   sortBy,
   zip,
 } from 'fp-ts/es6/Array'
+import { last } from 'fp-ts/es6/NonEmptyArray'
 import { fold, Option } from 'fp-ts/es6/Option'
 import { ord, ordNumber } from 'fp-ts/es6/Ord'
 import * as React from 'react'
@@ -85,7 +86,24 @@ function loadBalancer(
     ordNumber,
     (keyswitch: Keyswitch): number => keyswitch.actuationCost
   )
+
+  // avoid repeating the same finger on the path to a kapp by making
+  // the previous keyswitch the most costly only at this level of the tree
+  let parentKeyswitch
+  let oldParentKeyswitchActuationCost
+  if (state.tempRoot.keybindingBreadcrumbs.length > 1) {
+    let _parentWaypoint
+    [parentKeyswitch, _parentWaypoint ]= last(state.tempRoot.keybindingBreadcrumbs)
+    oldParentKeyswitchActuationCost = parentKeyswitch.actuationCost
+    parentKeyswitch.actuationCost = 255
+  }
+
   const sortedAscCostKeyswitches = sortBy([lowestActuationCost])(keyswitches)
+
+  // restore actuation cost after sorting
+  if (parentKeyswitch && oldParentKeyswitchActuationCost) {
+    parentKeyswitch.actuationCost = oldParentKeyswitchActuationCost
+  }
 
   keybindings = keybindings.concat(
     zip(sortedAscCostKeyswitches, sideBalancedWaypoints)
