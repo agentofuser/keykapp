@@ -39,7 +39,7 @@ const useStyles = makeStyles({
     gridColumnGap: '2em',
     gridRowGap: '2em',
     justifyContent: 'center',
-    height: '16%',
+    height: '280px',
   },
   hand: {
     height: '100%',
