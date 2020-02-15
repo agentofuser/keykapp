@@ -452,14 +452,8 @@ export function commitIfChanged(
 function logKeystroke(
   prevState: AppState,
   keyswitch: Keyswitch,
-  nextState: {
-    syncRoot: Automerge.FreezeObject<AppSyncRoot> | null
-    tempRoot: AppTempRoot
-  }
-): void {
-  // FIXME: prevState shouldn't be used after logKeystroke() commits
-  return
-
+): AppState {
+  const nextState = { ...prevState }
   const huffmanTreeDepth = prevState.tempRoot.keybindingBreadcrumbs.length - 1
   const keystroke: Keystroke = {
     timestamp: Date.now(),
@@ -476,6 +470,7 @@ function logKeystroke(
     )
     commitIfChanged(prevState, nextState, 'syncRoot.keystrokeHistory.push()')
   }
+  return nextState
 }
 
 export function appReducer(prevState: AppState, action: AppAction): AppState {
@@ -495,7 +490,10 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
       const isKappWaypoint = !!kappIdv0
       const isMenuWaypoint = !isKappWaypoint
 
-      logKeystroke(prevState, keyswitch, nextState)
+      // prevState marks the last committed syncRoot change so it can be
+      // diffed by Automerge.change()
+      prevState = logKeystroke(prevState, keyswitch)
+      nextState = { ...prevState }
 
       // a menu is a non-leaf waypoint
       if (isMenuWaypoint) {
@@ -523,14 +521,15 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
 
           commitIfChanged(prevState, nextState, kappIdv0)
         } else if (kapp.type === 'SystemKapp') {
-          nextState = kapp.instruction(nextState, action)
+          nextState = kapp.instruction(prevState, action)
         }
       }
 
       break
 
     case 'KeypadUp':
-      logKeystroke(prevState, spacebarKeyswitch, nextState)
+      prevState = logKeystroke(prevState, spacebarKeyswitch)
+      nextState = { ...prevState }
       nextState = menuUpKapp.instruction(nextState, action)
       break
 
