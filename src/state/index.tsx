@@ -32,68 +32,21 @@ import {
   Waypoint,
 } from '../types'
 
+  const _fs = new FS('keykappUser')
+
 export async function setupGit(): Promise<boolean> {
   console.info('Configuring LightningFS...')
   const _fs = new FS('keykappUser')
   window.fs = _fs
   console.info('Done configuring LightningFS.')
-  git.plugins.set('fs', window.fs)
-  console.info('Running git.clone()...')
-  // FIXME: this is in "works on my machine" state. make it usable to
-  // other people.
-  await git.clone({
+  console.info('Running git.init()...')
+
+  await git.init({
+    fs: _fs,
     dir: gitRepoDir,
-    corsProxy: 'http://localhost:9999',
-    url: 'http://localhost:8080',
-    noGitSuffix: true,
   })
 
   return true
-}
-
-// give keybase time to process pushes before sending a new one.
-let isPushResponsePending = false
-let pushesPending = 0
-
-function flushGitPushQueue(): Promise<any> {
-  if (pushesPending === 0) return Promise.resolve('Nothing to push.')
-
-  if (isPushResponsePending) {
-    return Promise.resolve(
-      'Waiting for ongoing push to conclude. Retrying soon...'
-    )
-  }
-
-  isPushResponsePending = true
-  pushesPending = 0
-  console.log(
-    "Backing up to filesystem git repo. (And from there to Keybase if that's properly set up.)"
-  )
-  return git
-    .push({
-      dir: gitRepoDir,
-      remote: 'origin',
-      noGitSuffix: true,
-    })
-    .then((_res: git.PushResponse): any => {
-      isPushResponsePending = false
-      if (pushesPending > 0) {
-        return flushGitPushQueue()
-      } else {
-        const msg = 'Git push queue empty. Filesystem backup successful.'
-        console.log(msg)
-        return msg
-      }
-    })
-    .catch((message: any): void => {
-      isPushResponsePending = false
-      devStringifyAndLog(message)
-    })
-}
-
-function enqueueGitPush(): Promise<any> {
-  pushesPending = pushesPending + 1
-  return flushGitPushQueue()
 }
 
 function commitChanges(
@@ -105,15 +58,13 @@ function commitChanges(
 
   return git
     .commit({
+      fs: _fs,
       dir: gitRepoDir,
       author: {
         name: 'Keykapp Syncbot',
         email: 'syncbot@keykapp.com',
       },
       message,
-    })
-    .then((_sha: string) => {
-      return enqueueGitPush()
     })
 }
 
@@ -201,6 +152,7 @@ export async function loadSyncRootFromBrowserGit(
     let syncRoot: AppSyncRoot | null = null
     try {
       const commits = await git.log({
+        fs: _fs,
         dir: gitRepoDir,
       })
       console.info(`Loaded ${commits.length} commits from git log.`)
@@ -210,9 +162,9 @@ export async function loadSyncRootFromBrowserGit(
         [],
         (
           allChanges: Automerge.Change[],
-          commit: git.CommitDescription
+          readCommitResult: git.ReadCommitResult
         ): Automerge.Change[] => {
-          const lines = commit.message.split('\n')
+          const lines = readCommitResult.commit.message.split('\n')
           const kappIdv0 = lines[0].startsWith('/') && lines[0]
           kappIdv0 && state.tempRoot.kappIdv0Log.push(kappIdv0)
 
@@ -238,28 +190,26 @@ export async function loadSyncRootFromBrowserGit(
 
       console.info('Finished applying changes.')
 
+    } catch (e) {
+      console.error(e)
+      devStringifyAndLog(e)
+      const initialSyncRoot = makeInitialSyncRoot()
+      const initialChanges = Automerge.getChanges(
+        Automerge.init(),
+        initialSyncRoot
+      )
+      if (initialChanges.length > 0) {
+        await commitChanges('initialSyncRoot', initialChanges)
+      }
+
+      syncRoot = initialSyncRoot
+    } finally {
       if (syncRoot) {
         dispatchMiddleware(dispatch)({
           type: 'LoadSyncRootFromBrowserGit',
           data: { timestamp: Date.now(), syncRoot },
         })
       }
-    } catch (e) {
-      console.error(e)
-      devStringifyAndLog(e)
-      throw e
-      // const initialSyncRoot = makeInitialSyncRoot()
-      // const initialChanges = Automerge.getChanges(
-      //   Automerge.init(),
-      //   initialSyncRoot
-      // )
-      // if (initialChanges.length > 0) {
-      //   await commitChanges('initialSyncRoot', initialChanges)
-      // }
-
-      // syncRoot = initialSyncRoot
-      // } finally {
-      // }
     }
   }
 }
