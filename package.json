@@ -10,7 +10,7 @@
   "scripts": {
     "build": "rm -rf ./.cache ./public && gatsby build",
     "deploy": "now --prod",
-    "format": "prettier --write ./**/*.{js,ts,tsx,json,md,mdx,html,css}",
+    "format": "prettier --write ./**/*.{js,ts,tsx,json,md,html,css}",
     "lint": "eslint --fix src/**/*",
     "now-build": "gatsby build",
     "serve": "gatsby serve",

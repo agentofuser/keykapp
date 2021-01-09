@@ -40,6 +40,7 @@ export function recomputeMenuRoot(draftState: AppState): void {
   const mode = draftState.syncRoot
     ? currentMode(draftState.syncRoot)
     : 'text-mode'
+
   // Update huffman tree based on kapp's updated weight calculated
   // from the kappLog
   draftState.tempRoot.keybindingBreadcrumbs = [[
