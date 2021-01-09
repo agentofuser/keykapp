@@ -71,14 +71,26 @@ function loadBalancer(
   // alternate between right and left hands for different depths of the huffman
   // tree. this leads to better load-balancing while keeping things predictable
   // for improved motor learning.
+
+  let appendedLast: Waypoint[] = []
+  let evenLengthWaypointsList = null
+  if (sortedDescWeightWaypoints.length % 2 === 0) {
+    evenLengthWaypointsList = sortedDescWeightWaypoints
+  } else {
+    const lastItemIndex = sortedDescWeightWaypoints.length - 1
+    evenLengthWaypointsList = sortedDescWeightWaypoints.slice(0, lastItemIndex)
+    appendedLast = [sortedDescWeightWaypoints[lastItemIndex]]
+  }
+
   const { left, right } = partitionWithIndex(
     (i: number, _waypoint: Menu): boolean => i % 2 === 0
-  )(sortedDescWeightWaypoints)
+  )(evenLengthWaypointsList)
+
   const sideBalancedWaypoints = flatten(
     state.tempRoot.keybindingBreadcrumbs.length % 2 === 0
       ? zip(left, right)
       : zip(right, left)
-  )
+  ).concat(appendedLast)
 
   let keybindings: Keybinding[] = []
 
