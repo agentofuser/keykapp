@@ -1,4 +1,21 @@
 {
   "eslint.enable": true,
-  "cSpell.enabled": false
+  "cSpell.enabled": false,
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#1bf7c3",
+    "activityBar.activeBorder": "#d665fa",
+    "activityBar.background": "#1bf7c3",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#d665fa",
+    "activityBarBadge.foreground": "#15202b",
+    "statusBar.background": "#08d7a6",
+    "statusBar.foreground": "#15202b",
+    "statusBarItem.hoverBackground": "#06a680",
+    "titleBar.activeBackground": "#08d7a6",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveBackground": "#08d7a699",
+    "titleBar.inactiveForeground": "#15202b99"
+  },
+  "peacock.color": "#08d7a6"
 }
