@@ -1,6 +1,13 @@
-node_modules
 .cache/
 public/
 private
 .env*
-cors-proxy.pid
+
+# yarn zero-install
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
