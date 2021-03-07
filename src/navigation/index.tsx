@@ -1,8 +1,18 @@
 import { isNonEmpty } from 'fp-ts/es6/Array'
 import { head } from 'fp-ts/es6/NonEmptyArray'
-import { listModeKapps, textModeKapps } from '../kapps'
+import {
+  inputModeInsertKapp,
+  inputModeMenuKapp,
+  listModeKapps,
+  textModeKapps,
+} from '../kapps'
 import { currentMode } from '../state'
-import { AppAction, AppState, DraftAppStateMutator, Keybinding } from '../types'
+import {
+  AppAction,
+  AppState,
+  DraftAppStateMutator,
+  Keybinding,
+} from '../types'
 import { newHuffmanRoot } from './huffman'
 import { spacebarKeyswitch } from '../constants'
 
@@ -37,17 +47,27 @@ export function menuOut(draftState: AppState, _action: AppAction): AppState {
 }
 
 export function recomputeMenuRoot(draftState: AppState): void {
-  const mode = draftState.syncRoot
+  const operandValueType = draftState.syncRoot
     ? currentMode(draftState.syncRoot)
     : 'text-mode'
 
+  const inputModeToggleKapp =
+    draftState.tempRoot.inputMode == 'InsertMode'
+      ? inputModeMenuKapp
+      : inputModeInsertKapp
+
   // Update huffman tree based on kapp's updated weight calculated
   // from the kappLog
-  draftState.tempRoot.keybindingBreadcrumbs = [[
-    spacebarKeyswitch,
-    newHuffmanRoot({
-      state: draftState,
-      kapps: mode === 'list-mode' ? listModeKapps : textModeKapps,
-    }),
-  ]]
+  draftState.tempRoot.keybindingBreadcrumbs = [
+    [
+      spacebarKeyswitch,
+      newHuffmanRoot({
+        state: draftState,
+        kapps:
+          operandValueType === 'list-mode'
+            ? listModeKapps
+            : [...textModeKapps, inputModeToggleKapp],
+      }),
+    ],
+  ]
 }

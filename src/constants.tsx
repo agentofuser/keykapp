@@ -18,6 +18,12 @@ export const spacebarKeyswitch: Keyswitch = {
   actuationCost: 1,
 }
 
+export const escapeKeyswitch: Keyswitch = {
+  index: 9,
+  key: 'Escape',
+  actuationCost: 4,
+}
+
 export const idv0UserlandPrefix = '/userland/kapp/'
 export const asciiIdv0Path = `${idv0UserlandPrefix}literals/ascii/`
 
@@ -26,13 +32,19 @@ export const idv0SystemPrefix = '/system/kapp/'
 export const undoIdv0 = `${idv0SystemPrefix}syncRoot/undo`
 export const redoIdv0 = `${idv0SystemPrefix}syncRoot/redo`
 
+export const modeInsertIdv0 = `${idv0SystemPrefix}inputMode/insert`
+export const modeMenuIdv0 = `${idv0SystemPrefix}inputMode/menu`
+
 export const manualWeights: { [name: string]: number } = {}
 manualWeights[`${idv0UserlandPrefix}text/copy`] = 40
 manualWeights[undoIdv0] = 150
 manualWeights[redoIdv0] = 150
 
+manualWeights[modeInsertIdv0] = 10000
+manualWeights[modeMenuIdv0] = 10000
+
 const zoom = (name: string): void => {
-  manualWeights[`${idv0UserlandPrefix}zoom/${name}`] = 200
+  manualWeights[`${idv0UserlandPrefix}zoom/${name}`] = 2000
 }
 zoom('in')
 zoom('out')

@@ -72,7 +72,18 @@ export interface KeypadUp {
   }
 }
 
-export type AppAction = KeyswitchUp | LoadSyncRootFromBrowserGit | KeypadUp
+export interface InputModeMenu {
+  type: 'InputModeMenu'
+  data: {
+    timestamp: number
+    keybinding: Keybinding
+  }
+}
+export type AppAction =
+  | KeyswitchUp
+  | LoadSyncRootFromBrowserGit
+  | KeypadUp
+  | InputModeMenu
 
 // TODO figure out how to define a recursive type like
 // type TextTree = Automerge.List<TextTreeItem>
@@ -95,9 +106,12 @@ export interface Keystroke {
 }
 
 export interface AppSyncRoot {
-  sexp: SexpList // the root userland sexp
-  sexpMetadata: { [key: string]: SexpInfo } // keyed by Automerge.UUID (string)
-  sexpListZoomPath: number[] // stack of int list indices: empty means root
+  // the root userland sexp
+  sexp: SexpList
+  // keyed by Automerge.UUID (string)
+  sexpMetadata: { [key: string]: SexpInfo }
+  // stack of int list indices: empty means root
+  sexpListZoomPath: number[]
   // zoom cursor boundary index. 0 for empty list, list.length for last item.
   // insertion happens at the cursor position. kapps operate on list index
   // cursor - 1.
@@ -107,6 +121,8 @@ export interface AppSyncRoot {
 
 export type Menu = Waypoint
 
+export type InputMode = 'InsertMode' | 'MenuMode'
+
 export interface AppTempRoot {
   kappIdv0Log: string[]
   // TODO rename "waypoint" to "menu" at some point
@@ -114,6 +130,7 @@ export interface AppTempRoot {
   menuIns: Waypoint[]
   sequenceFrequencies: { [key: string]: number }
   keyUpCount: number
+  inputMode: InputMode
 }
 
 export interface AppState {

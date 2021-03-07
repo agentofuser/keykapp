@@ -3,6 +3,8 @@ import { filter, map } from 'fp-ts/es6/Array'
 import {
   idv0SystemPrefix,
   idv0UserlandPrefix,
+  modeInsertIdv0,
+  modeMenuIdv0,
   redoIdv0,
   undoIdv0,
 } from '../constants'
@@ -26,10 +28,10 @@ import {
 } from '../types'
 import { newlineChar, printableAsciiChars } from './literals'
 import {
+  deleteKapp,
   zoomedListOnlyKapps,
   zoomedListOrTextKapps,
   zoomOutKapp,
-  deleteKapp,
 } from './Sexp'
 
 const mapFocusedChar = (
@@ -137,6 +139,22 @@ export const menuUpKapp: SystemKapp = {
   instruction: menuOut,
 }
 
+export const inputModeInsertKapp: SystemKapp = {
+  type: 'SystemKapp',
+  idv0: modeInsertIdv0,
+  shortAsciiName: ':mode-insert',
+  legend: '🔠:mode-insert',
+  instruction: modeInsert,
+}
+
+export const inputModeMenuKapp: SystemKapp = {
+  type: 'SystemKapp',
+  idv0: modeMenuIdv0,
+  shortAsciiName: ':mode-menu',
+  legend: '🌲:mode-menu',
+  instruction: modeMenu,
+}
+
 function undoInstruction(draftState: AppState, _action: AppAction): AppState {
   const syncRoot = draftState.syncRoot
   if (!syncRoot) return draftState
@@ -175,6 +193,39 @@ function redoInstruction(draftState: AppState, _action: AppAction): AppState {
   return nextState
 }
 
+function modeInsert(draftState: AppState, _action: AppAction): AppState {
+  const prevState = draftState
+  draftState = { ...prevState }
+
+  console.log('Entering insert mode')
+
+  draftState.tempRoot.inputMode = 'InsertMode'
+  draftState.tempRoot.kappIdv0Log.push(modeInsertIdv0)
+
+  updateTailSequenceFrequencies(draftState)
+  recomputeMenuRoot(draftState)
+  menuOutToRoot(draftState, _action)
+  const nextState = draftState
+  commitIfChanged(prevState, nextState, modeInsertIdv0)
+  return nextState
+}
+
+function modeMenu(draftState: AppState, _action: AppAction): AppState {
+  const prevState = draftState
+  draftState = { ...prevState }
+
+  console.log('Entering menu mode')
+
+  draftState.tempRoot.inputMode = 'MenuMode'
+  draftState.tempRoot.kappIdv0Log.push(modeMenuIdv0)
+
+  updateTailSequenceFrequencies(draftState)
+  recomputeMenuRoot(draftState)
+  menuOutToRoot(draftState, _action)
+  const nextState = draftState
+  commitIfChanged(prevState, nextState, modeMenuIdv0)
+  return nextState
+}
 export const undoKapp: SystemKapp = {
   type: 'SystemKapp',
   idv0: undoIdv0,
@@ -230,6 +281,8 @@ export const systemKapps: SystemKapp[] = [
   undoKapp,
   redoKapp,
   exportKapp,
+  inputModeInsertKapp,
+  inputModeMenuKapp,
 ]
 
 export const allKapps: Kapp[] = [...userlandKapps, ...systemKapps]

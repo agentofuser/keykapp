@@ -7,6 +7,7 @@ import {
 } from '../state'
 import {
   AppAction,
+  AppState,
   AppSyncRoot,
   DraftSyncRootMutator,
   UserlandKapp,

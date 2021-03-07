@@ -9,6 +9,7 @@ import { Dispatch } from 'react'
 import { gitRepoDir, nGramRange, spacebarKeyswitch } from '../constants'
 import {
   findKappById,
+  inputModeMenuKapp,
   menuUpKapp,
   pasteIdv0,
   zoomedTextOnlyKapps,
@@ -32,7 +33,7 @@ import {
   Waypoint,
 } from '../types'
 
-  const _fs = new FS('keykappUser')
+const _fs = new FS('keykappUser')
 
 export async function setupGit(): Promise<boolean> {
   console.info('Configuring LightningFS...')
@@ -56,16 +57,15 @@ function commitChanges(
   const serializedChanges = JSON.stringify(changes, null, 2)
   const message = `${messageTitle}\n\n${serializedChanges}`
 
-  return git
-    .commit({
-      fs: _fs,
-      dir: gitRepoDir,
-      author: {
-        name: 'Keykapp Syncbot',
-        email: 'syncbot@keykapp.com',
-      },
-      message,
-    })
+  return git.commit({
+    fs: _fs,
+    dir: gitRepoDir,
+    author: {
+      name: 'Keykapp Syncbot',
+      email: 'syncbot@keykapp.com',
+    },
+    message,
+  })
 }
 
 export function makeInitialAppState(): AppState {
@@ -79,6 +79,7 @@ export function makeInitialAppState(): AppState {
     menuIns: [],
     sequenceFrequencies: {},
     keyUpCount: 0,
+    inputMode: 'MenuMode',
   }
 
   const initialAppState: AppState = { syncRoot, tempRoot }
@@ -189,7 +190,6 @@ export async function loadSyncRootFromBrowserGit(
       syncRoot = migratedSyncRoot
 
       console.info('Finished applying changes.')
-
     } catch (e) {
       console.error(e)
       devStringifyAndLog(e)
@@ -216,7 +216,9 @@ export async function loadSyncRootFromBrowserGit(
 
 export function currentWaypoint(state: AppState): Option<Waypoint> {
   const waypointOption = last(state.tempRoot.keybindingBreadcrumbs)
-  return optionMap(([_keyswitch, waypoint]:Keybinding): Waypoint => waypoint)(waypointOption)
+  return optionMap(([_keyswitch, waypoint]: Keybinding): Waypoint => waypoint)(
+    waypointOption
+  )
 }
 
 export function lastListInZoomPath(syncRoot: AppSyncRoot): SexpList {
@@ -399,10 +401,7 @@ export function commitIfChanged(
   }
 }
 
-function logKeystroke(
-  prevState: AppState,
-  keyswitch: Keyswitch,
-): AppState {
+function logKeystroke(prevState: AppState, keyswitch: Keyswitch): AppState {
   const nextState = { ...prevState }
   const huffmanTreeDepth = prevState.tempRoot.keybindingBreadcrumbs.length - 1
   const keystroke: Keystroke = {
@@ -481,6 +480,12 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
       prevState = logKeystroke(prevState, spacebarKeyswitch)
       nextState = { ...prevState }
       nextState = menuUpKapp.instruction(nextState, action)
+      break
+
+    case 'InputModeMenu':
+      prevState = logKeystroke(prevState, action.data.keybinding[0])
+      nextState = { ...prevState }
+      nextState = inputModeMenuKapp.instruction(nextState, action)
       break
 
     default:

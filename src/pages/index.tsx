@@ -7,7 +7,7 @@ import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
 import SexpComponent from '../components/Sexp'
-import { spacebarKeyswitch } from '../constants'
+import { escapeKeyswitch, spacebarKeyswitch } from '../constants'
 import {
   appReducer,
   currentWaypoint,
@@ -17,7 +17,7 @@ import {
   setupGit,
   zoomedSexp,
 } from '../state'
-import { Keybinding, KeypadUp } from '../types'
+import { InputModeMenu, Keybinding, KeypadUp } from '../types'
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -39,38 +39,59 @@ export default function App(): React.ReactNode {
     event.preventDefault()
     const waypointOption = currentWaypoint(state)
     const waypoint = toNullable(waypointOption)
-    if (event.key == ' ' && waypoint) {
-      const keybinding: Keybinding = [spacebarKeyswitch, waypoint]
-      const keypadUp: KeypadUp = {
-        type: 'KeypadUp',
-        data: {
-          timestamp: Date.now(),
-          keybinding,
-        },
-      }
-      dispatchMiddleware(dispatch)(keypadUp)
-    } else {
-      // FIXME: move the call to layout() out of the loop
-      // Why is layout() being called at all? Shouldn't this have been calculated
-      // and stored upon rendering the frame?
-      const keybinding: Option<Keybinding> = waypoint
-        ? findFirst(
-            ([keyswitch, _waypoint]: Keybinding): boolean =>
-              keyswitch.key === event.key
-          )(layout(state, waypointOption))
-        : none
+    if (state.tempRoot.inputMode == 'MenuMode') {
+      if (event.key == ' ' && waypoint) {
+        const keybinding: Keybinding = [spacebarKeyswitch, waypoint]
+        const keypadUp: KeypadUp = {
+          type: 'KeypadUp',
+          data: {
+            timestamp: Date.now(),
+            keybinding,
+          },
+        }
+        dispatchMiddleware(dispatch)(keypadUp)
+      } else {
+        // FIXME: move the call to layout() out of the loop
+        // Why is layout() being called at all? Shouldn't this have been calculated
+        // and stored upon rendering the frame?
+        const keybinding: Option<Keybinding> = waypoint
+          ? findFirst(
+              ([keyswitch, _waypoint]: Keybinding): boolean =>
+                keyswitch.key === event.key
+            )(layout(state, waypointOption))
+          : none
 
-      fold(
-        (): void => {},
-        (keybinding: Keybinding): void =>
-          dispatchMiddleware(dispatch)({
-            type: 'KeyswitchUp',
-            data: {
-              timestamp: Date.now(),
-              keybinding,
-            },
-          })
-      )(keybinding)
+        fold(
+          (): void => {},
+          (keybinding: Keybinding): void =>
+            dispatchMiddleware(dispatch)({
+              type: 'KeyswitchUp',
+              data: {
+                timestamp: Date.now(),
+                keybinding,
+              },
+            })
+        )(keybinding)
+      }
+    } else {
+      if (
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        event.key == 'Escape'
+      ) {
+        const keybinding: Keybinding = [escapeKeyswitch, waypoint]
+        const inputModeMenu: InputModeMenu = {
+          type: 'InputModeMenu',
+          data: {
+            timestamp: Date.now(),
+            keybinding,
+          },
+        }
+        dispatchMiddleware(dispatch)(inputModeMenu)
+      } else {
+        console.log(`[TODO] call kapp to append: ${event.key}`)
+      }
     }
   }
 
