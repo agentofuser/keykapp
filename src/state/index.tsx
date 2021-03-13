@@ -325,10 +325,6 @@ export function logKappExecution(tempRoot: AppTempRoot, kapp: Kapp): void {
   tempRoot.kappIdv0Log.push(kapp.idv0)
 }
 
-export function rootWaypoint(state: AppState): Waypoint {
-  return head(state.tempRoot.keybindingBreadcrumbs)
-}
-
 export function updateSequenceFrequencies(draftState: AppState): void {
   if (!draftState.syncRoot) return
   const kappLog = draftState.tempRoot.kappIdv0Log
@@ -426,34 +422,80 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
   let nextState = { ...prevState }
   switch (action.type) {
     case 'LoadSyncRootFromBrowserGit':
-      if (!nextState.syncRoot) {
-        nextState.syncRoot = action.data.syncRoot
-        afterSyncRootSwap(nextState)
+      {
+        if (!nextState.syncRoot) {
+          nextState.syncRoot = action.data.syncRoot
+          afterSyncRootSwap(nextState)
+        }
       }
       break
     case 'KeyswitchUp':
-      nextState.tempRoot.keyUpCount++
-      const [keyswitch, waypoint] = action.data.keybinding
-      const kappIdv0 = waypoint.value.kappIdv0
-      const kapp = kappIdv0 && findKappById(kappIdv0)
-      const isKappWaypoint = !!kappIdv0
-      const isMenuWaypoint = !isKappWaypoint
+      {
+        nextState.tempRoot.keyUpCount++
+        const [keyswitch, waypoint] = action.data.keybinding
+        const kappIdv0 = waypoint.value.kappIdv0
+        const kapp = kappIdv0 && findKappById(kappIdv0)
+        const isKappWaypoint = !!kappIdv0
+        const isMenuWaypoint = !isKappWaypoint
 
-      // prevState marks the last committed syncRoot change so it can be
-      // diffed by Automerge.change()
-      prevState = logKeystroke(prevState, keyswitch)
-      nextState = { ...prevState }
+        // prevState marks the last committed syncRoot change so it can be
+        // diffed by Automerge.change()
+        prevState = logKeystroke(prevState, keyswitch)
+        nextState = { ...prevState }
 
-      // a menu is a non-leaf waypoint
-      if (isMenuWaypoint) {
-        menuIn(action.data.keybinding)(nextState, action)
-      } else if (
-        kappIdv0 &&
-        kapp &&
-        prevState.syncRoot &&
-        nextState.syncRoot
-      ) {
-        if (kapp.type === 'UserlandKapp') {
+        // a menu is a non-leaf waypoint
+        if (isMenuWaypoint) {
+          menuIn(action.data.keybinding)(nextState, action)
+        } else if (
+          kappIdv0 &&
+          kapp &&
+          prevState.syncRoot &&
+          nextState.syncRoot
+        ) {
+          if (kapp.type === 'UserlandKapp') {
+            nextState.syncRoot = Automerge.change(
+              prevState.syncRoot,
+              kappIdv0,
+              (draftSyncRoot: AppSyncRoot): void => {
+                kapp.instruction(draftSyncRoot, action)
+                logKappExecution(nextState.tempRoot, kapp)
+              }
+            )
+
+            updateTailSequenceFrequencies(nextState)
+            recomputeMenuRoot(nextState)
+
+            menuOutToRoot(nextState, action)
+
+            commitIfChanged(prevState, nextState, kappIdv0)
+          } else if (kapp.type === 'SystemKapp') {
+            nextState = kapp.instruction(prevState, action)
+          }
+        }
+      }
+      break
+
+    case 'KeypadUp':
+      {
+        prevState = logKeystroke(prevState, spacebarKeyswitch)
+        nextState = { ...prevState }
+        nextState = menuUpKapp.instruction(nextState, action)
+      }
+      break
+
+    case 'InputModeMenu':
+      {
+        prevState = logKeystroke(prevState, action.data.keybinding[0])
+        nextState = { ...prevState }
+        nextState = inputModeMenuKapp.instruction(nextState, action)
+      }
+      break
+
+    case 'RunKapp':
+      {
+        const kappIdv0 = action.data.kappIdv0
+        const kapp = kappIdv0 && findKappById(kappIdv0)
+        if (kapp && kapp.type === 'UserlandKapp') {
           nextState.syncRoot = Automerge.change(
             prevState.syncRoot,
             kappIdv0,
@@ -469,25 +511,9 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
           menuOutToRoot(nextState, action)
 
           commitIfChanged(prevState, nextState, kappIdv0)
-        } else if (kapp.type === 'SystemKapp') {
-          nextState = kapp.instruction(prevState, action)
         }
       }
-
       break
-
-    case 'KeypadUp':
-      prevState = logKeystroke(prevState, spacebarKeyswitch)
-      nextState = { ...prevState }
-      nextState = menuUpKapp.instruction(nextState, action)
-      break
-
-    case 'InputModeMenu':
-      prevState = logKeystroke(prevState, action.data.keybinding[0])
-      nextState = { ...prevState }
-      nextState = inputModeMenuKapp.instruction(nextState, action)
-      break
-
     default:
       break
   }

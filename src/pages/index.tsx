@@ -7,7 +7,11 @@ import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import Keypad, { layout } from '../components/Keypad'
 import SexpComponent from '../components/Sexp'
-import { escapeKeyswitch, spacebarKeyswitch } from '../constants'
+import {
+  asciiIdv0Path,
+  escapeKeyswitch,
+  spacebarKeyswitch,
+} from '../constants'
 import {
   appReducer,
   currentWaypoint,
@@ -17,7 +21,13 @@ import {
   setupGit,
   zoomedSexp,
 } from '../state'
-import { InputModeMenu, Keybinding, KeypadUp } from '../types'
+import {
+  InputModeMenu,
+  Keybinding,
+  KeypadUp,
+  Keyswitch,
+  RunKapp,
+} from '../types'
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -35,8 +45,13 @@ export default function App(): React.ReactNode {
   const [state, dispatch] = React.useReducer(appReducer, makeInitialAppState())
 
   function onKeyUp(event: KeyboardEvent): void {
+    if (event.isComposing || event.keyCode === 229) {
+      return
+    }
+
     event.stopPropagation()
     event.preventDefault()
+
     const waypointOption = currentWaypoint(state)
     const waypoint = toNullable(waypointOption)
     if (state.tempRoot.inputMode == 'MenuMode') {
@@ -90,7 +105,15 @@ export default function App(): React.ReactNode {
         }
         dispatchMiddleware(dispatch)(inputModeMenu)
       } else {
-        console.log(`[TODO] call kapp to append: ${event.key}`)
+        const kappIdv0 = `${asciiIdv0Path}${event.key.charCodeAt(0)}`
+        const runKappAction: RunKapp = {
+          type: 'RunKapp',
+          data: {
+            timestamp: Date.now(),
+            kappIdv0,
+          },
+        }
+        dispatchMiddleware(dispatch)(runKappAction)
       }
     }
   }

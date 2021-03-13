@@ -79,11 +79,20 @@ export interface InputModeMenu {
     keybinding: Keybinding
   }
 }
+
+export interface RunKapp {
+  type: 'RunKapp'
+  data: {
+    timestamp: number
+    kappIdv0: string
+  }
+}
 export type AppAction =
   | KeyswitchUp
   | LoadSyncRootFromBrowserGit
   | KeypadUp
   | InputModeMenu
+  | RunKapp
 
 // TODO figure out how to define a recursive type like
 // type TextTree = Automerge.List<TextTreeItem>
