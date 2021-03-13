@@ -4,8 +4,8 @@ module.exports = {
     {
       resolve: 'gatsby-plugin-typescript',
       options: {
-        // isTSX: true,
-        // allExtensions: true,
+        isTSX: true,
+        allExtensions: true,
       },
     },
     {

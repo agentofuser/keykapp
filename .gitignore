@@ -3,11 +3,12 @@ public/
 private
 .env*
 
-# yarn zero-install
+# not using yarn zero-installs
 .yarn/*
-!.yarn/cache
 !.yarn/patches
-!.yarn/plugins
 !.yarn/releases
+!.yarn/plugins
 !.yarn/sdks
 !.yarn/versions
+.pnp.*
+node_modules
