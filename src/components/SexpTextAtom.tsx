@@ -47,15 +47,15 @@ function DirectedCharCursor({ char }: { char: string }): React.ReactElement {
   )
 }
 
-export interface SexpTextAtomComponentProps {
+export interface SexpAtomStringComponentProps {
   state: AppState
   text: Automerge.Text
 }
 
-export default function SexpTextAtomComponent({
+export default function SexpAtomStringComponent({
   state,
   text,
-}: SexpTextAtomComponentProps): React.ReactElement {
+}: SexpAtomStringComponentProps): React.ReactElement {
   const classes = useStyles()
 
   let textWithCursor: React.ReactNode = 'Loading...'

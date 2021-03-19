@@ -1,7 +1,7 @@
 import * as Automerge from 'automerge'
 import * as React from 'react'
-import { Sexp, AppState } from '../types'
-import SexpTextAtomComponent from './SexpTextAtom'
+import { SexpNode, AppState } from '../types'
+import SexpAtomStringComponent from './SexpAtomString'
 import SexpListComponent from './SexpList'
 
 export default function SexpComponent({
@@ -9,10 +9,10 @@ export default function SexpComponent({
   sexp,
 }: {
   state: AppState
-  sexp: Sexp
+  sexp: SexpNode
 }): React.ReactElement {
   if (sexp instanceof Automerge.Text) {
-    return <SexpTextAtomComponent state={state} text={sexp} />
+    return <SexpAtomStringComponent state={state} text={sexp} />
   } else if (sexp instanceof Array) {
     return <SexpListComponent state={state} list={sexp} />
   } else {

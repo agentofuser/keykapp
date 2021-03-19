@@ -1,6 +1,5 @@
 import Container from '@material-ui/core/Container'
 import { makeStyles } from '@material-ui/styles'
-import * as Automerge from 'automerge'
 import { findFirst } from 'fp-ts/es6/Array'
 import { fold, none, Option, toNullable } from 'fp-ts/es6/Option'
 import * as React from 'react'
@@ -16,9 +15,7 @@ import {
   appReducer,
   currentWaypoint,
   dispatchMiddleware,
-  loadSyncRootFromBrowserGit,
   makeInitialAppState,
-  setupGit,
   zoomedSexp,
 } from '../state'
 import {
@@ -118,22 +115,6 @@ export default function App(): React.ReactNode {
     }
   }
 
-  React.useEffect((): void => {
-    // Set up browser-local git repository
-    if (!hasGitSetupStarted) {
-      hasGitSetupStarted = true
-      console.info('Setting up local git repo...')
-      setupGit().then((): void => {
-        console.info('Git repo is ready.')
-        const isSyncRootLoaded = !!state.syncRoot
-        if (!isSyncRootLoaded) {
-          console.info('Loading state from git log...')
-          loadSyncRootFromBrowserGit(state, dispatch)
-        }
-      })
-    }
-  })
-
   React.useEffect((): (() => void) => {
     window.addEventListener('keyup', onKeyUp)
 
@@ -144,15 +125,8 @@ export default function App(): React.ReactNode {
 
   const classes = useStyles()
 
-  let display
-  if (state.syncRoot) {
-    const sexp = zoomedSexp(state.syncRoot)
-    display = <SexpComponent state={state} sexp={sexp} />
-  } else {
-    display = (
-      <SexpComponent state={state} sexp={new Automerge.Text('Loading...')} />
-    )
-  }
+  const sexp = zoomedSexp(state.syncRoot)
+  const display = <SexpComponent state={state} sexp={sexp} />
 
   return (
     <React.Fragment>

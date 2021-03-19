@@ -1,4 +1,3 @@
-import * as Automerge from 'automerge'
 import { NonEmptyArray } from 'fp-ts/es6/NonEmptyArray'
 import { Tree } from 'fp-ts/es6/tree'
 
@@ -56,8 +55,8 @@ export interface KeyswitchUp {
   middlewarePayload?: string
 }
 
-export interface LoadSyncRootFromBrowserGit {
-  type: 'LoadSyncRootFromBrowserGit'
+export interface LoadSyncRoot {
+  type: 'LoadSyncRoot'
   data: {
     timestamp: number
     syncRoot: AppSyncRoot
@@ -89,20 +88,27 @@ export interface RunKapp {
 }
 export type AppAction =
   | KeyswitchUp
-  | LoadSyncRootFromBrowserGit
+  | LoadSyncRoot
   | KeypadUp
   | InputModeMenu
   | RunKapp
 
-// TODO figure out how to define a recursive type like
-// type TextTree = Automerge.List<TextTreeItem>
-// type TextTreeItem = Automerge.Text | TextTree
-export type SexpList = Automerge.List<any>
-export type SexpTextAtom = Automerge.Text
-export type SexpAtom = SexpTextAtom
-export type Sexp = SexpList | SexpAtom
-
 export type UUID = string
+
+export interface HasUuid {
+  uuid: UUID
+}
+
+export interface SexpText extends HasUuid {
+  text: string
+}
+
+export interface SexpList extends HasUuid {
+  children: Array<SexpNode>
+}
+
+export type SexpAtom = SexpText
+export type SexpNode = SexpAtom | SexpList
 
 export interface SexpInfo {
   focusCursorIdx: number
@@ -143,7 +149,7 @@ export interface AppTempRoot {
 }
 
 export interface AppState {
-  syncRoot: Automerge.Doc<AppSyncRoot> | null
+  syncRoot: AppSyncRoot | null
   tempRoot: AppTempRoot
 }
 

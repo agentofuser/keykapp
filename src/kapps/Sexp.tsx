@@ -1,4 +1,3 @@
-import * as Automerge from 'automerge'
 import { idv0UserlandPrefix } from '../constants'
 import {
   focusedSexp,
@@ -8,10 +7,33 @@ import {
   zoomedList,
   zoomedSexp,
 } from '../state'
-import { AppAction, AppSyncRoot, Sexp, UserlandKapp } from '../types'
+import {
+  AppAction,
+  AppSyncRoot,
+  SexpNode,
+  SexpList,
+  UserlandKapp,
+  SexpText as SexpText,
+} from '../types'
+import { v4 as uuidv4 } from 'uuid'
+
+export const Sexp = {
+  List: {
+    from: (xs: Array<SexpNode>): SexpList => ({
+      uuid: uuidv4(),
+      children: [],
+    }),
+  },
+  isList: (sexp: SexpNode): sexp is SexpList => {
+    return (sexp as SexpList).children !== undefined
+  },
+  isText: (sexp: SexpNode): sexp is SexpText => {
+    return (sexp as SexpText).text !== undefined
+  },
+}
 
 function textNew(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
-  const list: Automerge.List<Sexp> = lastListInZoomPath(draftSyncRoot)
+  const list: Automerge.List<SexpNode> = lastListInZoomPath(draftSyncRoot)
   const zoomCursorIdx = draftSyncRoot.sexpZoomCursorIdx
   const zoomLevel = zoomCursorIdx > 0 ? 'atom' : 'list'
 

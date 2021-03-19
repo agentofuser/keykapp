@@ -1,5 +1,5 @@
 import * as Automerge from 'automerge'
-import { Sexp } from '../types'
+import { SexpNode } from '../types'
 
 function t(str: string): Automerge.Text {
   return new Automerge.Text(str)
@@ -16,7 +16,7 @@ All this with only 4 buttons!
 Keykapp learns with your history (which never leaves your phone) so you type as little as possible.
 `
 
-const tutorial: Sexp = [
+const tutorial: SexpNode = [
   t('Welcome to Keykapp!'),
   t('Find `:focus-prev` below'),
   [

@@ -6,10 +6,9 @@ import {
   Paper,
   Theme,
 } from '@material-ui/core'
-import { getObjectId, Text } from 'automerge'
 import * as React from 'react'
 import { getCurrentFocusCursorIdx, isSexpItemFocused } from '../state'
-import { AppState, Sexp, SexpList } from '../types'
+import { AppState, SexpNode, SexpList } from '../types'
 
 const useStyles = makeStyles((theme: Theme) => ({
   surface: {
@@ -37,7 +36,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }))
 
-function sexpDecoration(sexp: Sexp): string {
+function sexpDecoration(sexp: SexpNode): string {
   if (sexp instanceof Text) {
     return '📝 '
   } else {
@@ -50,7 +49,7 @@ function textSummary(text: Text): string {
   return str
 }
 
-function sexpSummary(sexp: Sexp): string {
+function sexpSummary(sexp: SexpNode): string {
   if (sexp instanceof Text) {
     return textSummary(sexp)
   } else {
@@ -67,7 +66,7 @@ function SexpItem({
   sexp,
 }: {
   state: AppState
-  sexp: Sexp
+  sexp: SexpNode
 }): React.ReactElement {
   const classes = useStyles()
 
@@ -95,7 +94,7 @@ export default function SexpListComponent({
   const classes = useStyles()
 
   const listItems = list.map(
-    (sexp: Sexp): React.ReactElement => (
+    (sexp: SexpNode): React.ReactElement => (
       <SexpItem state={state} sexp={sexp} key={getObjectId(sexp)} />
     )
   )

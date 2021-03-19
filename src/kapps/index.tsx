@@ -58,7 +58,7 @@ const mapFocusedChar = (
 }
 
 // TODO this should be an async task or something to handle effects
-// const copyCurrentSexpTextAtomToClipboard: DraftSyncRootMutator = (
+// const copyCurrentSexpAtomStringToClipboard: DraftSyncRootMutator = (
 //   draftState,
 //   _action
 // ): void => {
@@ -114,7 +114,7 @@ export const zoomedTextOnlyKapps: UserlandKapp[] = [
   //   idv0: `${idv0UserlandPrefix}text/copy`,
   //   shortAsciiName: ':copy!',
   //   legend: '📋:copy!',
-  //   instruction: copyCurrentSexpTextAtomToClipboard,
+  //   instruction: copyCurrentSexpAtomStringToClipboard,
   // },
   // {
   //   type: 'UserlandKapp',

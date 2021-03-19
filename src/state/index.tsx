@@ -1,12 +1,8 @@
-import * as FS from '@isomorphic-git/lightning-fs'
-import * as Automerge from 'automerge'
 import { last, map, reduce } from 'fp-ts/es6/Array'
-import { head } from 'fp-ts/es6/NonEmptyArray'
-import { Option, map as optionMap } from 'fp-ts/es6/Option'
-import * as git from 'isomorphic-git'
+import { map as optionMap, Option } from 'fp-ts/es6/Option'
 import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
-import { gitRepoDir, nGramRange, spacebarKeyswitch } from '../constants'
+import { nGramRange, spacebarKeyswitch } from '../constants'
 import {
   findKappById,
   inputModeMenuKapp,
@@ -14,7 +10,7 @@ import {
   pasteIdv0,
   zoomedTextOnlyKapps,
 } from '../kapps'
-import { devStringifyAndLog } from '../kitchensink/effectfns'
+import { Sexp } from '../kapps/Sexp'
 import { menuIn, menuOutToRoot, recomputeMenuRoot } from '../navigation'
 import { newHuffmanRoot } from '../navigation/huffman'
 import {
@@ -27,51 +23,27 @@ import {
   Keystroke,
   Keyswitch,
   NGrammer,
-  Sexp,
+  SexpText,
   SexpInfo,
   SexpList,
+  SexpNode,
   Waypoint,
 } from '../types'
 
-const _fs = new FS('keykappUser')
-
-export async function setupGit(): Promise<boolean> {
-  console.info('Configuring LightningFS...')
-  const _fs = new FS('keykappUser')
-  window.fs = _fs
-  console.info('Done configuring LightningFS.')
-  console.info('Running git.init()...')
-
-  await git.init({
-    fs: _fs,
-    dir: gitRepoDir,
-  })
-
-  return true
-}
-
-function commitChanges(
-  messageTitle: string,
-  changes: Automerge.Change[]
-): any {
-  const serializedChanges = JSON.stringify(changes, null, 2)
-  const message = `${messageTitle}\n\n${serializedChanges}`
-
-  return git.commit({
-    fs: _fs,
-    dir: gitRepoDir,
-    author: {
-      name: 'Keykapp Syncbot',
-      email: 'syncbot@keykapp.com',
-    },
-    message,
-  })
+export function makeInitialSyncRoot(): AppSyncRoot {
+  return {
+    sexp: Sexp.List.from([]),
+    sexpMetadata: {},
+    sexpListZoomPath: [],
+    sexpZoomCursorIdx: 0,
+    keystrokeHistory: [],
+  }
 }
 
 export function makeInitialAppState(): AppState {
   const initialHuffmanRoot = newHuffmanRoot({ kapps: zoomedTextOnlyKapps })
 
-  const syncRoot = null
+  const syncRoot = makeInitialSyncRoot()
 
   const tempRoot: AppTempRoot = {
     kappIdv0Log: [],
@@ -84,43 +56,6 @@ export function makeInitialAppState(): AppState {
 
   const initialAppState: AppState = { syncRoot, tempRoot }
   return initialAppState
-}
-
-export function makeInitialSyncRoot(): AppSyncRoot {
-  return Automerge.from({
-    sexp: [],
-    sexpMetadata: {},
-    sexpListZoomPath: [],
-    sexpZoomCursorIdx: 0,
-    keystrokeHistory: [],
-  })
-}
-
-function migrateSyncRootSchema(syncRoot: AppSyncRoot): AppSyncRoot {
-  return Automerge.change(
-    syncRoot,
-    'migrateSyncRootSchema',
-    (doc: AppSyncRoot): void => {
-      if (doc.sexp === undefined) {
-        doc.sexp = [new Automerge.Text('')]
-      }
-      if (doc.sexpListZoomPath === undefined) {
-        doc.sexpListZoomPath = []
-      }
-      if (doc.sexpZoomCursorIdx === undefined) {
-        doc.sexpZoomCursorIdx = 1
-      }
-      if (doc.sexpMetadata === undefined) {
-        doc.sexpMetadata = {}
-      }
-      if ((doc as any).kappIdv0Log !== undefined) {
-        delete (doc as any).kappIdv0Log
-      }
-      if (doc.keystrokeHistory === undefined) {
-        doc.keystrokeHistory = []
-      }
-    }
-  )
 }
 
 export function dispatchMiddleware(
@@ -145,75 +80,6 @@ export function dispatchMiddleware(
   }
 }
 
-export async function loadSyncRootFromBrowserGit(
-  state: AppState,
-  dispatch: Dispatch<AppAction>
-): Promise<void> {
-  if (!state.syncRoot) {
-    let syncRoot: AppSyncRoot | null = null
-    try {
-      const commits = await git.log({
-        fs: _fs,
-        dir: gitRepoDir,
-      })
-      console.info(`Loaded ${commits.length} commits from git log.`)
-
-      console.info('Parsing commit messages into Automerge changes...')
-      const syncRootChanges = reduce(
-        [],
-        (
-          allChanges: Automerge.Change[],
-          readCommitResult: git.ReadCommitResult
-        ): Automerge.Change[] => {
-          const lines = readCommitResult.commit.message.split('\n')
-          const kappIdv0 = lines[0].startsWith('/') && lines[0]
-          kappIdv0 && state.tempRoot.kappIdv0Log.push(kappIdv0)
-
-          const payload = lines.slice(2).join('\n')
-
-          const changes = JSON.parse(payload)
-
-          return allChanges.concat(changes)
-        }
-      )(commits.reverse())
-
-      console.info('Done parsing Automerge changes.')
-
-      console.info('Applying Automerge changes to base state...')
-      syncRoot = Automerge.applyChanges(Automerge.init(), syncRootChanges)
-
-      const migratedSyncRoot = migrateSyncRootSchema(syncRoot)
-      const migrationChanges = Automerge.getChanges(syncRoot, migratedSyncRoot)
-      if (migrationChanges.length > 0) {
-        await commitChanges('schemaMigration', migrationChanges)
-      }
-      syncRoot = migratedSyncRoot
-
-      console.info('Finished applying changes.')
-    } catch (e) {
-      console.error(e)
-      devStringifyAndLog(e)
-      const initialSyncRoot = makeInitialSyncRoot()
-      const initialChanges = Automerge.getChanges(
-        Automerge.init(),
-        initialSyncRoot
-      )
-      if (initialChanges.length > 0) {
-        await commitChanges('initialSyncRoot', initialChanges)
-      }
-
-      syncRoot = initialSyncRoot
-    } finally {
-      if (syncRoot) {
-        dispatchMiddleware(dispatch)({
-          type: 'LoadSyncRootFromBrowserGit',
-          data: { timestamp: Date.now(), syncRoot },
-        })
-      }
-    }
-  }
-}
-
 export function currentWaypoint(state: AppState): Option<Waypoint> {
   const waypointOption = last(state.tempRoot.keybindingBreadcrumbs)
   return optionMap(([_keyswitch, waypoint]: Keybinding): Waypoint => waypoint)(
@@ -224,7 +90,7 @@ export function currentWaypoint(state: AppState): Option<Waypoint> {
 export function lastListInZoomPath(syncRoot: AppSyncRoot): SexpList {
   let selectedList = syncRoot.sexp
   for (const index of syncRoot.sexpListZoomPath) {
-    selectedList = selectedList[index]
+    selectedList = selectedList.children[index] as SexpList
   }
   return selectedList
 }
@@ -248,7 +114,7 @@ export function parentList(syncRoot: AppSyncRoot): SexpList | null {
   return zoomLevel(syncRoot) === 'atom' ? lastList : secondToLastList
 }
 
-export function zoomedSexp(syncRoot: AppSyncRoot): Sexp {
+export function zoomedSexp(syncRoot: AppSyncRoot): SexpNode {
   const list = lastListInZoomPath(syncRoot)
   const cursorIdx = syncRoot.sexpZoomCursorIdx
   const sexp = cursorIdx > 0 ? list[cursorIdx - 1] : list
@@ -257,15 +123,16 @@ export function zoomedSexp(syncRoot: AppSyncRoot): Sexp {
 
 function zoomedSexpAndInfo(
   syncRoot: AppSyncRoot
-): { sexp: Sexp; info: SexpInfo } {
+): { sexp: SexpNode; info: SexpInfo } {
   const sexp = zoomedSexp(syncRoot)
-  const info = syncRoot.sexpMetadata[Automerge.getObjectId(sexp)]
+  const info = syncRoot.sexpMetadata[sexp.uuid]
   return { sexp, info }
 }
 
 export function zoomedList(syncRoot: AppSyncRoot): SexpList | null {
-  if (zoomLevel(syncRoot) === 'list') {
-    return zoomedSexp(syncRoot)
+  const sexp = zoomedSexp(syncRoot)
+  if ((sexp as SexpList).children) {
+    return sexp as SexpList
   } else {
     return null
   }
@@ -273,11 +140,12 @@ export function zoomedList(syncRoot: AppSyncRoot): SexpList | null {
 
 export function getCurrentFocusCursorIdx(syncRoot: AppSyncRoot): number {
   const { info, sexp } = zoomedSexpAndInfo(syncRoot)
-  const cursorIdx = info ? info.focusCursorIdx : sexp.length
+  const length = Sexp.isText(sexp) ? sexp.text.length : sexp.children.length
+  const cursorIdx = info ? info.focusCursorIdx : length
   return cursorIdx
 }
 
-export function focusedSexp(syncRoot: AppSyncRoot): Sexp | null {
+export function focusedSexp(syncRoot: AppSyncRoot): SexpNode | null {
   const list = zoomedList(syncRoot)
   if (list) {
     const idx = getCurrentFocusCursorIdx(syncRoot) - 1
@@ -287,16 +155,19 @@ export function focusedSexp(syncRoot: AppSyncRoot): Sexp | null {
   }
 }
 
-export function zoomedText(syncRoot: AppSyncRoot): Automerge.Text | null {
+export function zoomedText(syncRoot: AppSyncRoot): SexpText | null {
   const sexp = zoomedSexp(syncRoot)
-  if (sexp instanceof Automerge.Text) {
-    return sexp
+  if ((sexp as SexpText).text !== undefined) {
+    return sexp as SexpText
   } else {
     return null
   }
 }
 
-export function isSexpItemFocused(syncRoot: AppSyncRoot, sexp: Sexp): boolean {
+export function isSexpItemFocused(
+  syncRoot: AppSyncRoot,
+  sexp: SexpNode
+): boolean {
   const list: Automerge.List<any> = zoomedSexp(syncRoot)
   const focusCursorIdx = getCurrentFocusCursorIdx(syncRoot)
   return list.indexOf(sexp) === focusCursorIdx - 1
@@ -304,7 +175,7 @@ export function isSexpItemFocused(syncRoot: AppSyncRoot, sexp: Sexp): boolean {
 
 export function setFocusCursorIdx(
   draftSyncRoot: AppSyncRoot,
-  sexp: Sexp,
+  sexp: SexpNode,
   focusCursorIdx: number | undefined
 ): void {
   if (focusCursorIdx === undefined) {
@@ -421,7 +292,7 @@ function logKeystroke(prevState: AppState, keyswitch: Keyswitch): AppState {
 export function appReducer(prevState: AppState, action: AppAction): AppState {
   let nextState = { ...prevState }
   switch (action.type) {
-    case 'LoadSyncRootFromBrowserGit':
+    case 'LoadSyncRoot':
       {
         if (!nextState.syncRoot) {
           nextState.syncRoot = action.data.syncRoot
