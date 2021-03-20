@@ -93,11 +93,10 @@ function moveBack(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
       const newIdx = idx - 1
       const newFocusCursorIdx = newIdx + 1
       const sexp = list[idx]
-      if (list.deleteAt && list.insertAt) {
-        list.deleteAt(idx)
-        list.insertAt(newIdx, sexp)
-        setFocusCursorIdx(draftSyncRoot, list, newFocusCursorIdx)
-      }
+
+      list.children.splice(idx, 1)
+      list.children.splice(newIdx, 0, sexp)
+      setFocusCursorIdx(draftSyncRoot, list, newFocusCursorIdx)
     }
   }
 }
@@ -106,13 +105,13 @@ function moveForth(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   const list = zoomedList(draftSyncRoot)
   if (list) {
     const idx = getCurrentFocusCursorIdx(draftSyncRoot) - 1
-    if (idx < list.length - 1) {
+    if (idx < list.children.length - 1) {
       const newIdx = idx + 1
       const newFocusCursorIdx = newIdx + 1
       const sexp = list[idx]
-      if (list.deleteAt && list.insertAt) {
-        list.deleteAt(idx)
-        list.insertAt(newIdx, sexp)
+      {
+        list.children.splice(idx, 1)
+        list.children.splice(newIdx, 0, sexp)
         setFocusCursorIdx(draftSyncRoot, list, newFocusCursorIdx)
       }
     }
@@ -122,7 +121,8 @@ function moveForth(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
 function focusNext(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   const sexp = zoomedSexp(draftSyncRoot)
   const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
-  if (focusCursorIdx < sexp.length) {
+  const length = Sexp.isList(sexp) ? sexp.children.length : sexp.value.length
+  if (focusCursorIdx < length) {
     setFocusCursorIdx(draftSyncRoot, sexp, focusCursorIdx + 1)
   }
 }
@@ -146,8 +146,9 @@ function focusFirst(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
 function focusLast(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   const sexp = zoomedSexp(draftSyncRoot)
   const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
-  if (focusCursorIdx < sexp.length) {
-    setFocusCursorIdx(draftSyncRoot, sexp, sexp.length)
+  const length = Sexp.isList(sexp) ? sexp.children.length : sexp.value.length
+  if (focusCursorIdx < length) {
+    setFocusCursorIdx(draftSyncRoot, sexp, length)
   }
 }
 
@@ -155,7 +156,7 @@ function zoomIn(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   const sexp = focusedSexp(draftSyncRoot)
   if (sexp) {
     const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
-    if (sexp instanceof Automerge.Text) {
+    if (Sexp.isText(sexp)) {
       draftSyncRoot.sexpZoomCursorIdx = focusCursorIdx
     } else {
       draftSyncRoot.sexpListZoomPath.push(focusCursorIdx - 1)
