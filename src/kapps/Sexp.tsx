@@ -28,7 +28,7 @@ export const Sexp = {
     return (sexp as SexpList).children !== undefined
   },
   isText: (sexp: SexpNode): sexp is SexpText => {
-    return (sexp as SexpText).text !== undefined
+    return (sexp as SexpText).value !== undefined
   },
 }
 

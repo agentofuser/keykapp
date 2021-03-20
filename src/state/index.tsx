@@ -140,7 +140,7 @@ export function zoomedList(syncRoot: AppSyncRoot): SexpList | null {
 
 export function getCurrentFocusCursorIdx(syncRoot: AppSyncRoot): number {
   const { info, sexp } = zoomedSexpAndInfo(syncRoot)
-  const length = Sexp.isText(sexp) ? sexp.text.length : sexp.children.length
+  const length = Sexp.isText(sexp) ? sexp.value.length : sexp.children.length
   const cursorIdx = info ? info.focusCursorIdx : length
   return cursorIdx
 }
@@ -157,7 +157,7 @@ export function focusedSexp(syncRoot: AppSyncRoot): SexpNode | null {
 
 export function zoomedText(syncRoot: AppSyncRoot): SexpText | null {
   const sexp = zoomedSexp(syncRoot)
-  if ((sexp as SexpText).text !== undefined) {
+  if ((sexp as SexpText).value !== undefined) {
     return sexp as SexpText
   } else {
     return null
@@ -168,9 +168,9 @@ export function isSexpItemFocused(
   syncRoot: AppSyncRoot,
   sexp: SexpNode
 ): boolean {
-  const list: Automerge.List<any> = zoomedSexp(syncRoot)
+  const list: SexpList = zoomedList(syncRoot)
   const focusCursorIdx = getCurrentFocusCursorIdx(syncRoot)
-  return list.indexOf(sexp) === focusCursorIdx - 1
+  return list.children.indexOf(sexp) === focusCursorIdx - 1
 }
 
 export function setFocusCursorIdx(
@@ -238,7 +238,7 @@ export function updateTailSequenceFrequencies(draftState: AppState): void {
 }
 
 function afterSyncRootSwap(nextState: {
-  syncRoot: Automerge.FreezeObject<AppSyncRoot> | null
+  syncRoot: AppSyncRoot | null
   tempRoot: AppTempRoot
 }): void {
   console.info('Calculating n-grams for kapp prediction...')
@@ -247,25 +247,6 @@ function afterSyncRootSwap(nextState: {
   console.info('Updating huffman menu tree...')
   recomputeMenuRoot(nextState)
   console.info('Keykapp is ready to use.')
-}
-
-export function commitIfChanged(
-  prevState: AppState,
-  nextState: {
-    syncRoot: Automerge.FreezeObject<AppSyncRoot> | null
-    tempRoot: AppTempRoot
-  },
-  message: string
-): void {
-  if (prevState.syncRoot && nextState.syncRoot) {
-    const changes = Automerge.getChanges(
-      prevState.syncRoot,
-      nextState.syncRoot
-    )
-    if (changes.length > 0) {
-      commitChanges(message, changes)
-    }
-  }
 }
 
 function logKeystroke(prevState: AppState, keyswitch: Keyswitch): AppState {
@@ -284,7 +265,6 @@ function logKeystroke(prevState: AppState, keyswitch: Keyswitch): AppState {
         draftSyncRoot.keystrokeHistory.push(keystroke)
       }
     )
-    commitIfChanged(prevState, nextState, 'syncRoot.keystrokeHistory.push()')
   }
   return nextState
 }
@@ -337,8 +317,6 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
             recomputeMenuRoot(nextState)
 
             menuOutToRoot(nextState, action)
-
-            commitIfChanged(prevState, nextState, kappIdv0)
           } else if (kapp.type === 'SystemKapp') {
             nextState = kapp.instruction(prevState, action)
           }
@@ -380,8 +358,6 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
           recomputeMenuRoot(nextState)
 
           menuOutToRoot(nextState, action)
-
-          commitIfChanged(prevState, nextState, kappIdv0)
         }
       }
       break

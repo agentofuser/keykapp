@@ -100,7 +100,7 @@ export interface HasUuid {
 }
 
 export interface SexpText extends HasUuid {
-  text: string
+  value: string
 }
 
 export interface SexpList extends HasUuid {

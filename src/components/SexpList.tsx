@@ -7,8 +7,9 @@ import {
   Theme,
 } from '@material-ui/core'
 import * as React from 'react'
+import { Sexp } from '../kapps/Sexp'
 import { getCurrentFocusCursorIdx, isSexpItemFocused } from '../state'
-import { AppState, SexpNode, SexpList } from '../types'
+import { AppState, SexpList, SexpText, SexpNode } from '../types'
 
 const useStyles = makeStyles((theme: Theme) => ({
   surface: {
@@ -37,23 +38,23 @@ const useStyles = makeStyles((theme: Theme) => ({
 }))
 
 function sexpDecoration(sexp: SexpNode): string {
-  if (sexp instanceof Text) {
+  if (Sexp.isText(sexp)) {
     return '📝 '
   } else {
-    return `📃 ${sexp.length}⋮ `
+    return `📃 ${sexp.children.length}⋮ `
   }
 }
 
-function textSummary(text: Text): string {
-  const str = text.length > 0 ? text.join('').split('\n')[0] : ''
+function textSummary(sexpText: SexpText): string {
+  const str = sexpText.value.length > 0 ? sexpText.value.split('\n')[0] : ''
   return str
 }
 
 function sexpSummary(sexp: SexpNode): string {
-  if (sexp instanceof Text) {
+  if (Sexp.isText(sexp)) {
     return textSummary(sexp)
   } else {
-    if (sexp.length === 0) {
+    if (sexp.children.length === 0) {
       return ''
     } else {
       return sexpSummary(sexp[0])
@@ -93,7 +94,7 @@ export default function SexpListComponent({
 }): React.ReactElement {
   const classes = useStyles()
 
-  const listItems = list.map(
+  const listItems = list.children.map(
     (sexp: SexpNode): React.ReactElement => (
       <SexpItem state={state} sexp={sexp} key={getObjectId(sexp)} />
     )
