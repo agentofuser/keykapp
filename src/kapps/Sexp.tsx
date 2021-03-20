@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid'
 import { idv0UserlandPrefix } from '../constants'
 import {
   focusedSexp,
@@ -10,18 +11,23 @@ import {
 import {
   AppAction,
   AppSyncRoot,
-  SexpNode,
   SexpList,
-  UserlandKapp,
+  SexpNode,
   SexpText as SexpText,
+  UserlandKapp,
 } from '../types'
-import { v4 as uuidv4 } from 'uuid'
 
 export const Sexp = {
   List: {
-    from: (xs: Array<SexpNode>): SexpList => ({
+    from: (children: Array<SexpNode>): SexpList => ({
       uuid: uuidv4(),
-      children: [],
+      children,
+    }),
+  },
+  Text: {
+    from: (value: string): SexpText => ({
+      uuid: uuidv4(),
+      value,
     }),
   },
   isList: (sexp: SexpNode): sexp is SexpList => {
@@ -33,22 +39,19 @@ export const Sexp = {
 }
 
 function textNew(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
-  const list: Automerge.List<SexpNode> = lastListInZoomPath(draftSyncRoot)
+  const list: SexpList = lastListInZoomPath(draftSyncRoot)
   const zoomCursorIdx = draftSyncRoot.sexpZoomCursorIdx
   const zoomLevel = zoomCursorIdx > 0 ? 'atom' : 'list'
 
   if (zoomLevel === 'list') {
     const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
-    if (list.insertAt) {
-      list.insertAt(focusCursorIdx, new Automerge.Text(''))
-      setFocusCursorIdx(draftSyncRoot, list, focusCursorIdx + 1)
-    }
+
+    list.children.splice(focusCursorIdx, 0, Sexp.Text.from(''))
+    setFocusCursorIdx(draftSyncRoot, list, focusCursorIdx + 1)
   } else if (zoomLevel === 'atom') {
-    if (list.insertAt) {
-      list.insertAt(zoomCursorIdx, new Automerge.Text(''))
-      draftSyncRoot.sexpZoomCursorIdx = zoomCursorIdx + 1
-      setFocusCursorIdx(draftSyncRoot, list, draftSyncRoot.sexpZoomCursorIdx)
-    }
+    list.children.splice(zoomCursorIdx, 0, Sexp.Text.from(''))
+    draftSyncRoot.sexpZoomCursorIdx = zoomCursorIdx + 1
+    setFocusCursorIdx(draftSyncRoot, list, draftSyncRoot.sexpZoomCursorIdx)
   }
 }
 
@@ -56,26 +59,29 @@ function listNew(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   const list = zoomedList(draftSyncRoot)
   if (list) {
     const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
-    if (list.insertAt) {
-      list.insertAt(focusCursorIdx, [])
-      setFocusCursorIdx(draftSyncRoot, list, focusCursorIdx + 1)
-    }
+
+    list.children.splice(focusCursorIdx, 0, Sexp.List.from([]))
+    setFocusCursorIdx(draftSyncRoot, list, focusCursorIdx + 1)
   }
 }
 
 function focusedDelete(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   const sexp = zoomedSexp(draftSyncRoot)
-  if (sexp) {
-    const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
-    const idx = focusCursorIdx - 1
-    if (sexp.deleteAt && focusCursorIdx > 0 && focusCursorIdx <= sexp.length) {
-      const deleted = sexp[idx]
-      sexp.deleteAt(idx)
-      if (!(sexp instanceof Automerge.Text)) {
-        setFocusCursorIdx(draftSyncRoot, deleted, undefined)
-      }
-      setFocusCursorIdx(draftSyncRoot, sexp, idx)
+
+  const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
+  const idx = focusCursorIdx - 1
+  const length = Sexp.isList(sexp) ? sexp.children.length : sexp.value.length
+  const arr = Sexp.isList(sexp) ? sexp.children : sexp.value.split('')
+  if (focusCursorIdx > 0 && focusCursorIdx <= length) {
+    const deleted = arr[idx]
+    arr.splice(idx, 1)
+    if (Sexp.isList(sexp)) {
+      setFocusCursorIdx(draftSyncRoot, deleted as SexpNode, undefined)
     }
+    if (Sexp.isText(sexp)) {
+      sexp.value = arr.join('')
+    }
+    setFocusCursorIdx(draftSyncRoot, sexp, idx)
   }
 }
 
