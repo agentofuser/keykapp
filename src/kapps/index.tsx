@@ -1,18 +1,14 @@
-import * as Automerge from 'automerge'
 import { filter, map } from 'fp-ts/es6/Array'
 import {
   idv0SystemPrefix,
   idv0UserlandPrefix,
   modeInsertIdv0,
   modeMenuIdv0,
-  redoIdv0,
-  undoIdv0,
 } from '../constants'
 import { stringSaveAs } from '../kitchensink/effectfns'
 import murmurhash from '../kitchensink/murmurhash'
 import { menuOut, menuOutToRoot, recomputeMenuRoot } from '../navigation'
 import {
-  commitIfChanged,
   getCurrentFocusCursorIdx,
   updateTailSequenceFrequencies,
   zoomedText,
@@ -45,15 +41,16 @@ const mapFocusedChar = (
   const focusedCursorIdx = getCurrentFocusCursorIdx(draftState)
   const charIdx = focusedCursorIdx - 1
 
-  if (text && focusedCursorIdx > 0 && charIdx < text.length) {
-    const focusedChar = text.get(charIdx)
+  if (text && focusedCursorIdx > 0 && charIdx < text.value.length) {
+    const focusedChar = text.value[charIdx]
 
-    if (text.deleteAt) {
-      text.deleteAt(charIdx)
-      const replacementChar = charMapper(focusedChar)
-      if (text.insertAt && replacementChar)
-        text.insertAt(charIdx, replacementChar)
-    }
+    text.value = text.value.split('').splice(charIdx, 1).join('')
+    const replacementChar = charMapper(focusedChar)
+    if (replacementChar)
+      text.value = text.value
+        .split('')
+        .splice(charIdx, 0, replacementChar)
+        .join('')
   }
 }
 
@@ -155,44 +152,6 @@ export const inputModeMenuKapp: SystemKapp = {
   instruction: modeMenu,
 }
 
-function undoInstruction(draftState: AppState, _action: AppAction): AppState {
-  const syncRoot = draftState.syncRoot
-  if (!syncRoot) return draftState
-
-  const prevState = draftState
-  draftState = { ...prevState }
-
-  if (Automerge.canUndo(syncRoot)) {
-    draftState.syncRoot = Automerge.undo(syncRoot, undoIdv0)
-    draftState.tempRoot.kappIdv0Log.push(undoIdv0)
-  }
-  updateTailSequenceFrequencies(draftState)
-  recomputeMenuRoot(draftState)
-  menuOutToRoot(draftState, _action)
-  const nextState = draftState
-  commitIfChanged(prevState, nextState, undoIdv0)
-  return nextState
-}
-
-function redoInstruction(draftState: AppState, _action: AppAction): AppState {
-  const syncRoot = draftState.syncRoot
-  if (!syncRoot) return draftState
-
-  const prevState = draftState
-  draftState = { ...prevState }
-
-  if (Automerge.canRedo(syncRoot)) {
-    draftState.syncRoot = Automerge.redo(syncRoot, redoIdv0)
-    draftState.tempRoot.kappIdv0Log.push(redoIdv0)
-  }
-  updateTailSequenceFrequencies(draftState)
-  recomputeMenuRoot(draftState)
-  menuOutToRoot(draftState, _action)
-  const nextState = draftState
-  commitIfChanged(prevState, nextState, redoIdv0)
-  return nextState
-}
-
 function modeInsert(draftState: AppState, _action: AppAction): AppState {
   const prevState = draftState
   draftState = { ...prevState }
@@ -206,7 +165,6 @@ function modeInsert(draftState: AppState, _action: AppAction): AppState {
   recomputeMenuRoot(draftState)
   menuOutToRoot(draftState, _action)
   const nextState = draftState
-  commitIfChanged(prevState, nextState, modeInsertIdv0)
   return nextState
 }
 
@@ -223,23 +181,7 @@ function modeMenu(draftState: AppState, _action: AppAction): AppState {
   recomputeMenuRoot(draftState)
   menuOutToRoot(draftState, _action)
   const nextState = draftState
-  commitIfChanged(prevState, nextState, modeMenuIdv0)
   return nextState
-}
-export const undoKapp: SystemKapp = {
-  type: 'SystemKapp',
-  idv0: undoIdv0,
-  shortAsciiName: ':undo',
-  legend: '↩️:undo',
-  instruction: undoInstruction,
-}
-
-export const redoKapp: SystemKapp = {
-  type: 'SystemKapp',
-  idv0: redoIdv0,
-  shortAsciiName: ':redo',
-  legend: '↪️:redo',
-  instruction: redoInstruction,
 }
 
 const exportIdv0 = `${idv0SystemPrefix}syncRoot/export`
@@ -255,7 +197,7 @@ function exportInstruction(
   const { syncRoot } = draftState
   let serializedSyncRoot
   if (syncRoot) {
-    serializedSyncRoot = Automerge.save(syncRoot)
+    serializedSyncRoot = JSON.stringify(syncRoot, null, 2)
     stringSaveAs(serializedSyncRoot, 'keykapp-sync-root.json')
   }
 
@@ -264,7 +206,6 @@ function exportInstruction(
   recomputeMenuRoot(draftState)
   menuOutToRoot(draftState, _action)
   const nextState = draftState
-  commitIfChanged(prevState, nextState, exportIdv0)
   return nextState
 }
 
@@ -278,8 +219,6 @@ const exportKapp: SystemKapp = {
 
 export const systemKapps: SystemKapp[] = [
   menuUpKapp,
-  undoKapp,
-  redoKapp,
   exportKapp,
   inputModeInsertKapp,
   inputModeMenuKapp,
@@ -290,8 +229,6 @@ export const allKapps: Kapp[] = [...userlandKapps, ...systemKapps]
 export const listModeKapps: Kapp[] = [
   ...zoomedListOnlyKapps,
   ...zoomedListOrTextKapps,
-  undoKapp,
-  redoKapp,
   exportKapp,
 ]
 

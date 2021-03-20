@@ -1,8 +1,8 @@
-import * as Automerge from 'automerge'
 import * as React from 'react'
 import { SexpNode, AppState } from '../types'
-import SexpAtomStringComponent from './SexpAtomString'
-import SexpListComponent from './SexpList'
+import SexpTextComponent from './SexpTextComponent'
+import SexpListComponent from './SexpListComponent'
+import { Sexp } from '../kapps/Sexp'
 
 export default function SexpComponent({
   state,
@@ -11,9 +11,9 @@ export default function SexpComponent({
   state: AppState
   sexp: SexpNode
 }): React.ReactElement {
-  if (sexp instanceof Automerge.Text) {
-    return <SexpAtomStringComponent state={state} text={sexp} />
-  } else if (sexp instanceof Array) {
+  if (Sexp.isText(sexp)) {
+    return <SexpTextComponent state={state} text={sexp} />
+  } else if (Sexp.isList(sexp)) {
     return <SexpListComponent state={state} list={sexp} />
   } else {
     return <p>Unexpected sexp type.</p>

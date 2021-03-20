@@ -9201,6 +9201,13 @@ fsevents@~2.3.1:
   languageName: node
   linkType: hard
 
+"immer@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "immer@npm:9.0.0"
+  checksum: abf7780c3028d34d9b53e1411c5c68eae39c8d5361fccff69bab9d7e3806b484a5dfed4d68cf9655888e58b605384c6cef3fd1da0f216862175f510ee7b6dc57
+  languageName: node
+  linkType: hard
+
 "import-cwd@npm:^2.0.0":
   version: 2.1.0
   resolution: "import-cwd@npm:2.1.0"
@@ -10617,6 +10624,7 @@ fsevents@~2.3.1:
     gatsby-plugin-offline: ^3.10.2
     gatsby-plugin-react-helmet: ^3.10.0
     gatsby-plugin-typescript: ^2.12.1
+    immer: ^9.0.0
     n-gram: ^1.1.2
     nodemon: ^2.0.7
     now: ^17.0.1

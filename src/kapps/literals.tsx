@@ -18,10 +18,10 @@ const pushLiteral = (literal: string): DraftSyncRootMutator => (
   _action: AppAction
 ): void => {
   const text = zoomedText(draftSyncRoot)
-  if (!(text && text.insertAt)) return
+  if (!text) return
 
   const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
-  text.insertAt(focusCursorIdx, literal)
+  text.value = text.value.split('').splice(focusCursorIdx, 0, literal).join('')
   setFocusCursorIdx(draftSyncRoot, text, focusCursorIdx + 1)
 }
 

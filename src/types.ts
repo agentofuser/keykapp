@@ -123,7 +123,7 @@ export interface Keystroke {
 export interface AppSyncRoot {
   // the root userland sexp
   sexp: SexpList
-  // keyed by Automerge.UUID (string)
+  // keys are type UUID
   sexpMetadata: { [key: string]: SexpInfo }
   // stack of int list indices: empty means root
   sexpListZoomPath: number[]

@@ -1,11 +1,10 @@
 import { Paper, Theme } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
-import * as Automerge from 'automerge'
 import { splitAt } from 'fp-ts/es6/Array'
 import * as React from 'react'
 import { wordCount, sizeInBytes } from '../kitchensink/purefns'
 import { getCurrentFocusCursorIdx } from '../state'
-import { AppState } from '../types'
+import { AppState, SexpText } from '../types'
 
 const useStyles = makeStyles((theme: Theme) => ({
   outputBuffer: {
@@ -34,8 +33,8 @@ function VerticalCharCursor(): React.ReactElement {
   )
 }
 
-function stats(text: Automerge.Text): React.ReactNode {
-  const string = text.join('')
+function stats(text: SexpText): React.ReactNode {
+  const string = text.value
   return `bytes: ${sizeInBytes(string)}, words: ${wordCount(string)}\n---\n`
 }
 
@@ -47,23 +46,25 @@ function DirectedCharCursor({ char }: { char: string }): React.ReactElement {
   )
 }
 
-export interface SexpAtomStringComponentProps {
+export interface SexpTextComponentProps {
   state: AppState
-  text: Automerge.Text
+  text: SexpText
 }
 
-export default function SexpAtomStringComponent({
+export default function SexpTextComponent({
   state,
   text,
-}: SexpAtomStringComponentProps): React.ReactElement {
+}: SexpTextComponentProps): React.ReactElement {
   const classes = useStyles()
 
   let textWithCursor: React.ReactNode = 'Loading...'
   if (state.syncRoot) {
     const focusCursorIdx = getCurrentFocusCursorIdx(state.syncRoot)
-    const [beforeCursor, afterCursor] = splitAt(focusCursorIdx)(text)
+    const [beforeCursor, afterCursor] = splitAt(focusCursorIdx)(
+      text.value.split('')
+    )
 
-    const lastChar = text.join('').slice(-1)
+    const lastChar = text.value.slice(-1)
 
     textWithCursor = ((): React.ReactNode => {
       switch (lastChar) {
@@ -71,7 +72,7 @@ export default function SexpAtomStringComponent({
           return (
             <React.Fragment>
               {stats(text)}
-              {text.join('')}
+              {text.value}
               <VerticalCharCursor />
             </React.Fragment>
           )

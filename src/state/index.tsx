@@ -2,6 +2,8 @@ import { last, map, reduce } from 'fp-ts/es6/Array'
 import { map as optionMap, Option } from 'fp-ts/es6/Option'
 import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
+import { enableAllPlugins } from 'immer'
+import produce from 'immer'
 import { nGramRange, spacebarKeyswitch } from '../constants'
 import {
   findKappById,
@@ -23,12 +25,15 @@ import {
   Keystroke,
   Keyswitch,
   NGrammer,
-  SexpText,
   SexpInfo,
   SexpList,
   SexpNode,
+  SexpText,
   Waypoint,
 } from '../types'
+
+// immerjs
+enableAllPlugins()
 
 export function makeInitialSyncRoot(): AppSyncRoot {
   return {
@@ -179,13 +184,13 @@ export function setFocusCursorIdx(
   focusCursorIdx: number | undefined
 ): void {
   if (focusCursorIdx === undefined) {
-    delete draftSyncRoot.sexpMetadata[Automerge.getObjectId(sexp)]
+    delete draftSyncRoot.sexpMetadata[sexp.uuid]
   } else {
-    const info = draftSyncRoot.sexpMetadata[Automerge.getObjectId(sexp)]
+    const info = draftSyncRoot.sexpMetadata[sexp.uuid]
     if (info) {
       info.focusCursorIdx = focusCursorIdx
     } else {
-      draftSyncRoot.sexpMetadata[Automerge.getObjectId(sexp)] = {
+      draftSyncRoot.sexpMetadata[sexp.uuid] = {
         focusCursorIdx,
       }
     }
@@ -258,9 +263,8 @@ function logKeystroke(prevState: AppState, keyswitch: Keyswitch): AppState {
     huffmanTreeDepth,
   }
   if (nextState.syncRoot) {
-    nextState.syncRoot = Automerge.change(
+    nextState.syncRoot = produce(
       prevState.syncRoot,
-      'syncRoot.keystrokeHistory.push()',
       (draftSyncRoot: AppSyncRoot): void => {
         draftSyncRoot.keystrokeHistory.push(keystroke)
       }
@@ -290,7 +294,7 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
         const isMenuWaypoint = !isKappWaypoint
 
         // prevState marks the last committed syncRoot change so it can be
-        // diffed by Automerge.change()
+        // diffed by produce()
         prevState = logKeystroke(prevState, keyswitch)
         nextState = { ...prevState }
 
@@ -304,9 +308,8 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
           nextState.syncRoot
         ) {
           if (kapp.type === 'UserlandKapp') {
-            nextState.syncRoot = Automerge.change(
+            nextState.syncRoot = produce(
               prevState.syncRoot,
-              kappIdv0,
               (draftSyncRoot: AppSyncRoot): void => {
                 kapp.instruction(draftSyncRoot, action)
                 logKappExecution(nextState.tempRoot, kapp)
@@ -345,9 +348,8 @@ export function appReducer(prevState: AppState, action: AppAction): AppState {
         const kappIdv0 = action.data.kappIdv0
         const kapp = kappIdv0 && findKappById(kappIdv0)
         if (kapp && kapp.type === 'UserlandKapp') {
-          nextState.syncRoot = Automerge.change(
+          nextState.syncRoot = produce(
             prevState.syncRoot,
-            kappIdv0,
             (draftSyncRoot: AppSyncRoot): void => {
               kapp.instruction(draftSyncRoot, action)
               logKappExecution(nextState.tempRoot, kapp)

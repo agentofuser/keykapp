@@ -96,7 +96,7 @@ export default function SexpListComponent({
 
   const listItems = list.children.map(
     (sexp: SexpNode): React.ReactElement => (
-      <SexpItem state={state} sexp={sexp} key={getObjectId(sexp)} />
+      <SexpItem state={state} sexp={sexp} key={sexp.uuid} />
     )
   )
 
