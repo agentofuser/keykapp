@@ -72,6 +72,8 @@ const nameWeight = (name: string, weight = 200): void => {
 }
 
 nameWeight('char/upcase', 1000)
+nameWeight('list/new', 10000)
+nameWeight('text/new', 10000)
 
 export const nGramRange = range(1, 16)
 
