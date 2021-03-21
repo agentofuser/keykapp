@@ -49,7 +49,7 @@ export function menuOut(draftState: AppState, _action: AppAction): AppState {
 export function recomputeMenuRoot(draftState: AppState): void {
   const operandValueType = draftState.syncRoot
     ? currentMode(draftState.syncRoot)
-    : 'text-mode'
+    : 'list-mode'
 
   const inputModeToggleKapp =
     draftState.tempRoot.inputMode == 'InsertMode'

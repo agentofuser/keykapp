@@ -105,7 +105,9 @@ function loadBalancer(
   let oldParentKeyswitchActuationCost
   if (state.tempRoot.keybindingBreadcrumbs.length > 1) {
     let _parentWaypoint
-    [parentKeyswitch, _parentWaypoint ]= last(state.tempRoot.keybindingBreadcrumbs)
+    ;[parentKeyswitch, _parentWaypoint] = last(
+      state.tempRoot.keybindingBreadcrumbs
+    )
     oldParentKeyswitchActuationCost = parentKeyswitch.actuationCost
     parentKeyswitch.actuationCost = 255
   }
@@ -136,8 +138,9 @@ export function layout(
 ): Layout {
   return fold(
     (): Layout => [],
-    (waypoint: Waypoint): Layout =>
-      loadBalancer(state, homerowKeyswitches, waypoint.forest)
+    (waypoint: Waypoint): Layout => {
+      return loadBalancer(state, homerowKeyswitches, waypoint.forest)
+    }
   )(waypointOption)
 }
 

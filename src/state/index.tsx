@@ -8,6 +8,7 @@ import { nGramRange, spacebarKeyswitch } from '../constants'
 import {
   findKappById,
   inputModeMenuKapp,
+  listModeKapps,
   menuUpKapp,
   pasteIdv0,
   zoomedTextOnlyKapps,
@@ -46,7 +47,7 @@ export function makeInitialSyncRoot(): AppSyncRoot {
 }
 
 export function makeInitialAppState(): AppState {
-  const initialHuffmanRoot = newHuffmanRoot({ kapps: zoomedTextOnlyKapps })
+  const initialHuffmanRoot = newHuffmanRoot({ kapps: listModeKapps })
 
   const syncRoot = makeInitialSyncRoot()
 
