@@ -1,9 +1,8 @@
 import { last, map, reduce } from 'fp-ts/es6/Array'
 import { map as optionMap, Option } from 'fp-ts/es6/Option'
+import produce, { enableAllPlugins } from 'immer'
 import * as nGram from 'n-gram'
 import { Dispatch } from 'react'
-import { enableAllPlugins } from 'immer'
-import produce from 'immer'
 import { nGramRange, spacebarKeyswitch } from '../constants'
 import {
   findKappById,
@@ -11,7 +10,6 @@ import {
   listModeKapps,
   menuUpKapp,
   pasteIdv0,
-  zoomedTextOnlyKapps,
 } from '../kapps'
 import { Sexp } from '../kapps/Sexp'
 import { menuIn, menuOutToRoot, recomputeMenuRoot } from '../navigation'

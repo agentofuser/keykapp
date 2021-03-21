@@ -104,6 +104,11 @@ function loadBalancer(
   let parentKeyswitch
   let oldParentKeyswitchActuationCost
   if (state.tempRoot.keybindingBreadcrumbs.length > 1) {
+    // HACK for weird "Cannot assign to read only property actuationCost" error
+    // Not sure why it's read-only, but cloning it via JSON works.
+    state.tempRoot.keybindingBreadcrumbs = JSON.parse(
+      JSON.stringify(state.tempRoot.keybindingBreadcrumbs)
+    )
     let _parentWaypoint
     ;[parentKeyswitch, _parentWaypoint] = last(
       state.tempRoot.keybindingBreadcrumbs

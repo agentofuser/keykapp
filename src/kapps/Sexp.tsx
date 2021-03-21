@@ -154,11 +154,13 @@ function focusLast(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
 
 function zoomIn(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   const sexp = focusedSexp(draftSyncRoot)
+  console.log({ sexp })
   if (sexp) {
     const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
     if (Sexp.isText(sexp)) {
       draftSyncRoot.sexpZoomCursorIdx = focusCursorIdx
     } else {
+      console.log({ sexp })
       draftSyncRoot.sexpListZoomPath.push(focusCursorIdx - 1)
       draftSyncRoot.sexpZoomCursorIdx = 0
     }
