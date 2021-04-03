@@ -5,11 +5,9 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "runtimeExecutable": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
-      "userDataDir": "/tmp/chrome-debug/keykapp--user-data-dir",
-      "type": "chrome",
+      "type": "pwa-chrome",
       "request": "launch",
-      "name": "Launch Brave against localhost",
+      "name": "Launch Chrome against localhost",
       "url": "http://localhost:8000",
       "webRoot": "${workspaceFolder}"
     }
