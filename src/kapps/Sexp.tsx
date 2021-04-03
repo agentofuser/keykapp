@@ -92,7 +92,7 @@ function moveBack(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
     if (idx > 0) {
       const newIdx = idx - 1
       const newFocusCursorIdx = newIdx + 1
-      const sexp = list[idx]
+      const sexp = list.children[idx]
 
       list.children.splice(idx, 1)
       list.children.splice(newIdx, 0, sexp)
@@ -108,7 +108,7 @@ function moveForth(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
     if (idx < list.children.length - 1) {
       const newIdx = idx + 1
       const newFocusCursorIdx = newIdx + 1
-      const sexp = list[idx]
+      const sexp = list.children[idx]
       {
         list.children.splice(idx, 1)
         list.children.splice(newIdx, 0, sexp)
@@ -154,13 +154,12 @@ function focusLast(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
 
 function zoomIn(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   const sexp = focusedSexp(draftSyncRoot)
-  console.log({ sexp })
   if (sexp) {
     const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
+
     if (Sexp.isText(sexp)) {
       draftSyncRoot.sexpZoomCursorIdx = focusCursorIdx
     } else {
-      console.log({ sexp })
       draftSyncRoot.sexpListZoomPath.push(focusCursorIdx - 1)
       draftSyncRoot.sexpZoomCursorIdx = 0
     }
@@ -170,9 +169,8 @@ function zoomIn(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
 function zoomOut(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   const zoomCursorIdx = draftSyncRoot.sexpZoomCursorIdx
 
-  if (zoomCursorIdx > 0) {
-    draftSyncRoot.sexpZoomCursorIdx = 0
-  } else {
+  draftSyncRoot.sexpZoomCursorIdx = 0
+  if (zoomCursorIdx === 0) {
     draftSyncRoot.sexpListZoomPath.pop()
   }
 }

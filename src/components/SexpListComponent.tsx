@@ -57,7 +57,7 @@ function sexpSummary(sexp: SexpNode): string {
     if (sexp.children.length === 0) {
       return ''
     } else {
-      return sexpSummary(sexp[0])
+      return sexpSummary(sexp.children[0])
     }
   }
 }

@@ -113,7 +113,7 @@ export function parentList(syncRoot: AppSyncRoot): SexpList | null {
   let lastList = syncRoot.sexp
   for (const index of syncRoot.sexpListZoomPath) {
     if (index > 0) secondToLastList = lastList
-    lastList = lastList[index]
+    lastList = lastList.children[index]
   }
   return zoomLevel(syncRoot) === 'atom' ? lastList : secondToLastList
 }
@@ -121,7 +121,7 @@ export function parentList(syncRoot: AppSyncRoot): SexpList | null {
 export function zoomedSexp(syncRoot: AppSyncRoot): SexpNode {
   const list = lastListInZoomPath(syncRoot)
   const cursorIdx = syncRoot.sexpZoomCursorIdx
-  const sexp = cursorIdx > 0 ? list[cursorIdx - 1] : list
+  const sexp = cursorIdx > 0 ? list.children[cursorIdx - 1] : list
   return sexp
 }
 
@@ -146,17 +146,21 @@ export function getCurrentFocusCursorIdx(syncRoot: AppSyncRoot): number {
   const { info, sexp } = zoomedSexpAndInfo(syncRoot)
   const length = Sexp.isText(sexp) ? sexp.value.length : sexp.children.length
   const cursorIdx = info ? info.focusCursorIdx : length
+
   return cursorIdx
 }
 
 export function focusedSexp(syncRoot: AppSyncRoot): SexpNode | null {
   const list = zoomedList(syncRoot)
+
+  let result
   if (list) {
     const idx = getCurrentFocusCursorIdx(syncRoot) - 1
-    return list[idx]
+    result = list.children[idx]
   } else {
-    return null
+    result = null
   }
+  return result
 }
 
 export function zoomedText(syncRoot: AppSyncRoot): SexpText | null {
