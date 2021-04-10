@@ -44,13 +44,15 @@ const mapFocusedChar = (
   if (text && focusedCursorIdx > 0 && charIdx < text.value.length) {
     const focusedChar = text.value[charIdx]
 
-    text.value = text.value.split('').splice(charIdx, 1).join('')
+    const valueAsArray = text.value.split('')
+    valueAsArray.splice(charIdx, 1)
+    text.value = valueAsArray.join('')
     const replacementChar = charMapper(focusedChar)
-    if (replacementChar)
-      text.value = text.value
-        .split('')
-        .splice(charIdx, 0, replacementChar)
-        .join('')
+    if (replacementChar) {
+      const valueAsArray = text.value.split('')
+      valueAsArray.splice(charIdx, 0, replacementChar)
+      text.value = valueAsArray.join('')
+    }
   }
 }
 
