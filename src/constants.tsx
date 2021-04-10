@@ -37,43 +37,39 @@ export const modeMenuIdv0 = `${idv0SystemPrefix}inputMode/menu`
 
 export const manualWeights: { [name: string]: number } = {}
 manualWeights[`${idv0UserlandPrefix}text/copy`] = 40
-manualWeights[undoIdv0] = 150
-manualWeights[redoIdv0] = 150
+// manualWeights[undoIdv0] = 150
+// manualWeights[redoIdv0] = 150
 
-manualWeights[modeInsertIdv0] = 10000
-manualWeights[modeMenuIdv0] = 10000
+manualWeights[modeInsertIdv0] = 30000
+manualWeights[modeMenuIdv0] = 30000
 
 const zoom = (name: string): void => {
-  manualWeights[`${idv0UserlandPrefix}zoom/${name}`] = 2000
+  manualWeights[`${idv0UserlandPrefix}zoom/${name}`] = 10000
 }
 zoom('in')
 zoom('out')
 
 const focus = (name: string): void => {
-  manualWeights[`${idv0UserlandPrefix}focus/${name}`] = 200
+  manualWeights[`${idv0UserlandPrefix}focus/${name}`] = 10000
 }
 focus('next')
 focus('prev')
-focus('first')
-focus('last')
-const sexp = (name: string, weight = 200): void => {
+// focus('first')
+// focus('last')
+const sexp = (name: string, weight = 20000): void => {
   manualWeights[`${idv0UserlandPrefix}sexp/${name}`] = weight
 }
-sexp('delete', 1000)
-sexp('move-back')
-sexp('move-forth')
-const list = (name: string): void => {
-  manualWeights[`${idv0UserlandPrefix}list/${name}`] = 200
-}
-list('new')
+sexp('delete')
+// sexp('move-back')
+// sexp('move-forth')
 
-const nameWeight = (name: string, weight = 200): void => {
+const nameWeight = (name: string, weight = 20000): void => {
   manualWeights[`${idv0UserlandPrefix}${name}`] = weight
 }
 
-nameWeight('char/upcase', 1000)
-nameWeight('list/new', 10000)
-nameWeight('text/new', 10000)
+nameWeight('char/upcase', 20000)
+nameWeight('list/new', 40000)
+nameWeight('text/new', 40000)
 
 export const nGramRange = range(1, 16)
 
