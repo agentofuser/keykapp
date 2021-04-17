@@ -1,0 +1,1115 @@
+{
+  "sexp": {
+    "uuid": "df087aae-038f-48fc-a279-894366cf244a",
+    "children": [
+      {
+        "uuid": "30be76fc-aa40-4db0-9447-6d66693ff972",
+        "children": [
+          {
+            "uuid": "5b279a0b-4909-4bf3-a231-b80a42d9bb8e",
+            "value": "TODOs"
+          },
+          {
+            "uuid": "deeb8594-2375-4443-bd9a-c47b7231c956",
+            "value": "add :move-in and :move-out -- list sexp"
+          },
+          {
+            "uuid": "f90d3964-cdf2-445d-90f0-b1cfd0d0d111",
+            "value": "suggest k-grams with k > 1"
+          },
+          {
+            "uuid": "f581956f-d673-46f9-80d1-bcf571b2122c",
+            "value": "add webnative login kapp"
+          },
+          {
+            "uuid": "ad899beb-a853-4d65-ad03-58689b2f1f05",
+            "value": "add webnative :save kapp"
+          },
+          {
+            "uuid": "ecdd661f-53f9-4b79-98ae-fbffa14e6fb7",
+            "value": "add typechecker field to kapps for boolean function that is used to filter suggested kapps in the huffman menu tree"
+          },
+          {
+            "uuid": "e873b61e-456d-4f48-adc9-807f518b322e",
+            "value": "add back hand-swap load-balancing for predictive menu row"
+          }
+        ]
+      }
+    ]
+  },
+  "sexpMetadata": {
+    "df087aae-038f-48fc-a279-894366cf244a": {
+      "focusCursorIdx": 1
+    },
+    "30be76fc-aa40-4db0-9447-6d66693ff972": {
+      "focusCursorIdx": 7
+    },
+    "5b279a0b-4909-4bf3-a231-b80a42d9bb8e": {
+      "focusCursorIdx": 5
+    },
+    "deeb8594-2375-4443-bd9a-c47b7231c956": {
+      "focusCursorIdx": 39
+    },
+    "f90d3964-cdf2-445d-90f0-b1cfd0d0d111": {
+      "focusCursorIdx": 26
+    },
+    "f581956f-d673-46f9-80d1-bcf571b2122c": {
+      "focusCursorIdx": 24
+    },
+    "ad899beb-a853-4d65-ad03-58689b2f1f05": {
+      "focusCursorIdx": 24
+    },
+    "ecdd661f-53f9-4b79-98ae-fbffa14e6fb7": {
+      "focusCursorIdx": 115
+    },
+    "e873b61e-456d-4f48-adc9-807f518b322e": {
+      "focusCursorIdx": 57
+    }
+  },
+  "sexpListZoomPath": [
+    0
+  ],
+  "sexpZoomCursorIdx": 0,
+  "keystrokeHistory": [
+    {
+      "timestamp": 1618673019534,
+      "keyswitch": {
+        "index": 4,
+        "key": "j",
+        "actuationCost": 1,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673021771,
+      "keyswitch": {
+        "index": 0,
+        "key": "a",
+        "actuationCost": 4,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673026045,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673029618,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673038496,
+      "keyswitch": {
+        "index": 0,
+        "key": "a",
+        "actuationCost": 4,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673041197,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673079553,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673081140,
+      "keyswitch": {
+        "index": 0,
+        "key": "a",
+        "actuationCost": 4,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673083225,
+      "keyswitch": {
+        "index": 6,
+        "key": "l",
+        "actuationCost": 3,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673084572,
+      "keyswitch": {
+        "index": 6,
+        "key": "l",
+        "actuationCost": 3,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673086375,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673088298,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673091581,
+      "keyswitch": {
+        "index": 0,
+        "key": "a",
+        "actuationCost": 4,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673094071,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673095530,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673099186,
+      "keyswitch": {
+        "index": 6,
+        "key": "l",
+        "actuationCost": 3,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673103896,
+      "keyswitch": {
+        "index": 2,
+        "key": "d",
+        "actuationCost": 2,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673107198,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673109759,
+      "keyswitch": {
+        "index": 6,
+        "key": "l",
+        "actuationCost": 3,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673111694,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673113828,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673116391,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673120542,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673124416,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673130591,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673132063,
+      "keyswitch": {
+        "index": 0,
+        "key": "a",
+        "actuationCost": 4,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 1
+    },
+    {
+      "timestamp": 1618673138455,
+      "keyswitch": {
+        "index": 7,
+        "key": ";",
+        "actuationCost": 4,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673140449,
+      "keyswitch": {
+        "index": 4,
+        "key": "j",
+        "actuationCost": 1,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 1
+    },
+    {
+      "timestamp": 1618673251270,
+      "keyswitch": {
+        "index": 2,
+        "key": "d",
+        "actuationCost": 2,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673264049,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673267532,
+      "keyswitch": {
+        "index": 0,
+        "key": "a",
+        "actuationCost": 4,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673273245,
+      "keyswitch": {
+        "index": 4,
+        "key": "j",
+        "actuationCost": 1,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673274924,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673281959,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673290155,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673296823,
+      "keyswitch": {
+        "index": 0,
+        "key": "a",
+        "actuationCost": 4,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673300204,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673303954,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673305688,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673308329,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673310072,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673313446,
+      "keyswitch": {
+        "index": 6,
+        "key": "l",
+        "actuationCost": 3,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673315589,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673317497,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673318916,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673321485,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673322913,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673325250,
+      "keyswitch": {
+        "index": 4,
+        "key": "j",
+        "actuationCost": 1,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673326359,
+      "keyswitch": {
+        "index": 8,
+        "key": " ",
+        "actuationCost": 1
+      },
+      "huffmanTreeDepth": 1
+    },
+    {
+      "timestamp": 1618673326839,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673327607,
+      "keyswitch": {
+        "index": 0,
+        "key": "a",
+        "actuationCost": 4,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 1
+    },
+    {
+      "timestamp": 1618673336698,
+      "keyswitch": {
+        "index": 1,
+        "key": "s",
+        "actuationCost": 3,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673341539,
+      "keyswitch": {
+        "index": 1,
+        "key": "s",
+        "actuationCost": 3,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673381889,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673383417,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673385456,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673424894,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673426555,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673427203,
+      "keyswitch": {
+        "index": 0,
+        "key": "a",
+        "actuationCost": 4,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 1
+    },
+    {
+      "timestamp": 1618673441120,
+      "keyswitch": {
+        "index": 6,
+        "key": "l",
+        "actuationCost": 3,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673445244,
+      "keyswitch": {
+        "index": 0,
+        "key": "a",
+        "actuationCost": 4,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673446734,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673449013,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673450470,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673451757,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673452973,
+      "keyswitch": {
+        "index": 0,
+        "key": "a",
+        "actuationCost": 4,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 1
+    },
+    {
+      "timestamp": 1618673486782,
+      "keyswitch": {
+        "index": 7,
+        "key": ";",
+        "actuationCost": 4,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673488789,
+      "keyswitch": {
+        "index": 4,
+        "key": "j",
+        "actuationCost": 1,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 1
+    },
+    {
+      "timestamp": 1618673531588,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673536029,
+      "keyswitch": {
+        "index": 1,
+        "key": "s",
+        "actuationCost": 3,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673538341,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673541504,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673553625,
+      "keyswitch": {
+        "index": 2,
+        "key": "d",
+        "actuationCost": 2,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673556517,
+      "keyswitch": {
+        "index": 0,
+        "key": "a",
+        "actuationCost": 4,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673564560,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673611709,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673613548,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673614225,
+      "keyswitch": {
+        "index": 0,
+        "key": "a",
+        "actuationCost": 4,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 1
+    },
+    {
+      "timestamp": 1618673627317,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673630692,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673632777,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673669772,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673673415,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673675049,
+      "keyswitch": {
+        "index": 7,
+        "key": ";",
+        "actuationCost": 4,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 1
+    },
+    {
+      "timestamp": 1618673685863,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673687247,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673689597,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673717339,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673718384,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673730908,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673738036,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673741108,
+      "keyswitch": {
+        "index": 1,
+        "key": "s",
+        "actuationCost": 3,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673755810,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673758556,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673760296,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673806109,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673808507,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673809705,
+      "keyswitch": {
+        "index": 5,
+        "key": "k",
+        "actuationCost": 2,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 1
+    },
+    {
+      "timestamp": 1618673825396,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673826525,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673838479,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673881323,
+      "keyswitch": {
+        "index": 9,
+        "key": "Escape",
+        "actuationCost": 4
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673883343,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673884243,
+      "keyswitch": {
+        "index": 3,
+        "key": "f",
+        "actuationCost": 1,
+        "hand": "LeftHand"
+      },
+      "huffmanTreeDepth": 1
+    },
+    {
+      "timestamp": 1618673892450,
+      "keyswitch": {
+        "index": 7,
+        "key": ";",
+        "actuationCost": 4,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 0
+    },
+    {
+      "timestamp": 1618673894353,
+      "keyswitch": {
+        "index": 4,
+        "key": "j",
+        "actuationCost": 1,
+        "hand": "RightHand"
+      },
+      "huffmanTreeDepth": 1
+    }
+  ]
+}

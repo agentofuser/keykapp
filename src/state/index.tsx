@@ -30,18 +30,20 @@ import {
   SexpText,
   Waypoint,
 } from '../types'
+import savedSyncRoot from '../datasets/keykapp-sync-root.json'
 
 // immerjs
 enableAllPlugins()
 
 export function makeInitialSyncRoot(): AppSyncRoot {
-  return {
-    sexp: Sexp.List.from([]),
-    sexpMetadata: {},
-    sexpListZoomPath: [],
-    sexpZoomCursorIdx: 0,
-    keystrokeHistory: [],
-  }
+  // return {
+  //   sexp: Sexp.List.from([]),
+  //   sexpMetadata: {},
+  //   sexpListZoomPath: [],
+  //   sexpZoomCursorIdx: 0,
+  //   keystrokeHistory: [],
+  // }
+  return savedSyncRoot as AppSyncRoot
 }
 
 export function makeInitialAppState(): AppState {
