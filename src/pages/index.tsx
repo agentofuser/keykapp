@@ -11,6 +11,8 @@ import {
   escapeKeyswitch,
   spacebarKeyswitch,
 } from '../constants'
+import { ascii32To126, newlineChar } from '../kapps/literals'
+import { deleteKapp } from '../kapps/Sexp'
 import {
   appReducer,
   currentWaypoint,
@@ -51,8 +53,8 @@ export default function App(): React.ReactNode {
 
     const waypointOption = currentWaypoint(state)
     const waypoint = toNullable(waypointOption)
-    if (state.tempRoot.inputMode == 'MenuMode') {
-      if (event.key == ' ' && waypoint) {
+    if (state.tempRoot.inputMode === 'MenuMode') {
+      if (event.key === ' ' && waypoint) {
         const keybinding: Keybinding = [spacebarKeyswitch, waypoint]
         const keypadUp: KeypadUp = {
           type: 'KeypadUp',
@@ -86,12 +88,7 @@ export default function App(): React.ReactNode {
         )(keybinding)
       }
     } else {
-      if (
-        event.ctrlKey ||
-        event.metaKey ||
-        event.altKey ||
-        event.key == 'Escape'
-      ) {
+      if (event.key === 'Escape') {
         const keybinding: Keybinding = [escapeKeyswitch, waypoint]
         const inputModeMenu: InputModeMenu = {
           type: 'InputModeMenu',
@@ -101,7 +98,27 @@ export default function App(): React.ReactNode {
           },
         }
         dispatchMiddleware(dispatch)(inputModeMenu)
-      } else {
+      } else if (event.key === 'Backspace') {
+        const kappIdv0 = deleteKapp.idv0
+        const runKappAction: RunKapp = {
+          type: 'RunKapp',
+          data: {
+            timestamp: Date.now(),
+            kappIdv0,
+          },
+        }
+        dispatchMiddleware(dispatch)(runKappAction)
+      } else if (event.key === 'Enter') {
+        const kappIdv0 = newlineChar.idv0
+        const runKappAction: RunKapp = {
+          type: 'RunKapp',
+          data: {
+            timestamp: Date.now(),
+            kappIdv0,
+          },
+        }
+        dispatchMiddleware(dispatch)(runKappAction)
+      } else if (ascii32To126.split('').includes(event.key)) {
         const kappIdv0 = `${asciiIdv0Path}${event.key.charCodeAt(0)}`
         const runKappAction: RunKapp = {
           type: 'RunKapp',
