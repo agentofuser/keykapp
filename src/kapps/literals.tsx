@@ -33,14 +33,14 @@ const pushLiteral = (literal: string): DraftSyncRootMutator => (
 // This list doesn't include tab and newline. These are the character codes
 // from 32 to 126 minus uppercase letters.
 const ascii32To126MinusUppercase =
-  ' !"#$%&\'()*+,-./0123456789:;<=>?@[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
+  ' !"#$%&\'()*+,-./0123456789:;<=>?@[\\]^_`ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz{|}~'
 
 export const printableAsciiChars: UserlandKapp[] = map(
   (char: string): UserlandKapp => ({
     type: 'UserlandKapp',
     idv0: `${asciiIdv0Path}${char.charCodeAt(0)}`,
-    shortAsciiName: char === ' ' ? ':space' : char.toUpperCase(),
-    legend: char === ' ' ? 'space' : char.toUpperCase(),
+    shortAsciiName: char === ' ' ? ':space' : char,
+    legend: char === ' ' ? 'space' : char,
     instruction: pushLiteral(char),
   })
 )(ascii32To126MinusUppercase.split(''))
