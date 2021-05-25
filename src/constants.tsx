@@ -71,7 +71,7 @@ nameWeight('char/upcase', 20000)
 nameWeight('list/new', 40000)
 nameWeight('text/new', 40000)
 
-export const nGramRange = range(1, 16)
+export const nGramRange = range(1, 1)
 
 export const gitRepoDir = '/keykapp/syncRootLog/'
 
