@@ -85,6 +85,40 @@ function focusedDelete(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   }
 }
 
+function focusedWrap(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
+  const sexp = zoomedSexp(draftSyncRoot)
+  if (Sexp.isList(sexp)) {
+    const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
+    const idx = focusCursorIdx - 1
+    const length = sexp.children.length
+    const arr = sexp.children
+    if (focusCursorIdx > 0 && focusCursorIdx <= length) {
+      const wrapped = Sexp.List.from([arr[idx]])
+      arr[idx] = wrapped
+    }
+  }
+}
+
+function focusedUnwrap(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
+  const sexp = zoomedSexp(draftSyncRoot)
+  if (Sexp.isList(sexp)) {
+    const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
+    const idx = focusCursorIdx - 1
+    const length = sexp.children.length
+    const arr = sexp.children
+    if (focusCursorIdx > 0 && focusCursorIdx <= length) {
+      const deleted = arr[idx]
+      if (Sexp.isList(deleted)) {
+        arr.splice(idx, 1, ...deleted.children)
+        setFocusCursorIdx(draftSyncRoot, deleted as SexpNode, undefined)
+        if (deleted.children.length === 0) {
+          setFocusCursorIdx(draftSyncRoot, sexp, focusCursorIdx - 1)
+        }
+      }
+    }
+  }
+}
+
 function moveBack(draftSyncRoot: AppSyncRoot, _action: AppAction): void {
   const list = zoomedList(draftSyncRoot)
   if (list) {
@@ -203,6 +237,20 @@ export const zoomedListOnlyKapps: UserlandKapp[] = [
     shortAsciiName: ':move-forth',
     legend: '☀️:move-forth',
     instruction: moveForth,
+  },
+  {
+    type: 'UserlandKapp',
+    idv0: `${idv0UserlandPrefix}sexp/wrap`,
+    shortAsciiName: ':wrap',
+    legend: '🌮:wrap',
+    instruction: focusedWrap,
+  },
+  {
+    type: 'UserlandKapp',
+    idv0: `${idv0UserlandPrefix}sexp/unwrap`,
+    shortAsciiName: ':unwrap',
+    legend: '🍫:unwrap',
+    instruction: focusedUnwrap,
   },
   {
     type: 'UserlandKapp',
