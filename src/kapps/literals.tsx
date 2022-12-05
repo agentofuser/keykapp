@@ -13,34 +13,33 @@ import {
   UserlandKapp,
 } from '../types'
 
-const pushLiteral = (literal: string): DraftSyncRootMutator => (
-  draftSyncRoot: AppSyncRoot,
-  _action: AppAction
-): void => {
-  const text = zoomedText(draftSyncRoot)
+const pushLiteral =
+  (literal: string): DraftSyncRootMutator =>
+  (draftSyncRoot: AppSyncRoot, _action: AppAction): void => {
+    const text = zoomedText(draftSyncRoot)
 
-  if (!text) return
+    if (!text) return
 
-  const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
+    const focusCursorIdx = getCurrentFocusCursorIdx(draftSyncRoot)
 
-  const valueAsArray = text.value.split('')
-  valueAsArray.splice(focusCursorIdx, 0, literal)
-  text.value = valueAsArray.join('')
+    const valueAsArray = text.value.split('')
+    valueAsArray.splice(focusCursorIdx, 0, literal)
+    text.value = valueAsArray.join('')
 
-  setFocusCursorIdx(draftSyncRoot, text, focusCursorIdx + 1)
-}
+    setFocusCursorIdx(draftSyncRoot, text, focusCursorIdx + 1)
+  }
 
 // This list doesn't include tab and newline. These are the character codes
 // from 32 to 126 minus uppercase letters.
 export const ascii32To126 =
-  ' !"#$%&\'()*+,-./0123456789:;<=>?@[\\]^_`ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz{|}~'
+  ' !"#$%&\'()*+,-./0123456789:;<=>?@[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
 
 export const printableAsciiChars: UserlandKapp[] = map(
   (char: string): UserlandKapp => ({
     type: 'UserlandKapp',
     idv0: `${asciiIdv0Path}${char.charCodeAt(0)}`,
-    shortAsciiName: char === ' ' ? ':space' : char,
-    legend: char === ' ' ? 'space' : char,
+    shortAsciiName: char === ' ' ? ':space' : char.toUpperCase(),
+    legend: char === ' ' ? 'space' : char.toUpperCase(),
     instruction: pushLiteral(char),
   })
 )(ascii32To126.split(''))

@@ -19,15 +19,15 @@ import {
   manualWeights,
   nGramRange,
 } from '../constants'
-import { charCounts } from '../datasets/tweet'
+import charCounts from '../datasets/wikipedia-character-frequencies/output.json'
 import { getKappById } from '../kapps'
 import { sumReducer } from '../kitchensink/purefns'
 import { AppState, Kapp, Waypoint, WaypointValue } from '../types'
 
-function kappTwitterCount(kapp: Kapp): number {
+function kappDatasetCount(kapp: Kapp): number {
   const idv0 = kapp.idv0
 
-  let twitterCount = 0
+  let datasetCount = 0
   if (idv0.match(asciiIdv0Path)) {
     const pathSegments = idv0
       .split('/')
@@ -37,10 +37,10 @@ function kappTwitterCount(kapp: Kapp): number {
     const charCode = parseInt(charCodeString, 10)
     const char = String.fromCharCode(charCode)
 
-    twitterCount = charCounts[char] || 0
-    twitterCount = Math.floor(twitterCount)
+    datasetCount = charCounts[char] || 0
+    datasetCount = Math.floor(datasetCount)
   }
-  return twitterCount
+  return datasetCount
 }
 
 function tailKGram(k: number, state: AppState, kapp: Kapp): string {
@@ -62,21 +62,21 @@ function tailSequenceFrequencies(state: AppState, kapp: Kapp): number[] {
 }
 
 function huffmanWeightFromKapp(state: AppState | null, kapp: Kapp): number {
-  const idv0 = kapp.idv0
-  let manualWeight = 0
-  const twitterCount = kappTwitterCount(kapp)
-  const sequenceCounts = state ? tailSequenceFrequencies(state, kapp) : []
+  const datasetCount = kappDatasetCount(kapp)
+  // let manualWeight = 0
+  // const sequenceCounts = state ? tailSequenceFrequencies(state, kapp) : []
 
-  if (!idv0.match(asciiIdv0Path)) {
-    manualWeight = manualWeights[idv0] || 1
-  }
+  // const idv0 = kapp.idv0
+  // if (!idv0.match(asciiIdv0Path)) {
+  //   manualWeight = manualWeights[idv0] || 1
+  // }
 
-  const sequenceWeight = reduce(
-    0,
-    sumReducer
-  )(mapWithIndex((i, n: number): number => n * 1000 ** i)(sequenceCounts))
+  // const sequenceWeight = reduce(
+  //   0,
+  //   sumReducer
+  // )(mapWithIndex((i, n: number): number => n * 1000 ** i)(sequenceCounts))
 
-  const finalWeight = twitterCount + manualWeight + sequenceWeight
+  const finalWeight = datasetCount // + manualWeight + sequenceWeight
 
   return finalWeight
 }

@@ -278,7 +278,7 @@ export const deleteKapp: UserlandKapp = {
 }
 
 export const zoomedListOrTextKapps: UserlandKapp[] = [
-  deleteKapp,
+  // deleteKapp,
   zoomOutKapp,
   {
     type: 'UserlandKapp',

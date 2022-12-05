@@ -91,13 +91,13 @@ export const pasteIdv0 = `${idv0UserlandPrefix}text/paste`
 export const zoomedTextOnlyKapps: UserlandKapp[] = [
   ...printableAsciiChars,
   newlineChar,
-  {
-    type: 'UserlandKapp',
-    idv0: `${idv0UserlandPrefix}char/upcase`,
-    shortAsciiName: ':upcase',
-    legend: ':upcase',
-    instruction: mapFocusedChar((char: string): string => char.toUpperCase()),
-  },
+  // {
+  //   type: 'UserlandKapp',
+  //   idv0: `${idv0UserlandPrefix}char/upcase`,
+  //   shortAsciiName: ':upcase',
+  //   legend: ':upcase',
+  //   instruction: mapFocusedChar((char: string): string => char.toUpperCase()),
+  // },
   // {
   //   type: 'UserlandKapp',
   //   idv0: `${idv0UserlandPrefix}char/downcase`,
@@ -238,7 +238,7 @@ export const textModeKapps: Kapp[] = [
   // redoKapp,
   // exportKapp,
   // zoomOutKapp,
-  deleteKapp,
+  // deleteKapp,
 ]
 
 export const KappStore: Map<string, Kapp> = new Map(
