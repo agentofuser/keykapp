@@ -36,14 +36,17 @@ import savedSyncRoot from '../datasets/keykapp-sync-root.json'
 enableAllPlugins()
 
 export function makeInitialSyncRoot(): AppSyncRoot {
-  // return {
-  //   sexp: Sexp.List.from([]),
-  //   sexpMetadata: {},
-  //   sexpListZoomPath: [],
-  //   sexpZoomCursorIdx: 0,
-  //   keystrokeHistory: [],
-  // }
-  return savedSyncRoot as AppSyncRoot
+  return {
+    sexp: Sexp.List.from([Sexp.Text.from('')]),
+    // sexp: Sexp.List.from([]),
+    sexpMetadata: {},
+    // sexpListZoomPath: [0],
+    sexpListZoomPath: [],
+    sexpZoomCursorIdx: 1,
+    // sexpZoomCursorIdx: 0,
+    keystrokeHistory: [],
+  }
+  // return savedSyncRoot as AppSyncRoot
 }
 
 export function makeInitialAppState(): AppState {
@@ -61,6 +64,7 @@ export function makeInitialAppState(): AppState {
   }
 
   const initialAppState: AppState = { syncRoot, tempRoot }
+  recomputeMenuRoot(initialAppState)
   return initialAppState
 }
 
@@ -127,9 +131,10 @@ export function zoomedSexp(syncRoot: AppSyncRoot): SexpNode {
   return sexp
 }
 
-function zoomedSexpAndInfo(
-  syncRoot: AppSyncRoot
-): { sexp: SexpNode; info: SexpInfo } {
+function zoomedSexpAndInfo(syncRoot: AppSyncRoot): {
+  sexp: SexpNode
+  info: SexpInfo
+} {
   const sexp = zoomedSexp(syncRoot)
   const info = syncRoot.sexpMetadata[sexp.uuid]
   return { sexp, info }

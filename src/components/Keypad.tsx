@@ -164,19 +164,17 @@ export default function Keypad({
     (keybinding: Keybinding): boolean => keybinding[0].hand === RightHand
   )(layout(state, currentWaypoint(state)))
 
-  const hand = map(
-    (keybinding: Keybinding): React.ReactElement => {
-      const keyswitch = keybinding[0]
-      return (
-        <HuffmanButton
-          state={state}
-          dispatch={dispatch}
-          keybinding={keybinding}
-          key={`react-collection-key-${keyswitch.key}`}
-        ></HuffmanButton>
-      )
-    }
-  )
+  const hand = map((keybinding: Keybinding): React.ReactElement => {
+    const keyswitch = keybinding[0]
+    return (
+      <HuffmanButton
+        state={state}
+        dispatch={dispatch}
+        keybinding={keybinding}
+        key={`react-collection-key-${keyswitch.key}`}
+      ></HuffmanButton>
+    )
+  })
 
   return (
     <div className={classes.keypad}>
