@@ -30,31 +30,28 @@ import {
   zoomOutKapp,
 } from './Sexp'
 
-const mapFocusedChar = (
-  charMapper: (char: string) => string
-): DraftSyncRootMutator => (
-  draftState: AppSyncRoot,
-  _action: AppAction
-): void => {
-  const text = zoomedText(draftState)
-  if (!text) return
-  const focusedCursorIdx = getCurrentFocusCursorIdx(draftState)
-  const charIdx = focusedCursorIdx - 1
+const mapFocusedChar =
+  (charMapper: (char: string) => string): DraftSyncRootMutator =>
+  (draftState: AppSyncRoot, _action: AppAction): void => {
+    const text = zoomedText(draftState)
+    if (!text) return
+    const focusedCursorIdx = getCurrentFocusCursorIdx(draftState)
+    const charIdx = focusedCursorIdx - 1
 
-  if (text && focusedCursorIdx > 0 && charIdx < text.value.length) {
-    const focusedChar = text.value[charIdx]
+    if (text && focusedCursorIdx > 0 && charIdx < text.value.length) {
+      const focusedChar = text.value[charIdx]
 
-    const valueAsArray = text.value.split('')
-    valueAsArray.splice(charIdx, 1)
-    text.value = valueAsArray.join('')
-    const replacementChar = charMapper(focusedChar)
-    if (replacementChar) {
       const valueAsArray = text.value.split('')
-      valueAsArray.splice(charIdx, 0, replacementChar)
+      valueAsArray.splice(charIdx, 1)
       text.value = valueAsArray.join('')
+      const replacementChar = charMapper(focusedChar)
+      if (replacementChar) {
+        const valueAsArray = text.value.split('')
+        valueAsArray.splice(charIdx, 0, replacementChar)
+        text.value = valueAsArray.join('')
+      }
     }
   }
-}
 
 // TODO this should be an async task or something to handle effects
 // const copyCurrentSexpAtomStringToClipboard: DraftSyncRootMutator = (
@@ -240,7 +237,7 @@ export const textModeKapps: Kapp[] = [
   // undoKapp,
   // redoKapp,
   // exportKapp,
-  zoomOutKapp,
+  // zoomOutKapp,
   deleteKapp,
 ]
 

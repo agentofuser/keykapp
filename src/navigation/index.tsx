@@ -64,9 +64,8 @@ export function recomputeMenuRoot(draftState: AppState): void {
       newHuffmanRoot({
         state: draftState,
         kapps:
-          operandValueType === 'list-mode'
-            ? listModeKapps
-            : [...textModeKapps, inputModeToggleKapp],
+          operandValueType === 'list-mode' ? listModeKapps : textModeKapps,
+        // : [...textModeKapps, inputModeToggleKapp],
       }),
     ],
   ]
