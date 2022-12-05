@@ -15,14 +15,17 @@ try {
   // Loop through each line
   for (const line of lines) {
     // Skip the line if it's a comment or contains non-printable ASCII characters
-    if (/^#/.test(line) || /[^\x20-\x7E\n]/.test(line)) continue
+    if (/^#/.test(line) || /[^\x20-\x7E\n\t]/.test(line)) continue
 
     // Split the line into parts
     const parts = line.split('\t')
 
     // Get the character and its frequency
-    const char = parts[0]
+    const char = parts[0].replace(/^'|'$/g, '')
     const freq = parseInt(parts[2])
+
+    // Skip the line if it has an empty character or null frequency
+    if (char === '' || freq === null) continue
 
     // If the character is uppercase, add its frequency to the lowercase equivalent
     if (/[A-Z]/.test(char)) {
@@ -45,8 +48,9 @@ try {
   }
 
   // Convert the frequencies object to a JSON string
+  let json
   try {
-    const json = JSON.stringify(freqs)
+    json = JSON.stringify(freqs)
   } catch (err) {
     console.error(`Error converting to JSON: ${err.message}`)
     process.exit(1)
