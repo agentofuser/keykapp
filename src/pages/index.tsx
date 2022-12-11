@@ -148,7 +148,7 @@ export default function App(): React.ReactNode {
   return (
     <React.Fragment>
       <Helmet title="Keykapp"></Helmet>
-      <Container className={classes.container} maxWidth="lg">
+      <Container className={classes.container} maxWidth="xl">
         <div className={classes.display}>{display}</div>
         <Keypad dispatch={dispatch} state={state} />
       </Container>
