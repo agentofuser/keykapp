@@ -9,3 +9,5 @@ platforms = ["osx-arm64"]
 [tasks]
 
 [dependencies]
+textual = ">=0.70.0,<0.71"
+textual-dev = ">=1.5.1,<1.6"
