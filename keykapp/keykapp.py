@@ -33,10 +33,11 @@ class CommandKeyboard(Static):
 
 
 def insert_object(conn, data):
-    encoded = json.dumps(data, cls=DagJsonEncoder)
-    cid = str(CID.decode(encoded_cid(encoded)))  # Encode CID as a string
+    encoded = encode(data)  # Use the encode function to get bytes
+    cid = str(encoded_cid(encoded))  # Directly convert CID to string
     conn.execute(
-        "INSERT OR IGNORE INTO objects (cid, data) VALUES (?, ?)", (cid, encoded)
+        "INSERT OR IGNORE INTO objects (cid, data) VALUES (?, ?)",
+        (cid, encoded.decode()),
     )
     conn.commit()
 
@@ -74,8 +75,6 @@ if __name__ == "__main__":
         cid, encoded_data = row
         data = decode(encoded_data)
         print(f"CID: {cid}, Data: {data}")
-
-    conn.close()
 
     # app = KeykappApp()
     # app.run()
