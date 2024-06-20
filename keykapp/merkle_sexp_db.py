@@ -6,9 +6,16 @@ from multiformats import CID
 
 
 class MerkleSexpDB:
-    def __init__(self, db_path, sync_url=None, auth_token=None):
-        self.conn = libsql.connect(db_path, sync_url=sync_url, auth_token=auth_token)
-        self.conn.sync()
+    def __init__(self, db_path, mode="local", sync_url=None, auth_token=None):
+        if mode == "embedded":
+            self.conn = libsql.connect(
+                db_path, sync_url=sync_url, auth_token=auth_token
+            )
+            self.conn.sync()
+        elif mode == "local":
+            self.conn = libsql.connect(db_path)
+        else:
+            raise ValueError("Invalid mode. Use 'embedded' or 'local'.")
         self._create_table()
 
     def _create_table(self):
@@ -72,10 +79,11 @@ class MerkleSexpDB:
 
 
 def main():
+    mode = "local"  # Change to "embedded" for embedded replicas mode
     url = os.getenv("TURSO_DATABASE_URL")
     auth_token = os.getenv("TURSO_AUTH_TOKEN")
 
-    db = MerkleSexpDB("keykapp-dev.db", sync_url=url, auth_token=auth_token)
+    db = MerkleSexpDB("keykapp-dev.db", mode=mode, sync_url=url, auth_token=auth_token)
 
     # Example blobs of different DAG-JSON literal types
     cid_string = db.insert_blob("a string value")
