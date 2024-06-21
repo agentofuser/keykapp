@@ -1,21 +1,21 @@
 import os
-import random
+from rich.table import Table
 from textual import events
 from textual.app import App, ComposeResult
-from textual.widgets import Static, RichLog
+from textual.containers import VerticalScroll
+from textual.widgets import RichLog
 from huffman_arpeggio import (
     build_huffman_tree,
     generate_encoding_map_with_count,
 )
 from kapplang import KapplangApp
-from rich import print
 
 
 class KeykappApp(App):
     """Fleet cyborgism"""
 
+    CSS_PATH = "keykapp_app.tcss"
     ENABLE_COMMAND_PALETTE = False
-
     KEYSWITCHES = ["j", "f", "k", "d", "l", "s"]
 
     def on_mount(self) -> None:
@@ -24,18 +24,9 @@ class KeykappApp(App):
         self.generate_encoding_map()
         self.current_partial_arpeggio = []
 
-        # render stack
-        stack = self.vm.get_stack(self.stack_id)
-        stack_viz = f"{stack}"
-        self.query_one(RichLog).write(stack_viz)
-        # render command keyboard
-        self.generate_encoding_map()
-
-        kbd_viz = "\n".join(
-            f"{''.join(arpeggio)}: {kapp} ({count})"
-            for arpeggio, (kapp, count) in self.encoding_map.items()
-        )
-        self.query_one(RichLog).write(kbd_viz)
+        # Render initial state
+        self.update_stack_viz()
+        self.update_kbd_viz()
 
     def generate_encoding_map(self):
         kapp_counts = self.vm.get_kapp_counts()
@@ -50,35 +41,21 @@ class KeykappApp(App):
         if event.key not in self.KEYSWITCHES:
             self.query_one(RichLog).write(f"Unknown key: {event.key}")
         else:
-            # handle arpeggio
             self.current_partial_arpeggio.append(event.key)
             partial_arpeggio = tuple(self.current_partial_arpeggio)
             kapp, _ = self.encoding_map.get(partial_arpeggio, (None, 0))
 
             if kapp:
-                # reset arpeggio
                 self.current_partial_arpeggio = []
 
-                # render input and resolved kapp
                 input_viz = f"{event.key}: {kapp}"
                 self.query_one(RichLog).write(input_viz)
 
                 self.vm.dispatch(self.stack_id, kapp)
 
-                # render stack
-                stack = self.vm.get_stack(self.stack_id)
-                stack_viz = f"{stack}"
-                self.query_one(RichLog).write(stack_viz)
-                # render command keyboard
-                self.generate_encoding_map()
-
-                kbd_viz = "\n".join(
-                    f"{''.join(arpeggio)}: {kapp} ({count})"
-                    for arpeggio, (kapp, count) in self.encoding_map.items()
-                )
-                self.query_one(RichLog).write(kbd_viz)
+                self.update_stack_viz()
+                self.update_kbd_viz()
             else:
-                # check if partial arpeggio is a prefix of any full arpeggio
                 is_valid_prefix = False
                 for arpeggio, (kapp, count) in self.encoding_map.items():
                     if arpeggio[: len(partial_arpeggio)] == partial_arpeggio:
@@ -88,10 +65,27 @@ class KeykappApp(App):
                     self.query_one(RichLog).write(
                         f"Invalid prefix: {partial_arpeggio}"
                     )
-                    self.current_partial_arpeggio = []
+
+    def update_stack_viz(self):
+        stack = self.vm.get_stack(self.stack_id)
+        table = Table(title="Current Stack")
+        table.add_column("Index", style="dim", width=6)
+        table.add_column("Value", justify="right")
+        for i, item in enumerate(stack):
+            table.add_row(str(i), str(item))
+        self.query_one(RichLog).write(table)
+
+    def update_kbd_viz(self):
+        table = Table(title="Command Keyboard")
+        table.add_column("Key", style="dim")
+        table.add_column("Kapp")
+        table.add_column("Count", justify="right")
+        for arpeggio, (kapp, count) in self.encoding_map.items():
+            table.add_row("".join(arpeggio), kapp, str(count))
+        self.query_one(RichLog).write(table)
 
     def compose(self) -> ComposeResult:
-        yield RichLog()
+        yield VerticalScroll(RichLog())
 
 
 if __name__ == "__main__":
