@@ -1,11 +1,14 @@
 import json
+from textual import events
 from textual.app import App, ComposeResult
-from textual.widgets import Static
+from textual.widgets import Static, RichLog
 import libsql_experimental as libsql
 import os
 from dag_json import decode, encode, encoded_cid
 from multiformats import CID
 from dag_json import DagJsonEncoder
+
+from keykapp.merkle_sexp_db import MerkleSexpDB
 
 
 class KeykappApp(App):
@@ -13,16 +16,20 @@ class KeykappApp(App):
 
     ENABLE_COMMAND_PALETTE = False
 
+    def __init__(self) -> None:
+        self.db = MerkleSexpDB("keykapp-dev.db")
+
+    def on_key(self, event: events.Key) -> None:
+        self.db.insert_blob(event)
+        state = self.db.get_all_sexps()
+
+        viz = self.query_one(RichLog)
+        viz.write(event)
+        viz.write(state)
+
     def compose(self) -> ComposeResult:
-        yield StateViz(id="viz")
+        yield RichLog(id="viz")
         yield CommandKeyboard(id="kbd")
-
-
-class StateViz(Static):
-    """pure function of state"""
-
-    def on_mount(self) -> None:
-        self.update("State Visualization")
 
 
 class CommandKeyboard(Static):

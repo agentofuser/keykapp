@@ -77,6 +77,11 @@ class MerkleSexpDB:
 
         return recursive_get(cid)
 
+    def get_all_sexps(self):
+        sexps = {}
+        for cid, _ in self.get_all_objects():
+            sexps[cid] = self.get_sexp(cid)
+
 
 def main():
     mode = "local"  # Change to "embedded" for embedded replicas mode
