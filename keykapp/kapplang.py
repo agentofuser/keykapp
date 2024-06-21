@@ -62,13 +62,10 @@ class Stack(Aggregate):
 
     @event("div-applied")
     def div(self):
-        if len(self.items) >= 2:
+        if len(self.items) >= 2 and self.items[-1] != 0:
             a = self.items.pop()
             b = self.items.pop()
-            if a != 0:
-                self.items.append(b // a)
-            else:
-                self.items.append(0)
+            self.items.append(b // a)
 
 
 class KapplangApp(Application):
@@ -127,7 +124,8 @@ class KapplangApp(Application):
 
     def get_kapp_counts(self, start=1):
         reader = NotificationLogReader(self.notification_log)
-        kapp_counts = {}
+        # initialize kapp_counts with 0 for all grounded kapps
+        kapp_counts = {kapp: 0 for kapp in self.GROUNDED_KAPPS}
         for n in reader.read(start=start):
             kapp_name = n.topic.split(".")[-1].replace("-applied", "")
             # allow only grounded kapps
