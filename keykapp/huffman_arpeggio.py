@@ -116,4 +116,13 @@ def generate_encoding_map_with_count(
 
     encoding_map = {}
     traverse(root, [], encoding_map)
+
+    # sort encoding map by descending count
+    encoding_map = dict(
+        sorted(
+            encoding_map.items(),
+            key=lambda item: item[1][1],
+            reverse=True,
+        )
+    )
     return encoding_map

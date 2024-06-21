@@ -10,10 +10,6 @@ class Stack(Aggregate):
     def __init__(self):
         self.items = []
 
-    @event("push-applied")
-    def push(self, item):
-        self.items.append(item)
-
     @event("pop-applied")
     def pop(self):
         if self.items:
@@ -77,7 +73,6 @@ class Stack(Aggregate):
 
 class KapplangApp(Application):
     GROUNDED_KAPPS = [
-        "push",
         "pop",
         "dup",
         "swap",
@@ -107,6 +102,17 @@ class KapplangApp(Application):
         stack = self.repository.get(stack_id)
         return stack.items
 
+    def dispatch(self, stack_id, kapp_name):
+        stack = self.repository.get(stack_id)
+        # Check if kapp is grounded
+        if kapp_name not in self.GROUNDED_KAPPS:
+            raise ValueError(f"Kapp {kapp_name} not grounded")
+        kapp_method = getattr(stack, kapp_name, None)
+        if kapp_method is None:
+            raise ValueError(f"Kapp {kapp_name} implementation not found")
+        kapp_method()
+        self.save(stack)
+
     def get_event_log(self, start=1):
         reader = NotificationLogReader(self.notification_log)
         return [
@@ -119,16 +125,15 @@ class KapplangApp(Application):
             for n in reader.read(start=start)
         ]
 
-    def dispatch(self, stack_id, kapp_name):
-        stack = self.repository.get(stack_id)
-        # Check if kapp is grounded
-        if kapp_name not in self.GROUNDED_KAPPS:
-            raise ValueError(f"Kapp {kapp_name} not grounded")
-        kapp_method = getattr(stack, kapp_name, None)
-        if kapp_method is None:
-            raise ValueError(f"Kapp {kapp_name} implementation not found")
-        kapp_method()
-        self.save(stack)
+    def get_kapp_counts(self, start=1):
+        reader = NotificationLogReader(self.notification_log)
+        kapp_counts = {}
+        for n in reader.read(start=start):
+            kapp_name = n.topic.split(".")[-1].replace("-applied", "")
+            # allow only grounded kapps
+            if kapp_name in self.GROUNDED_KAPPS:
+                kapp_counts[kapp_name] = kapp_counts.get(kapp_name, 0) + 1
+        return kapp_counts
 
 
 @pytest.fixture(scope="module")
@@ -241,6 +246,26 @@ def test_event_log(app):
     assert (
         actual_kapps == expected_kapps
     ), f"Expected {expected_kapps}, but got {actual_kapps}"
+
+
+def test_kapp_counts(app):
+    start_log_length = len(app.get_event_log())
+    stack_id = app.create_stack()
+    kapps = app.push_int(1) + ["dup", "swap", "add"]
+    for kapp in kapps:
+        app.dispatch(stack_id, kapp)
+    kapp_counts = app.get_kapp_counts(start=start_log_length + 1)
+    expected_kapp_counts = {
+        "create": 1,
+        "zero": 1,
+        "succ": 1,
+        "dup": 1,
+        "swap": 1,
+        "add": 1,
+    }
+    assert (
+        kapp_counts == expected_kapp_counts
+    ), f"Expected {expected_kapp_counts}, but got {kapp_counts}"
 
 
 if __name__ == "__main__":
