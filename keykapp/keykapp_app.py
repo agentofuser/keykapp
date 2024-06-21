@@ -8,7 +8,7 @@ from dag_json import decode, encode, encoded_cid
 from multiformats import CID
 from dag_json import DagJsonEncoder
 
-from keykapp.merkle_sexp_db import MerkleSexpDB
+from merkle_sexp_db import MerkleSexpDB
 
 
 class KeykappApp(App):
@@ -16,11 +16,11 @@ class KeykappApp(App):
 
     ENABLE_COMMAND_PALETTE = False
 
-    def __init__(self) -> None:
+    def on_mount(self) -> None:
         self.db = MerkleSexpDB("keykapp-dev.db")
 
     def on_key(self, event: events.Key) -> None:
-        self.db.insert_blob(event)
+        self.db.insert_blob(str(event))
         state = self.db.get_all_sexps()
 
         viz = self.query_one(RichLog)

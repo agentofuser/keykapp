@@ -82,6 +82,8 @@ class MerkleSexpDB:
         for cid, _ in self.get_all_objects():
             sexps[cid] = self.get_sexp(cid)
 
+        return sexps
+
 
 def main():
     mode = "local"  # Change to "embedded" for embedded replicas mode
