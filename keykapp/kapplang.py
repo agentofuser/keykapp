@@ -107,7 +107,7 @@ class KapplangApp(Application):
 
     def dispatch(self, stack_id, kapp_name):
         stack = self.repository.get(stack_id)
-        kapp_method = getattr(stack, kapp_name + "-applied", None)
+        kapp_method = getattr(stack, kapp_name, None)
         if kapp_method is None:
             raise ValueError(f"Kapp {kapp_name} not found")
         kapp_method()
