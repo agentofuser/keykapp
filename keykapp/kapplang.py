@@ -76,6 +76,20 @@ class Stack(Aggregate):
 
 
 class KapplangApp(Application):
+    GROUNDED_KAPPS = [
+        "push",
+        "pop",
+        "dup",
+        "swap",
+        "zero",
+        "succ",
+        "pred",
+        "add",
+        "sub",
+        "mul",
+        "div",
+    ]
+
     def create_stack(self):
         stack = Stack()
         self.save(stack)
@@ -107,9 +121,12 @@ class KapplangApp(Application):
 
     def dispatch(self, stack_id, kapp_name):
         stack = self.repository.get(stack_id)
+        # Check if kapp is grounded
+        if kapp_name not in self.GROUNDED_KAPPS:
+            raise ValueError(f"Kapp {kapp_name} not grounded")
         kapp_method = getattr(stack, kapp_name, None)
         if kapp_method is None:
-            raise ValueError(f"Kapp {kapp_name} not found")
+            raise ValueError(f"Kapp {kapp_name} implementation not found")
         kapp_method()
         self.save(stack)
 
