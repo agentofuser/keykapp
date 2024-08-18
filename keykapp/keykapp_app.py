@@ -53,6 +53,7 @@ class KeykappApp(App):
 
                 self.vm.dispatch(self.stack_id, kapp)
 
+                self.generate_encoding_map()
                 self.update_stack_viz()
                 self.update_kbd_viz()
             else:
