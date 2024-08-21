@@ -25,6 +25,20 @@ class Stack(Aggregate):
         if len(self.items) >= 2:
             self.items[-1], self.items[-2] = self.items[-2], self.items[-1]
 
+    @event("over-applied")
+    def over(self):
+        if len(self.items) >= 2:
+            self.items.append(self.items[-2])
+
+    @event("rot-applied")
+    def rot(self):
+        if len(self.items) >= 3:
+            self.items[-3], self.items[-2], self.items[-1] = (
+                self.items[-2],
+                self.items[-1],
+                self.items[-3],
+            )
+
     @event("zero-applied")
     def zero(self):
         self.items.append(0)
@@ -73,6 +87,8 @@ class KapplangApp(Application):
         "pop",
         "dup",
         "swap",
+        "over",
+        "rot",
         "zero",
         "succ",
         "pred",
@@ -180,6 +196,26 @@ def test_swap(app, stack_id):
         app.dispatch(stack_id, kapp)
     app.dispatch(stack_id, "swap")
     assert app.get_stack(stack_id) == [2, 1]
+
+
+def test_over(app, stack_id):
+    for kapp in app.push_int(1):
+        app.dispatch(stack_id, kapp)
+    for kapp in app.push_int(2):
+        app.dispatch(stack_id, kapp)
+    app.dispatch(stack_id, "over")
+    assert app.get_stack(stack_id) == [1, 2, 1]
+
+
+def test_rot(app, stack_id):
+    for kapp in app.push_int(1):
+        app.dispatch(stack_id, kapp)
+    for kapp in app.push_int(2):
+        app.dispatch(stack_id, kapp)
+    for kapp in app.push_int(3):
+        app.dispatch(stack_id, kapp)
+    app.dispatch(stack_id, "rot")
+    assert app.get_stack(stack_id) == [2, 3, 1]
 
 
 def test_succ(app, stack_id):

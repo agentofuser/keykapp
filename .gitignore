@@ -4,3 +4,5 @@
 __pycache__
 .env
 keykapp-dev.db*
+keykapp-test.db-shm
+keykapp-test.db-wal
