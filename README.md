@@ -19,3 +19,9 @@ curl -fsSL https://pixi.sh/install.sh | bash
 ```bash
 pixi run textual run keykapp/keykapp_app.py
 ```
+
+## Possible next goals
+
+- [ ] Show frequent kapp _sequences_ as a single command in the keyboard
+  - [ ] Reify kapps as their own aggregate, with grounded kapps as leaves, and compound kapps as recursive lists of kapps
+  - [ ] Use some dictionary compression algorithm to find frequent sequences of kapps without (or with less) double-counting of shorter sequences
