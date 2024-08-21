@@ -1,4 +1,5 @@
 import os
+import sys
 from rich.table import Table
 from textual import events
 from textual.app import App, ComposeResult
@@ -18,15 +19,30 @@ class KeykappApp(App):
     ENABLE_COMMAND_PALETTE = False
     KEYSWITCHES = ["j", "f", "k", "d", "l", "s"]
 
+    def __init__(self, resume=False, **kwargs):
+        super().__init__(**kwargs)
+        self.resume = resume
+
     def on_mount(self) -> None:
         self.vm = KapplangApp()
-        self.stack_id = self.vm.create_stack()
+
+        # Resume the latest stack if --resume is passed, otherwise create a new one
+        self.stack_id = self.get_latest_stack_id() if self.resume else self.vm.create_stack()
+
         self.generate_encoding_map()
         self.current_partial_arpeggio = []
 
         # Render initial state
         self.update_stack_viz()
         self.update_kbd_viz()
+
+    def get_latest_stack_id(self):
+        event_log = self.vm.get_event_log()
+        create_events = [event for event in event_log if event[3] == "create"]
+        if create_events:
+            return create_events[-1][1]  # Return the last created stack ID
+        else:
+            return self.vm.create_stack()  # Create a new stack if none exist
 
     def generate_encoding_map(self):
         kapp_counts = self.vm.get_kapp_counts()
@@ -93,5 +109,6 @@ if __name__ == "__main__":
     os.environ["PERSISTENCE_MODULE"] = "eventsourcing.sqlite"
     os.environ["SQLITE_DBNAME"] = "keykapp-dev.db"
 
-    app = KeykappApp()
+    resume_flag = "--resume" in sys.argv
+    app = KeykappApp(resume=resume_flag)
     app.run()
