@@ -329,6 +329,7 @@ def test_or(app, stack_id):
     app.dispatch(stack_id, "or_op")
     assert app.get_stack(stack_id) == [True]
 
+
 def test_event_log(app):
     start_log_length = len(app.get_event_log())
     stack_id = app.create_stack()
@@ -349,9 +350,9 @@ def test_kapp_counts(app):
     kapps = app.push_int(1) + ["dup", "swap", "add"]
     for kapp in kapps:
         app.dispatch(stack_id, kapp)
-    
+
     kapp_counts = app.get_kapp_counts(start=start_log_length + 1)
-    
+
     # Filter out kapps with zero counts
     filtered_kapp_counts = {k: v for k, v in kapp_counts.items() if v > 0}
 
