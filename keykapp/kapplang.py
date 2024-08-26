@@ -10,76 +10,130 @@ class Stack(Aggregate):
     def __init__(self):
         self.items = []
 
+    def typecheck_pop(self):
+        return len(self.items) >= 1
+
     @event("pop-applied")
     def pop(self):
-        if self.items:
-            self.items.pop()
+        if not self.typecheck_pop():
+            return
+        self.items.pop()
+
+    def typecheck_dup(self):
+        return len(self.items) >= 1
 
     @event("dup-applied")
     def dup(self):
-        if self.items:
-            self.items.append(self.items[-1])
+        if not self.typecheck_dup():
+            return
+        self.items.append(self.items[-1])
+
+    def typecheck_swap(self):
+        return len(self.items) >= 2
 
     @event("swap-applied")
     def swap(self):
-        if len(self.items) >= 2:
-            self.items[-1], self.items[-2] = self.items[-2], self.items[-1]
+        if not self.typecheck_swap():
+            return
+        self.items[-1], self.items[-2] = self.items[-2], self.items[-1]
+
+    def typecheck_over(self):
+        return len(self.items) >= 2
 
     @event("over-applied")
     def over(self):
-        if len(self.items) >= 2:
-            self.items.append(self.items[-2])
+        if not self.typecheck_over():
+            return
+        self.items.append(self.items[-2])
+
+    def typecheck_rot(self):
+        return len(self.items) >= 3
 
     @event("rot-applied")
     def rot(self):
-        if len(self.items) >= 3:
-            self.items[-3], self.items[-2], self.items[-1] = (
-                self.items[-2],
-                self.items[-1],
-                self.items[-3],
-            )
+        if not self.typecheck_rot():
+            return
+        self.items[-3], self.items[-2], self.items[-1] = (
+            self.items[-2],
+            self.items[-1],
+            self.items[-3],
+        )
 
     @event("zero-applied")
     def zero(self):
         self.items.append(0)
 
+    def typecheck_succ(self):
+        return len(self.items) >= 1 and isinstance(self.items[-1], int)
+
     @event("succ-applied")
     def succ(self):
-        if self.items:
-            self.items.append(self.items.pop() + 1)
+        if not self.typecheck_succ():
+            return
+        self.items.append(self.items.pop() + 1)
+
+    def typecheck_pred(self):
+        return len(self.items) >= 1 and isinstance(self.items[-1], int)
 
     @event("pred-applied")
     def pred(self):
-        if self.items:
-            self.items.append(self.items.pop() - 1)
+        if not self.typecheck_pred():
+            return
+        self.items.append(self.items.pop() - 1)
+
+    def typecheck_add(self):
+        return len(self.items) >= 2 and all(
+            isinstance(i, int) for i in self.items[-2:]
+        )
 
     @event("add-applied")
     def add(self):
-        if len(self.items) >= 2:
-            a = self.items.pop()
-            b = self.items.pop()
-            self.items.append(b + a)
+        if not self.typecheck_add():
+            return
+        a = self.items.pop()
+        b = self.items.pop()
+        self.items.append(b + a)
+
+    def typecheck_sub(self):
+        return len(self.items) >= 2 and all(
+            isinstance(i, int) for i in self.items[-2:]
+        )
 
     @event("sub-applied")
     def sub(self):
-        if len(self.items) >= 2:
-            a = self.items.pop()
-            b = self.items.pop()
-            self.items.append(b - a)
+        if not self.typecheck_sub():
+            return
+        a = self.items.pop()
+        b = self.items.pop()
+        self.items.append(b - a)
+
+    def typecheck_mul(self):
+        return len(self.items) >= 2 and all(
+            isinstance(i, int) for i in self.items[-2:]
+        )
 
     @event("mul-applied")
     def mul(self):
-        if len(self.items) >= 2:
-            a = self.items.pop()
-            b = self.items.pop()
-            self.items.append(b * a)
+        if not self.typecheck_mul():
+            return
+        a = self.items.pop()
+        b = self.items.pop()
+        self.items.append(b * a)
+
+    def typecheck_div(self):
+        return (
+            len(self.items) >= 2
+            and self.items[-1] != 0
+            and all(isinstance(i, int) for i in self.items[-2:])
+        )
 
     @event("div-applied")
     def div(self):
-        if len(self.items) >= 2 and self.items[-1] != 0:
-            a = self.items.pop()
-            b = self.items.pop()
-            self.items.append(b // a)
+        if not self.typecheck_div():
+            return
+        a = self.items.pop()
+        b = self.items.pop()
+        self.items.append(b // a)
 
     @event("true-applied")
     def true(self):
@@ -89,19 +143,28 @@ class Stack(Aggregate):
     def false(self):
         self.items.append(False)
 
+    def typecheck_not_op(self):
+        return len(self.items) >= 1 and isinstance(self.items[-1], bool)
+
     @event("not_op-applied")
     def not_op(self):
-        if self.items:
-            self.items.append(not self.items.pop())
+        if not self.typecheck_not_op():
+            return
+        self.items.append(not self.items.pop())
+
+    def typecheck_and_op(self):
+        return len(self.items) >= 2 and all(
+            isinstance(i, bool) for i in self.items[-2:]
+        )
 
     @event("and_op-applied")
     def and_op(self):
-        if len(self.items) >= 2:
-            a = self.items.pop()
-            b = self.items.pop()
-            self.items.append(b and a)
+        if not self.typecheck_and_op():
+            return
+        a = self.items.pop()
+        b = self.items.pop()
+        self.items.append(b and a)
 
-    # check if stack has at least 2 items and both are boolean
     def typecheck_or_op(self):
         return (
             len(self.items) >= 2
@@ -111,7 +174,6 @@ class Stack(Aggregate):
 
     @event("or_op-applied")
     def or_op(self):
-        # no-op unless typechecks
         if not self.typecheck_or_op():
             return
         a = self.items.pop()
