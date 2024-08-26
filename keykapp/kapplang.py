@@ -101,12 +101,22 @@ class Stack(Aggregate):
             b = self.items.pop()
             self.items.append(b and a)
 
+    # check if stack has at least 2 items and both are boolean
+    def typecheck_or_op(self):
+        return (
+            len(self.items) >= 2
+            and isinstance(self.items[-1], bool)
+            and isinstance(self.items[-2], bool)
+        )
+
     @event("or_op-applied")
     def or_op(self):
-        if len(self.items) >= 2:
-            a = self.items.pop()
-            b = self.items.pop()
-            self.items.append(b or a)
+        # no-op unless typechecks
+        if not self.typecheck_or_op():
+            return
+        a = self.items.pop()
+        b = self.items.pop()
+        self.items.append(b or a)
 
 
 class KapplangApp(Application):
@@ -328,6 +338,13 @@ def test_or(app, stack_id):
     app.dispatch(stack_id, "false")
     app.dispatch(stack_id, "or_op")
     assert app.get_stack(stack_id) == [True]
+
+
+def test_or_typecheck(app, stack_id):
+    app.dispatch(stack_id, "true")
+    app.dispatch(stack_id, "zero")
+    app.dispatch(stack_id, "or_op")
+    assert app.get_stack(stack_id) == [True, 0]
 
 
 def test_event_log(app):
