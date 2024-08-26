@@ -328,3 +328,45 @@ def test_or(app, stack_id):
     app.dispatch(stack_id, "false")
     app.dispatch(stack_id, "or_op")
     assert app.get_stack(stack_id) == [True]
+
+def test_event_log(app):
+    start_log_length = len(app.get_event_log())
+    stack_id = app.create_stack()
+    kapps = app.push_int(1) + ["dup", "swap", "add"]
+    for kapp in kapps:
+        app.dispatch(stack_id, kapp)
+    event_log = app.get_event_log(start=start_log_length + 1)
+    expected_kapps = ["create"] + kapps
+    actual_kapps = [event[3] for event in event_log]
+    assert (
+        actual_kapps == expected_kapps
+    ), f"Expected {expected_kapps}, but got {actual_kapps}"
+
+
+def test_kapp_counts(app):
+    start_log_length = len(app.get_event_log())
+    stack_id = app.create_stack()
+    kapps = app.push_int(1) + ["dup", "swap", "add"]
+    for kapp in kapps:
+        app.dispatch(stack_id, kapp)
+    
+    kapp_counts = app.get_kapp_counts(start=start_log_length + 1)
+    
+    # Filter out kapps with zero counts
+    filtered_kapp_counts = {k: v for k, v in kapp_counts.items() if v > 0}
+
+    expected_kapp_counts = {
+        "zero": 1,
+        "succ": 1,
+        "dup": 1,
+        "swap": 1,
+        "add": 1,
+    }
+
+    assert (
+        filtered_kapp_counts == expected_kapp_counts
+    ), f"Expected {expected_kapp_counts}, but got {filtered_kapp_counts}"
+
+
+if __name__ == "__main__":
+    pytest.main()
