@@ -82,6 +82,8 @@ class Stack(Aggregate):
         self.items.append(self.items.pop() - 1)
 
     def typecheck_add(self):
+        # FIXME: it's adding True and 0 as 1 instead of no-opping on the
+        # typecheck.
         return len(self.items) >= 2 and all(
             isinstance(i, int) for i in self.items[-2:]
         )
