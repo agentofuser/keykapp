@@ -64,7 +64,11 @@ class Stack(Aggregate):
         self.items.append(0)
 
     def typecheck_succ(self):
-        return len(self.items) >= 1 and isinstance(self.items[-1], int)
+        return (
+            len(self.items) >= 1
+            and isinstance(self.items[-1], int)
+            and not isinstance(self.items[-1], bool)
+        )
 
     @event("succ-applied")
     def succ(self):
@@ -73,7 +77,11 @@ class Stack(Aggregate):
         self.items.append(self.items.pop() + 1)
 
     def typecheck_pred(self):
-        return len(self.items) >= 1 and isinstance(self.items[-1], int)
+        return (
+            len(self.items) >= 1
+            and isinstance(self.items[-1], int)
+            and not isinstance(self.items[-1], bool)
+        )
 
     @event("pred-applied")
     def pred(self):
@@ -82,10 +90,9 @@ class Stack(Aggregate):
         self.items.append(self.items.pop() - 1)
 
     def typecheck_add(self):
-        # FIXME: it's adding True and 0 as 1 instead of no-opping on the
-        # typecheck.
         return len(self.items) >= 2 and all(
-            isinstance(i, int) for i in self.items[-2:]
+            isinstance(i, int) and not isinstance(i, bool)
+            for i in self.items[-2:]
         )
 
     @event("add-applied")
@@ -98,7 +105,8 @@ class Stack(Aggregate):
 
     def typecheck_sub(self):
         return len(self.items) >= 2 and all(
-            isinstance(i, int) for i in self.items[-2:]
+            isinstance(i, int) and not isinstance(i, bool)
+            for i in self.items[-2:]
         )
 
     @event("sub-applied")
@@ -111,7 +119,8 @@ class Stack(Aggregate):
 
     def typecheck_mul(self):
         return len(self.items) >= 2 and all(
-            isinstance(i, int) for i in self.items[-2:]
+            isinstance(i, int) and not isinstance(i, bool)
+            for i in self.items[-2:]
         )
 
     @event("mul-applied")
@@ -126,7 +135,10 @@ class Stack(Aggregate):
         return (
             len(self.items) >= 2
             and self.items[-1] != 0
-            and all(isinstance(i, int) for i in self.items[-2:])
+            and all(
+                isinstance(i, int) and not isinstance(i, bool)
+                for i in self.items[-2:]
+            )
         )
 
     @event("div-applied")
