@@ -59,8 +59,13 @@ class Stack(Aggregate):
             self.items[-3],
         )
 
+    def typecheck_zero(self):
+        return True
+
     @event("zero-applied")
     def zero(self):
+        if not self.typecheck_zero():
+            return
         self.items.append(0)
 
     def typecheck_succ(self):
@@ -149,12 +154,22 @@ class Stack(Aggregate):
         b = self.items.pop()
         self.items.append(b // a)
 
+    def typecheck_true(self):
+        return True
+
     @event("true-applied")
     def true(self):
+        if not self.typecheck_true():
+            return
         self.items.append(True)
+
+    def typecheck_false(self):
+        return True
 
     @event("false-applied")
     def false(self):
+        if not self.typecheck_false():
+            return
         self.items.append(False)
 
     def typecheck_not_op(self):
