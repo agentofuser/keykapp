@@ -27,7 +27,11 @@ class KeykappApp(App):
         self.vm = KapplangApp()
 
         # Resume the latest stack if --resume is passed, otherwise create a new one
-        self.stack_id = self.get_latest_stack_id() if self.resume else self.vm.create_stack()
+        self.stack_id = (
+            self.get_latest_stack_id()
+            if self.resume
+            else self.vm.create_stack()
+        )
 
         self.generate_encoding_map()
         self.current_partial_arpeggio = []
@@ -46,6 +50,9 @@ class KeykappApp(App):
 
     def generate_encoding_map(self):
         kapp_counts = self.vm.get_kapp_counts()
+        kapp_counts = self.vm.filter_kapp_counts_with_typechecking(
+            self.stack_id, kapp_counts
+        )
         root = build_huffman_tree(kapp_counts, self.KEYSWITCHES)
         if root is None:
             raise ValueError("Huffman tree root is None")

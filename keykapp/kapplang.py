@@ -212,24 +212,27 @@ class Stack(Aggregate):
 
 class KapplangApp(Application):
     GROUNDED_KAPPS = [
-        "pop",
-        "dup",
-        "swap",
-        "over",
-        "rot",
-        "zero",
-        "succ",
-        "pred",
-        "add",
-        "sub",
-        "mul",
-        "div",
-        "true",
-        "false",
-        "not_op",
-        "and_op",
-        "or_op",
+        {"name": "pop", "typecheck": "typecheck_pop"},
+        {"name": "dup", "typecheck": "typecheck_dup"},
+        {"name": "swap", "typecheck": "typecheck_swap"},
+        {"name": "over", "typecheck": "typecheck_over"},
+        {"name": "rot", "typecheck": "typecheck_rot"},
+        {"name": "zero", "typecheck": "typecheck_zero"},
+        {"name": "succ", "typecheck": "typecheck_succ"},
+        {"name": "pred", "typecheck": "typecheck_pred"},
+        {"name": "add", "typecheck": "typecheck_add"},
+        {"name": "sub", "typecheck": "typecheck_sub"},
+        {"name": "mul", "typecheck": "typecheck_mul"},
+        {"name": "div", "typecheck": "typecheck_div"},
+        {"name": "true", "typecheck": "typecheck_true"},
+        {"name": "false", "typecheck": "typecheck_false"},
+        {"name": "not_op", "typecheck": "typecheck_not_op"},
+        {"name": "and_op", "typecheck": "typecheck_and_op"},
+        {"name": "or_op", "typecheck": "typecheck_or_op"},
     ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def create_stack(self):
         stack = Stack()
@@ -250,8 +253,10 @@ class KapplangApp(Application):
 
     def dispatch(self, stack_id, kapp_name):
         stack = self.repository.get(stack_id)
-        # Check if kapp is grounded
-        if kapp_name not in self.GROUNDED_KAPPS:
+        grounded_kapp = next(
+            (k for k in self.GROUNDED_KAPPS if k["name"] == kapp_name), None
+        )
+        if grounded_kapp is None:
             raise ValueError(f"Kapp {kapp_name} not grounded")
         kapp_method = getattr(stack, kapp_name, None)
         if kapp_method is None:
@@ -273,14 +278,32 @@ class KapplangApp(Application):
 
     def get_kapp_counts(self, start=1):
         reader = NotificationLogReader(self.notification_log)
-        # initialize kapp_counts with 0 for all grounded kapps
-        kapp_counts = {kapp: 0 for kapp in self.GROUNDED_KAPPS}
+        kapp_counts = {k["name"]: 0 for k in self.GROUNDED_KAPPS}
         for n in reader.read(start=start):
             kapp_name = n.topic.split(".")[-1].replace("-applied", "")
-            # allow only grounded kapps
-            if kapp_name in self.GROUNDED_KAPPS:
-                kapp_counts[kapp_name] = kapp_counts.get(kapp_name, 0) + 1
+            if kapp_name in kapp_counts:
+                kapp_counts[kapp_name] += 1
         return kapp_counts
+
+    def filter_kapp_counts_with_typechecking(self, stack_id, kapp_counts):
+        """
+        Filters the kapp_counts dictionary based on typechecking against the current stack state.
+        """
+        filtered_kapp_counts = {}
+        stack = self.repository.get(stack_id)
+        for kapp_name, count in kapp_counts.items():
+            # Find the corresponding typecheck method
+            grounded_kapp = next(
+                (k for k in self.GROUNDED_KAPPS if k["name"] == kapp_name),
+                None,
+            )
+            if grounded_kapp:
+                typecheck_method = getattr(
+                    stack, grounded_kapp["typecheck"], None
+                )
+                if typecheck_method and typecheck_method():
+                    filtered_kapp_counts[kapp_name] = count
+        return filtered_kapp_counts
 
 
 @pytest.fixture(scope="module")
