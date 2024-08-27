@@ -69,13 +69,17 @@ class KeykappApp(App):
             kapp, _ = self.encoding_map.get(partial_arpeggio, (None, 0))
 
             if kapp:
+                # Clear the current partial arpeggio after a successful command
                 self.current_partial_arpeggio = []
 
-                input_viz = f"{event.key}: {kapp}"
+                # Print the whole arpeggio, not just the last key
+                input_viz = f"\n{''.join(partial_arpeggio)}: {kapp}\n\n\n################################################################\n\n"
                 self.query_one(RichLog).write(input_viz)
 
+                # Dispatch the Kapp
                 self.vm.dispatch(self.stack_id, kapp)
 
+                # Update the encoding map and visualizations
                 self.generate_encoding_map()
                 self.update_stack_viz()
                 self.update_kbd_viz()
