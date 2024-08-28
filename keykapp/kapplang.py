@@ -10,8 +10,26 @@ class Stack(Aggregate):
     def __init__(self):
         self.items = []
 
+    # Helper methods for common type checks
+    def has_at_least_items(self, n):
+        return len(self.items) >= n
+
+    def is_int(self, item):
+        return isinstance(item, int) and not isinstance(item, bool)
+
+    def is_float(self, item):
+        return isinstance(item, float)
+
+    def is_number(self, item):
+        return self.is_int(item) or self.is_float(item)
+
+    def is_bool(self, item):
+        return isinstance(item, bool)
+
+    # Existing methods with added float support
+
     def typecheck_pop(self):
-        return len(self.items) >= 1
+        return self.has_at_least_items(1)
 
     @event("pop-applied")
     def pop(self):
@@ -20,7 +38,7 @@ class Stack(Aggregate):
         self.items.pop()
 
     def typecheck_dup(self):
-        return len(self.items) >= 1
+        return self.has_at_least_items(1)
 
     @event("dup-applied")
     def dup(self):
@@ -29,7 +47,7 @@ class Stack(Aggregate):
         self.items.append(self.items[-1])
 
     def typecheck_swap(self):
-        return len(self.items) >= 2
+        return self.has_at_least_items(2)
 
     @event("swap-applied")
     def swap(self):
@@ -38,7 +56,7 @@ class Stack(Aggregate):
         self.items[-1], self.items[-2] = self.items[-2], self.items[-1]
 
     def typecheck_over(self):
-        return len(self.items) >= 2
+        return self.has_at_least_items(2)
 
     @event("over-applied")
     def over(self):
@@ -47,7 +65,7 @@ class Stack(Aggregate):
         self.items.append(self.items[-2])
 
     def typecheck_rot(self):
-        return len(self.items) >= 3
+        return self.has_at_least_items(3)
 
     @event("rot-applied")
     def rot(self):
@@ -69,11 +87,7 @@ class Stack(Aggregate):
         self.items.append(0)
 
     def typecheck_succ(self):
-        return (
-            len(self.items) >= 1
-            and isinstance(self.items[-1], int)
-            and not isinstance(self.items[-1], bool)
-        )
+        return self.has_at_least_items(1) and self.is_number(self.items[-1])
 
     @event("succ-applied")
     def succ(self):
@@ -82,11 +96,7 @@ class Stack(Aggregate):
         self.items.append(self.items.pop() + 1)
 
     def typecheck_pred(self):
-        return (
-            len(self.items) >= 1
-            and isinstance(self.items[-1], int)
-            and not isinstance(self.items[-1], bool)
-        )
+        return self.has_at_least_items(1) and self.is_number(self.items[-1])
 
     @event("pred-applied")
     def pred(self):
@@ -95,9 +105,10 @@ class Stack(Aggregate):
         self.items.append(self.items.pop() - 1)
 
     def typecheck_add(self):
-        return len(self.items) >= 2 and all(
-            isinstance(i, int) and not isinstance(i, bool)
-            for i in self.items[-2:]
+        return (
+            self.has_at_least_items(2)
+            and self.is_number(self.items[-1])
+            and self.is_number(self.items[-2])
         )
 
     @event("add-applied")
@@ -109,9 +120,10 @@ class Stack(Aggregate):
         self.items.append(b + a)
 
     def typecheck_sub(self):
-        return len(self.items) >= 2 and all(
-            isinstance(i, int) and not isinstance(i, bool)
-            for i in self.items[-2:]
+        return (
+            self.has_at_least_items(2)
+            and self.is_number(self.items[-1])
+            and self.is_number(self.items[-2])
         )
 
     @event("sub-applied")
@@ -123,9 +135,10 @@ class Stack(Aggregate):
         self.items.append(b - a)
 
     def typecheck_mul(self):
-        return len(self.items) >= 2 and all(
-            isinstance(i, int) and not isinstance(i, bool)
-            for i in self.items[-2:]
+        return (
+            self.has_at_least_items(2)
+            and self.is_number(self.items[-1])
+            and self.is_number(self.items[-2])
         )
 
     @event("mul-applied")
@@ -138,12 +151,10 @@ class Stack(Aggregate):
 
     def typecheck_div(self):
         return (
-            len(self.items) >= 2
+            self.has_at_least_items(2)
             and self.items[-1] != 0
-            and all(
-                isinstance(i, int) and not isinstance(i, bool)
-                for i in self.items[-2:]
-            )
+            and self.is_number(self.items[-1])
+            and self.is_number(self.items[-2])
         )
 
     @event("div-applied")
@@ -152,7 +163,7 @@ class Stack(Aggregate):
             return
         a = self.items.pop()
         b = self.items.pop()
-        self.items.append(b // a)
+        self.items.append(b / a)
 
     def typecheck_true(self):
         return True
@@ -173,7 +184,7 @@ class Stack(Aggregate):
         self.items.append(False)
 
     def typecheck_not_op(self):
-        return len(self.items) >= 1 and isinstance(self.items[-1], bool)
+        return self.has_at_least_items(1) and self.is_bool(self.items[-1])
 
     @event("not_op-applied")
     def not_op(self):
@@ -182,8 +193,10 @@ class Stack(Aggregate):
         self.items.append(not self.items.pop())
 
     def typecheck_and_op(self):
-        return len(self.items) >= 2 and all(
-            isinstance(i, bool) for i in self.items[-2:]
+        return (
+            self.has_at_least_items(2)
+            and self.is_bool(self.items[-1])
+            and self.is_bool(self.items[-2])
         )
 
     @event("and_op-applied")
@@ -196,9 +209,9 @@ class Stack(Aggregate):
 
     def typecheck_or_op(self):
         return (
-            len(self.items) >= 2
-            and isinstance(self.items[-1], bool)
-            and isinstance(self.items[-2], bool)
+            self.has_at_least_items(2)
+            and self.is_bool(self.items[-1])
+            and self.is_bool(self.items[-2])
         )
 
     @event("or_op-applied")
@@ -210,7 +223,7 @@ class Stack(Aggregate):
         self.items.append(b or a)
 
     def typecheck_eq_op(self):
-        return len(self.items) >= 2
+        return self.has_at_least_items(2)
 
     @event("eq_op-applied")
     def eq_op(self):
@@ -221,7 +234,7 @@ class Stack(Aggregate):
         self.items.append(b == a)
 
     def typecheck_neq_op(self):
-        return len(self.items) >= 2
+        return self.has_at_least_items(2)
 
     @event("neq_op-applied")
     def neq_op(self):
@@ -232,9 +245,10 @@ class Stack(Aggregate):
         self.items.append(b != a)
 
     def typecheck_gt_op(self):
-        return len(self.items) >= 2 and all(
-            isinstance(i, int) and not isinstance(i, bool)
-            for i in self.items[-2:]
+        return (
+            self.has_at_least_items(2)
+            and self.is_number(self.items[-1])
+            and self.is_number(self.items[-2])
         )
 
     @event("gt_op-applied")
@@ -244,6 +258,51 @@ class Stack(Aggregate):
         a = self.items.pop()
         b = self.items.pop()
         self.items.append(b > a)
+
+    def typecheck_to_float(self):
+        return self.has_at_least_items(1) and self.is_int(self.items[-1])
+
+    @event("to_float-applied")
+    def to_float(self):
+        if not self.typecheck_to_float():
+            return
+        self.items.append(float(self.items.pop()))
+
+    def typecheck_round(self):
+        return self.has_at_least_items(1) and self.is_float(self.items[-1])
+
+    @event("round-applied")
+    def round(self):
+        if not self.typecheck_round():
+            return
+        self.items.append(int(round(self.items.pop())))
+
+    def typecheck_floor(self):
+        return self.has_at_least_items(1) and self.is_float(self.items[-1])
+
+    @event("floor-applied")
+    def floor(self):
+        if not self.typecheck_floor():
+            return
+        self.items.append(int(self.items.pop()))
+
+    def typecheck_ceiling(self):
+        return self.has_at_least_items(1) and self.is_float(self.items[-1])
+
+    @event("ceiling-applied")
+    def ceiling(self):
+        if not self.typecheck_ceiling():
+            return
+        self.items.append(int(self.items.pop() + 1))
+
+    def typecheck_to_int(self):
+        return self.has_at_least_items(1) and self.is_float(self.items[-1])
+
+    @event("to_int-applied")
+    def to_int(self):
+        if not self.typecheck_to_int():
+            return
+        self.items.append(int(self.items.pop()))
 
 
 class KapplangApp(Application):
@@ -268,6 +327,11 @@ class KapplangApp(Application):
         {"name": "eq_op", "typecheck": "typecheck_eq_op"},
         {"name": "neq_op", "typecheck": "typecheck_neq_op"},
         {"name": "gt_op", "typecheck": "typecheck_gt_op"},
+        {"name": "to_float", "typecheck": "typecheck_to_float"},
+        {"name": "round", "typecheck": "typecheck_round"},
+        {"name": "floor", "typecheck": "typecheck_floor"},
+        {"name": "ceiling", "typecheck": "typecheck_ceiling"},
+        {"name": "to_int", "typecheck": "typecheck_to_int"},
     ]
 
     def __init__(self, *args, **kwargs):
