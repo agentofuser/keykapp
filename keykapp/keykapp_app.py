@@ -36,17 +36,15 @@ class KeykappApp(App):
         self.generate_encoding_map()
         self.current_partial_arpeggio = []
 
-        # Render initial state
-        self.update_stack_viz()
-        self.update_kbd_viz()
+        # Initial rendering
+        self.render_ui()
 
     def get_latest_stack_id(self):
         event_log = self.vm.get_event_log()
         create_events = [event for event in event_log if event[3] == "create"]
-        if create_events:
-            return create_events[-1][1]  # Return the last created stack ID
-        else:
-            return self.vm.create_stack()  # Create a new stack if none exist
+        return (
+            create_events[-1][1] if create_events else self.vm.create_stack()
+        )
 
     def generate_encoding_map(self):
         kapp_counts = self.vm.get_kapp_counts()
@@ -62,55 +60,87 @@ class KeykappApp(App):
 
     def on_key(self, event: events.Key) -> None:
         if event.key not in self.KEYSWITCHES:
-            self.query_one(RichLog).write(f"Unknown key: {event.key}")
+            self.render_log(f"Unknown key: {event.key}")
         else:
-            self.current_partial_arpeggio.append(event.key)
-            partial_arpeggio = tuple(self.current_partial_arpeggio)
-            kapp, _ = self.encoding_map.get(partial_arpeggio, (None, 0))
+            self.handle_key_input(event.key)
 
-            if kapp:
-                # Clear the current partial arpeggio after a successful command
-                self.current_partial_arpeggio = []
+    def handle_key_input(self, key: str) -> None:
+        self.current_partial_arpeggio.append(key)
+        partial_arpeggio = tuple(self.current_partial_arpeggio)
+        kapp, _ = self.encoding_map.get(partial_arpeggio, (None, 0))
 
-                # Print the whole arpeggio, not just the last key
-                input_viz = f"\n{''.join(partial_arpeggio)}: {kapp}\n\n\n################################################################\n\n"
-                self.query_one(RichLog).write(input_viz)
-
-                # Dispatch the Kapp
-                self.vm.dispatch(self.stack_id, kapp)
-
-                # Update the encoding map and visualizations
-                self.generate_encoding_map()
-                self.update_stack_viz()
-                self.update_kbd_viz()
+        if kapp:
+            self.current_partial_arpeggio = []
+            self.vm.dispatch(self.stack_id, kapp)
+            self.generate_encoding_map()
+            self.render_ui(kapp=kapp, partial_arpeggio=partial_arpeggio)
+        else:
+            is_valid_prefix = any(
+                arpeggio[: len(partial_arpeggio)] == partial_arpeggio
+                for arpeggio, (kapp, count) in self.encoding_map.items()
+            )
+            if not is_valid_prefix:
+                self.render_log(f"Invalid prefix: {partial_arpeggio}")
             else:
-                is_valid_prefix = False
-                for arpeggio, (kapp, count) in self.encoding_map.items():
-                    if arpeggio[: len(partial_arpeggio)] == partial_arpeggio:
-                        is_valid_prefix = True
-                        break
-                if not is_valid_prefix:
-                    self.query_one(RichLog).write(
-                        f"Invalid prefix: {partial_arpeggio}"
-                    )
+                reachable_kapps_viz = " ".join(
+                    [
+                        f"{kapp}"
+                        for kapp in self.get_reachable_kapps(partial_arpeggio)
+                    ]
+                )
+                self.render_log(
+                    f"{''.join(partial_arpeggio)}: {reachable_kapps_viz}"
+                )
 
-    def update_stack_viz(self):
+    def get_reachable_kapps(self, partial_arpeggio):
+        reachable_kapps = [
+            kapp
+            for arpeggio, (kapp, count) in self.encoding_map.items()
+            if arpeggio[: len(partial_arpeggio)] == partial_arpeggio
+        ]
+        kapp_counts = self.vm.get_kapp_counts()
+        kapp_counts = self.vm.filter_kapp_counts_with_typechecking(
+            self.stack_id, kapp_counts
+        )
+        return sorted(
+            reachable_kapps,
+            key=lambda kapp: kapp_counts.get(kapp, 0),
+            reverse=True,
+        )
+
+    def format_stack_viz(self):
         stack = self.vm.get_stack(self.stack_id)
         table = Table(title="Current Stack")
         table.add_column("Index", style="dim", width=6)
         table.add_column("Value", justify="right")
         for i, item in enumerate(stack):
             table.add_row(str(i), str(item))
-        self.query_one(RichLog).write(table)
+        return table
 
-    def update_kbd_viz(self):
+    def format_kbd_viz(self):
         table = Table(title="Command Keyboard")
         table.add_column("Key", style="dim")
         table.add_column("Kapp")
         table.add_column("Count", justify="right")
         for arpeggio, (kapp, count) in self.encoding_map.items():
             table.add_row("".join(arpeggio), kapp, str(count))
-        self.query_one(RichLog).write(table)
+        return table
+
+    def render_log(self, message: str):
+        self.query_one(RichLog).write(message)
+
+    def render_frame(self, stack_viz, kbd_viz):
+        self.query_one(RichLog).write(stack_viz)
+        self.query_one(RichLog).write(kbd_viz)
+
+    def render_ui(self, kapp=None, partial_arpeggio=None):
+        if kapp and partial_arpeggio:
+            self.render_log(
+                f"\n{''.join(partial_arpeggio)}: {kapp}\n\n\n{'#' * 64}\n\n"
+            )
+        stack_viz = self.format_stack_viz()
+        kbd_viz = self.format_kbd_viz()
+        self.render_frame(stack_viz, kbd_viz)
 
     def compose(self) -> ComposeResult:
         yield VerticalScroll(RichLog())
