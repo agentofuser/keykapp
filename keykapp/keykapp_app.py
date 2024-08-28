@@ -25,17 +25,11 @@ def style_prefix_suffix(
     :param suffix_style: The style for the rest of the characters (e.g., "dim").
     :return: A Rich Text object that can be rendered.
     """
-    # Create a Rich Text object
     rich_text = Text()
-
-    # Apply prefix style to the first N characters
     prefix_part = input_string[:n]
     rich_text.append(prefix_part, style=prefix_style)
-
-    # Apply suffix style to the rest of the characters
     suffix_part = input_string[n:]
     rich_text.append(suffix_part, style=suffix_style)
-
     return rich_text
 
 
@@ -52,18 +46,13 @@ class KeykappApp(App):
 
     def on_mount(self) -> None:
         self.vm = KapplangApp()
-
-        # Resume the latest stack if --resume is passed, otherwise create a new one
         self.stack_id = (
             self.get_latest_stack_id()
             if self.resume
             else self.vm.create_stack()
         )
-
         self.generate_encoding_map()
         self.current_partial_arpeggio = []
-
-        # Initial rendering
         self.render_ui()
 
     def get_latest_stack_id(self):
@@ -97,13 +86,13 @@ class KeykappApp(App):
         kapp, _ = self.encoding_map.get(partial_arpeggio, (None, 0))
 
         if kapp:
-            # Valid complete arpeggio, reset partial and process kapp
-            self.current_partial_arpeggio = []
             self.vm.dispatch(self.stack_id, kapp)
             self.generate_encoding_map()
-            self.render_ui(kapp=kapp, partial_arpeggio=partial_arpeggio)
+            self.current_partial_arpeggio = []  # Reset the partial arpeggio after dispatch
+            self.render_ui(
+                kapp=kapp, partial_arpeggio=None
+            )  # Use None to reset styling
         else:
-            # Check if it's a valid prefix of any known arpeggio
             is_valid_prefix = any(
                 arpeggio[: len(partial_arpeggio)] == partial_arpeggio
                 for arpeggio, (kapp, count) in self.encoding_map.items()
@@ -112,7 +101,6 @@ class KeykappApp(App):
                 self.current_partial_arpeggio = []  # Reset on invalid input
                 self.render_log(f"Invalid prefix: {''.join(partial_arpeggio)}")
             else:
-                # Trigger render for valid partial arpeggio
                 self.render_ui(partial_arpeggio=partial_arpeggio)
 
     def get_reachable_kapps(self, partial_arpeggio):
@@ -157,9 +145,9 @@ class KeykappApp(App):
                     suffix_style="dim",
                 )
             else:
-                styled_arpeggio = Text(
-                    arpeggio_str, style="dim"
-                )  # Let the text handle its own style
+                styled_arpeggio = style_prefix_suffix(
+                    arpeggio_str, 0, prefix_style="dim", suffix_style="dim"
+                )
             table.add_row(styled_arpeggio, kapp, str(count))
         return table
 
@@ -167,7 +155,6 @@ class KeykappApp(App):
         self.query_one(RichLog).write(message)
 
     def render_frame(self, stack_viz, kbd_viz):
-        # Render the title at the top of the frame
         title = style_prefix_suffix(
             (" " * 30) + "KEYKAPP" + (" " * 30) + "\n", 33, "dim", "bold white"
         )
