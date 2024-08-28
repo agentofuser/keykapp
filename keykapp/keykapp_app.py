@@ -11,6 +11,7 @@ from huffman_arpeggio import (
     generate_encoding_map_with_count,
 )
 from kapplang import KapplangApp
+from collections import deque
 
 
 def style_prefix_suffix(
@@ -43,6 +44,7 @@ class KeykappApp(App):
     def __init__(self, resume=False, **kwargs):
         super().__init__(**kwargs)
         self.resume = resume
+        self.message_queue = deque()  # Initialize the message queue
 
     def on_mount(self) -> None:
         self.vm = KapplangApp()
@@ -88,6 +90,10 @@ class KeykappApp(App):
         if kapp:
             self.vm.dispatch(self.stack_id, kapp)
             self.generate_encoding_map()
+            input_viz = f"{''.join(partial_arpeggio)}: {kapp}"
+            self.message_queue.append(
+                input_viz
+            )  # Add input_viz to the message queue
             self.current_partial_arpeggio = []  # Reset the partial arpeggio after dispatch
             self.render_ui(
                 kapp=kapp, partial_arpeggio=None
@@ -155,18 +161,35 @@ class KeykappApp(App):
         self.query_one(RichLog).write(message)
 
     def render_frame(self, stack_viz, kbd_viz):
+        # Render the title at the top of the frame
         title = style_prefix_suffix(
             (" " * 30) + "KEYKAPP" + (" " * 30) + "\n", 33, "dim", "bold white"
         )
         self.render_log(title)
+
+        # Render the message queue
+        is_message_queue_empty = not self.message_queue
+        while self.message_queue:
+            message = (
+                self.message_queue.popleft()
+            )  # Print and remove each message
+            self.render_log(message)
+        self.render_log("\n") if not is_message_queue_empty else None
+
+        # Render the stack and keyboard visualizations
         self.render_log(stack_viz)
         self.render_log(kbd_viz)
 
+        # Render a separator line
+        separator_line = "#" * 64
+        self.render_log(separator_line)
+
     def render_ui(self, kapp=None, partial_arpeggio=None):
         if kapp and partial_arpeggio:
-            self.render_log(
-                f"\n{''.join(partial_arpeggio)}: {kapp}\n\n\n{'#' * 64}\n\n"
-            )
+            input_viz = f"\n{''.join(partial_arpeggio)}: {kapp}\n\n"
+            self.message_queue.append(
+                input_viz
+            )  # Queue the input visualization message
         stack_viz = self.format_stack_viz()
         kbd_viz = self.format_kbd_viz(partial_arpeggio)
         self.render_frame(stack_viz, kbd_viz)
