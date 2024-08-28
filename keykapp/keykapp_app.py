@@ -1,6 +1,7 @@
 import os
 import sys
 from rich.table import Table
+from rich.text import Text
 from textual import events
 from textual.app import App, ComposeResult
 from textual.containers import VerticalScroll
@@ -10,6 +11,32 @@ from huffman_arpeggio import (
     generate_encoding_map_with_count,
 )
 from kapplang import KapplangApp
+
+
+def style_prefix_suffix(
+    input_string: str, n: int, prefix_style: str, suffix_style: str
+) -> Text:
+    """
+    Returns a Rich Text object with different styles for the first N characters and the rest.
+
+    :param input_string: The string to be styled.
+    :param n: The number of characters to apply the prefix style to.
+    :param prefix_style: The style for the first N characters (e.g., "bold white").
+    :param suffix_style: The style for the rest of the characters (e.g., "dim").
+    :return: A Rich Text object that can be rendered.
+    """
+    # Create a Rich Text object
+    rich_text = Text()
+
+    # Apply prefix style to the first N characters
+    prefix_part = input_string[:n]
+    rich_text.append(prefix_part, style=prefix_style)
+
+    # Apply suffix style to the rest of the characters
+    suffix_part = input_string[n:]
+    rich_text.append(suffix_part, style=suffix_style)
+
+    return rich_text
 
 
 class KeykappApp(App):
@@ -130,6 +157,11 @@ class KeykappApp(App):
         self.query_one(RichLog).write(message)
 
     def render_frame(self, stack_viz, kbd_viz):
+        # Render the title at the top of the frame
+        title = style_prefix_suffix(
+            (" " * 30) + "KEYKAPP" + (" " * 30) + "\n", 33, "dim", "bold white"
+        )
+        self.render_log(title)
         self.render_log(stack_viz)
         self.render_log(kbd_viz)
 
