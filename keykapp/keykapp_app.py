@@ -130,8 +130,8 @@ class KeykappApp(App):
         self.query_one(RichLog).write(message)
 
     def render_frame(self, stack_viz, kbd_viz):
-        self.query_one(RichLog).write(stack_viz)
-        self.query_one(RichLog).write(kbd_viz)
+        self.render_log(stack_viz)
+        self.render_log(kbd_viz)
 
     def render_ui(self, kapp=None, partial_arpeggio=None):
         if kapp and partial_arpeggio:
