@@ -97,27 +97,23 @@ class KeykappApp(App):
         kapp, _ = self.encoding_map.get(partial_arpeggio, (None, 0))
 
         if kapp:
+            # Valid complete arpeggio, reset partial and process kapp
             self.current_partial_arpeggio = []
             self.vm.dispatch(self.stack_id, kapp)
             self.generate_encoding_map()
             self.render_ui(kapp=kapp, partial_arpeggio=partial_arpeggio)
         else:
+            # Check if it's a valid prefix of any known arpeggio
             is_valid_prefix = any(
                 arpeggio[: len(partial_arpeggio)] == partial_arpeggio
                 for arpeggio, (kapp, count) in self.encoding_map.items()
             )
             if not is_valid_prefix:
-                self.render_log(f"Invalid prefix: {partial_arpeggio}")
+                self.current_partial_arpeggio = []  # Reset on invalid input
+                self.render_log(f"Invalid prefix: {''.join(partial_arpeggio)}")
             else:
-                reachable_kapps_viz = " ".join(
-                    [
-                        f"{kapp}"
-                        for kapp in self.get_reachable_kapps(partial_arpeggio)
-                    ]
-                )
-                self.render_log(
-                    f"{''.join(partial_arpeggio)}: {reachable_kapps_viz}"
-                )
+                # Trigger render for valid partial arpeggio
+                self.render_ui(partial_arpeggio=partial_arpeggio)
 
     def get_reachable_kapps(self, partial_arpeggio):
         reachable_kapps = [
@@ -144,13 +140,27 @@ class KeykappApp(App):
             table.add_row(str(i), str(item))
         return table
 
-    def format_kbd_viz(self):
+    def format_kbd_viz(self, partial_arpeggio=None):
         table = Table(title="Command Keyboard")
-        table.add_column("Key", style="dim")
+        table.add_column("Key")  # Remove default dim style from here
         table.add_column("Kapp")
         table.add_column("Count", justify="right")
         for arpeggio, (kapp, count) in self.encoding_map.items():
-            table.add_row("".join(arpeggio), kapp, str(count))
+            arpeggio_str = "".join(arpeggio)
+            if partial_arpeggio and arpeggio_str.startswith(
+                "".join(partial_arpeggio)
+            ):
+                styled_arpeggio = style_prefix_suffix(
+                    arpeggio_str,
+                    len(partial_arpeggio),
+                    prefix_style="bold white",
+                    suffix_style="dim",
+                )
+            else:
+                styled_arpeggio = Text(
+                    arpeggio_str, style="dim"
+                )  # Let the text handle its own style
+            table.add_row(styled_arpeggio, kapp, str(count))
         return table
 
     def render_log(self, message: str):
@@ -171,7 +181,7 @@ class KeykappApp(App):
                 f"\n{''.join(partial_arpeggio)}: {kapp}\n\n\n{'#' * 64}\n\n"
             )
         stack_viz = self.format_stack_viz()
-        kbd_viz = self.format_kbd_viz()
+        kbd_viz = self.format_kbd_viz(partial_arpeggio)
         self.render_frame(stack_viz, kbd_viz)
 
     def compose(self) -> ComposeResult:
