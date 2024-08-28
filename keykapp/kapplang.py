@@ -209,6 +209,42 @@ class Stack(Aggregate):
         b = self.items.pop()
         self.items.append(b or a)
 
+    def typecheck_eq_op(self):
+        return len(self.items) >= 2
+
+    @event("eq_op-applied")
+    def eq_op(self):
+        if not self.typecheck_eq_op():
+            return
+        a = self.items.pop()
+        b = self.items.pop()
+        self.items.append(b == a)
+
+    def typecheck_neq_op(self):
+        return len(self.items) >= 2
+
+    @event("neq_op-applied")
+    def neq_op(self):
+        if not self.typecheck_neq_op():
+            return
+        a = self.items.pop()
+        b = self.items.pop()
+        self.items.append(b != a)
+
+    def typecheck_gt_op(self):
+        return len(self.items) >= 2 and all(
+            isinstance(i, int) and not isinstance(i, bool)
+            for i in self.items[-2:]
+        )
+
+    @event("gt_op-applied")
+    def gt_op(self):
+        if not self.typecheck_gt_op():
+            return
+        a = self.items.pop()
+        b = self.items.pop()
+        self.items.append(b > a)
+
 
 class KapplangApp(Application):
     GROUNDED_KAPPS = [
@@ -229,6 +265,9 @@ class KapplangApp(Application):
         {"name": "not_op", "typecheck": "typecheck_not_op"},
         {"name": "and_op", "typecheck": "typecheck_and_op"},
         {"name": "or_op", "typecheck": "typecheck_or_op"},
+        {"name": "eq_op", "typecheck": "typecheck_eq_op"},
+        {"name": "neq_op", "typecheck": "typecheck_neq_op"},
+        {"name": "gt_op", "typecheck": "typecheck_gt_op"},
     ]
 
     def __init__(self, *args, **kwargs):
