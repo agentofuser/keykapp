@@ -130,8 +130,13 @@ class KeykappApp(App):
         table = Table(title="Current Stack")
         table.add_column("Index", style="dim", width=6)
         table.add_column("Value", justify="right")
+
+        stack_length = len(stack)
         for i, item in enumerate(stack):
-            table.add_row(str(i), str(item))
+            # Inverted index calculation
+            inverted_index = stack_length - 1 - i
+            table.add_row(str(inverted_index), repr(item))
+
         return table
 
     def format_kbd_viz(self, partial_arpeggio=None):

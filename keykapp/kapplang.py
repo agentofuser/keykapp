@@ -26,6 +26,12 @@ class Stack(Aggregate):
     def is_bool(self, item):
         return isinstance(item, bool)
 
+    def is_string(self, item):
+        return isinstance(item, str)
+
+    def is_char(self, item):
+        return self.is_string(item) and len(item) == 1
+
     # Existing methods with added float support
 
     def typecheck_pop(self):
@@ -163,7 +169,11 @@ class Stack(Aggregate):
             return
         a = self.items.pop()
         b = self.items.pop()
-        self.items.append(b / a)
+        # FIXME: if operands are int and there is no remainder, return int
+        if self.is_int(b) and self.is_int(a) and b % a == 0:
+            self.items.append(b // a)
+        else:
+            self.items.append(b / a)
 
     def typecheck_true(self):
         return True
@@ -296,13 +306,36 @@ class Stack(Aggregate):
         self.items.append(int(self.items.pop() + 1))
 
     def typecheck_to_int(self):
-        return self.has_at_least_items(1) and self.is_float(self.items[-1])
+        return self.has_at_least_items(1) and (
+            self.is_float(self.items[-1]) or self.is_char(self.items[-1])
+        )
 
     @event("to_int-applied")
     def to_int(self):
         if not self.typecheck_to_int():
             return
-        self.items.append(int(self.items.pop()))
+        if self.is_float(self.items[-1]):
+            self.items.append(int(self.items.pop()))
+        elif self.is_char(self.items[-1]):
+            self.items.append(str(self.items.pop()))
+        else:
+            raise ValueError("Unsupported type conversion")
+
+    # only printable ascii for now
+    def typecheck_to_char(self):
+        return (
+            self.has_at_least_items(1)
+            and self.is_int(self.items[-1])
+            and 32 <= self.items[-1] <= 126
+        )
+
+    # only printable ascii for now
+    # chars are strings of length 1, not a separate type
+    @event("to_char-applied")
+    def to_char(self):
+        if not self.typecheck_to_char():
+            return
+        self.items.append(chr(self.items.pop()))
 
 
 class KapplangApp(Application):
@@ -332,6 +365,7 @@ class KapplangApp(Application):
         {"name": "floor", "typecheck": "typecheck_floor"},
         {"name": "ceiling", "typecheck": "typecheck_ceiling"},
         {"name": "to_int", "typecheck": "typecheck_to_int"},
+        {"name": "to_char", "typecheck": "typecheck_to_char"},
     ]
 
     def __init__(self, *args, **kwargs):
