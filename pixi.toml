@@ -13,7 +13,4 @@ textual = ">=0.70.0,<0.71"
 textual-dev = ">=1.5.1,<1.6"
 
 [pypi-dependencies]
-libsql-experimental = "*"
-eventsourcing = "*"
-dag-json = { git = "https://github.com/snarfed/dag-json.git", rev = "4bfd62976377bc6d5a9f0047b2442c296944364a" }
 pytest = "*"
